@@ -1,0 +1,9 @@
+# Managed-cloud build trust only. Normal local Docker builds use compose.yaml.
+services:
+  app:
+    build:
+      secrets:
+        - proxy_ca
+secrets:
+  proxy_ca:
+    file: ${CODEX_PROXY_CERT:?The managed cloud must provide its public proxy CA path}
