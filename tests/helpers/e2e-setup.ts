@@ -17,7 +17,8 @@ export default async function setup() {
   runTestCommand("docker", composeArgs(["up", image ? "--no-build" : "--build", "-d", "--force-recreate", "--wait"]));
   mkdirSync("local-certs", { recursive: true });
   const certificate = resolve(`local-certs/${settings.project}.crt`);
-  runTestCommand("docker", composeArgs(["cp", "proxy:/data/caddy/pki/authorities/local/root.crt", certificate]));
+  // Read through exec: some Linux Docker hosts refuse `compose cp` from a container with read-only bind mounts.
+  writeFileSync(certificate, runTestCommand("docker", composeArgs(["exec", "-T", "proxy", "cat", "/data/caddy/pki/authorities/local/root.crt"])));
   // APIRequestContext runs in Node workers, which need the same public CA at startup.
   const bundle=resolve(`local-certs/${settings.project}-node.pem`);
   const previous=process.env.NODE_EXTRA_CA_CERTS;
