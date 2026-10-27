@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 try {
   const { values } = parseArgs({ options: { "env-file": { type: "string", default: ".env" }, port: { type: "string", default: "443" } }, strict: true });
-  if (!/^[0-9]+$/.test(values.port) || Number(values.port) < 1 || Number(values.port) > 65535) throw new Error("Port must be 1â€“65535");
+  if (!/^[0-9]+$/.test(values.port) || Number(values.port) < 1 || Number(values.port) > 65535) throw new Error("Port must be 1-65535");
   const port = Number(values.port);
   const origin = `https://localhost${port === 443 ? "" : `:${port}`}`;
   const contents = [

@@ -2,5 +2,5 @@
 set -eu
 cd "$(dirname "$0")/.."
 mkdir -p local-certs
-docker compose cp proxy:/data/caddy/pki/authorities/local/root.crt local-certs/root.crt >/dev/null
+MSYS_NO_PATHCONV=1 docker compose exec -T proxy cat /data/caddy/pki/authorities/local/root.crt > local-certs/root.crt
 exec node -- scripts/smoke.mjs
