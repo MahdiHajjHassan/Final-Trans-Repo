@@ -1,0 +1,27 @@
+# Dependencies, application builds, and generated ORM client
+node_modules/
+.next/
+out/
+src/generated/prisma/
+
+# Local credentials, databases, and certificates
+.env*
+!.env.example
+data/
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+local-certs/
+*.pem
+*.key
+
+# Local logs and test output
+.worktrees/
+.logs/
+coverage/
+test-results/
+playwright-report/
+playwright/.auth/
+*.tsbuildinfo
+.DS_Store

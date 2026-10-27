@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated/prisma"
+}
+datasource db {
+  provider = "sqlite"
+}
+enum Role {
+  MEMBER
+  ADMIN
+}
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  displayName String
+  passwordHash String
+  role Role @default(MEMBER)
+  createdAt DateTime @default(now())
+  sessions Session[]
+  gamesAsX Game[] @relation("GameX")
+  gamesAsO Game[] @relation("GameO")
+}
+model Session {
+  id String @id
+  userId String
+  expiresAt DateTime
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  @@index([userId])
+  @@index([expiresAt])
+}
+model RateLimitBucket {
+  key String @id
+  windowStart DateTime
+  count Int @default(0)
+  @@index([windowStart])
+}
+enum GameMode {
+  HUMAN
+  AI
+}
+enum GameStatus {
+  WAITING
+  ACTIVE
+  FINISHED
+  CANCELLED
+}
+model Game {
+  id String @id @default(uuid())
+  mode GameMode
+  xId String?
+  oId String?
+  x User? @relation("GameX", fields: [xId], references: [id], onDelete: SetNull)
+  o User? @relation("GameO", fields: [oId], references: [id], onDelete: SetNull)
+  board String @default(".........")
+  turn String? @default("X")
+  status GameStatus @default(WAITING)
+  winner String?
+  reason String?
+  inviteCode String? @unique
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  finishedAt DateTime?
+  moves GameMove[]
+  @@index([xId, updatedAt])
+  @@index([oId, updatedAt])
+}
+model GameMove {
+  id String @id @default(uuid())
+  gameId String
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  ply Int
+  mark String
+  cell Int
+  createdAt DateTime @default(now())
+  @@unique([gameId, ply])
+  @@unique([gameId, cell])
+}

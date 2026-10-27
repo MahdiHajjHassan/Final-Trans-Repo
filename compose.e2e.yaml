@@ -1,0 +1,10 @@
+# Only the explicitly isolated test project receives the reset-script guard.
+services:
+  app:
+    environment:
+      TICTACTOE_E2E_PROJECT: ${TICTACTOE_E2E_PROJECT:?Set an isolated tictactoe-e2e project}
+
+# Rehearsal may reuse the already trusted test authority; game data stays separate.
+volumes:
+  caddy-data:
+    name: ${TICTACTOE_E2E_CA_VOLUME:?Set the isolated test certificate volume}
