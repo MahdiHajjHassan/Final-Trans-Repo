@@ -215,6 +215,7 @@ npm run test:e2e
 ```
 
 `npm run verify` runs the main checks sequentially. The default end-to-end command
+runs page-generation builds with one worker to limit local memory spikes and
 runs actual Chrome and Edge. Run `npx playwright test --project=firefox` separately
 after installing Playwright's Firefox build with `npx playwright install firefox`.
 A runner that cannot start is not a browser-compatibility pass. The installed
