@@ -15,7 +15,7 @@ export function GameLobby({locale}:{locale:Locale}) {
   return <><div className="play-options">
     <section className="play-option"><h2>{t.computer}</h2><p>{t.computerHelp}</p><Button disabled={mutation.pending} onClick={()=>void mutation.run(()=>create("AI"))}>{mutation.pending?t.pending:t.playComputer}</Button></section>
     <section className="play-option"><h2>{t.friend}</h2><p>{t.friendHelp}</p><Button variant="secondary" disabled={mutation.pending} onClick={()=>void mutation.run(()=>create("HUMAN"))}>{t.createFriend}</Button>
-      <form className="join-form" onSubmit={event=>{event.preventDefault();const data=new FormData(event.currentTarget);void mutation.run(async()=>{
+      <form method="post" className="join-form" onSubmit={event=>{event.preventDefault();const data=new FormData(event.currentTarget);void mutation.run(async()=>{
         const result=await request<GameView>("/api/games/join","POST",{code:String(data.get("code"))});
         router.push("/"+locale+"/games/"+result.game.id);router.refresh();
       });}}><TextField label={t.roomCode} hint={t.joinHint} name="code" autoCapitalize="characters" autoComplete="off" dir="ltr" required minLength={8} maxLength={8} /><Button variant="secondary" disabled={mutation.pending}>{t.joinGame}</Button></form>
