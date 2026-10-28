@@ -2,6 +2,8 @@
 
 import { useId, type SelectHTMLAttributes } from "react";
 import { FormField } from "@/frontend/components/ui/FormField";
+
+/** A labelled select. Generate an ID when its caller has not supplied one. */
 export function SelectField({
   label,
   id: suppliedId,

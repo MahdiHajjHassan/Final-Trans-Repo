@@ -1,15 +1,20 @@
 import { isIP } from "node:net";
 import { DomainError } from "../errors";
 
+// Cookie-authenticated writes must come from our own site, not a form on another origin.
 export function requireSameOrigin(request: Request, appOrigin: string): void {
   if (request.headers.get("Origin") !== appOrigin) throw new DomainError("FORBIDDEN");
 }
+
+// The proxy supplies the client IP for rate limits. Invalid or missing addresses share
+// "unknown".
 export function clientKey(request: Request): string {
   // Caddy replaces this header with the actual client address.
   const address = request.headers.get("X-Taskboard-Client-IP") ?? "";
   return isIP(address) ? address : "unknown";
 }
 
+// Reads at most 16 KiB of JSON, including when the caller leaves out Content-Length.
 export async function readJson(request: Request): Promise<unknown> {
   if (
     request.headers.get("Content-Type")?.split(";")[0].trim().toLowerCase() !== "application/json"

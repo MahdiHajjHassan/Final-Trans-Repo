@@ -2,11 +2,16 @@
 
 import { useState } from "react";
 import { RequestError } from "@/frontend/lib/api/http";
+
+/** State for a form or button action: pending, success and the last failure. */
 export function useMutation() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<RequestError | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Start with clean feedback, run the action, then store its result for the component.
   async function run(action: () => Promise<void>) {
+    // Moves are never retried here: a lost response may still have saved the move.
     setPending(true);
     setError(null);
     setSuccess(false);

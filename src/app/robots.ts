@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { locales } from "@/shared/i18n/config";
 import { loadConfig } from "@/backend/config/env";
 export const dynamic = "force-dynamic";
+
+/** Tell crawlers about public pages while excluding API, account, admin and private game URLs. */
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {

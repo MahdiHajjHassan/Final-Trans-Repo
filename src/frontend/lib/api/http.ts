@@ -1,5 +1,6 @@
 "use client";
 
+/** The API error code and its field errors, ready for the form to display. */
 export class RequestError extends Error {
   constructor(
     public code: string,
@@ -9,6 +10,10 @@ export class RequestError extends Error {
   }
 }
 
+/**
+ * Sends one JSON call with the session cookie and returns the data from its answer.
+ * A failed fetch becomes NETWORK; HTTP failures keep the backend's error code.
+ */
 export async function request<T = unknown>(
   url: string,
   method: string,
@@ -28,6 +33,7 @@ export async function request<T = unknown>(
   return decodeResponse<T>(response);
 }
 
+/** Unwraps { data } or throws the API error. A 204 response has no JSON body. */
 export async function decodeResponse<T>(response: Response): Promise<T> {
   if (response.status === 204) return undefined as T;
   const result = await response.json().catch(() => ({}));

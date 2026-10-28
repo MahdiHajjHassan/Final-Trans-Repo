@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { DomainError } from "./errors";
 
+// Checks unknown input against a schema. Invalid fields become the error map used by the
+// forms.
 export function parseInput<T>(schema: z.ZodType<T>, input: unknown): T {
   const result = schema.safeParse(input);
   if (result.success) return result.data;

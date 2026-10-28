@@ -1,10 +1,12 @@
 import { setTimeout } from "node:timers/promises";
 import { DomainError } from "../common/errors";
 
+// Recognises SQLite lock errors even when Prisma or the adapter wraps the original cause.
 export function isBusy(error: unknown, depth = 0): boolean {
   if (!error || typeof error !== "object" || depth > 5 || error instanceof DomainError)
     return false;
   const details = error as Record<string, unknown>;
+
   // Prisma can wrap SQLite lock errors in either of these codes.
   if (details.code === "P2034" || details.code === "P1008") return true;
   for (const code of [details.code, details.originalCode]) {
@@ -15,7 +17,7 @@ export function isBusy(error: unknown, depth = 0): boolean {
   );
 }
 
-// Retry the whole transaction when another SQLite writer holds the lock.
+// Retries a locked write transaction twice, with short waits. Other errors go straight back.
 export async function withWriteRetry<T>(operation: () => Promise<T>): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     try {

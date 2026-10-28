@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 
+/** Status feedback; errors use the alert role so assistive technology announces them promptly. */
 export function Alert({
   children,
   tone = "info",

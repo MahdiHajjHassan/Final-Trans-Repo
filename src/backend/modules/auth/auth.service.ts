@@ -16,6 +16,7 @@ import { createSessionToken, resolveSessionToken, revokeSessionToken } from "./s
 import { currentActor } from "./session.guard";
 import { withWriteRetry } from "../../database/write-retry";
 
+// Only account fields we can send back. Password hashes stay in the database.
 const accountSelect = {
   id: true,
   email: true,
@@ -24,6 +25,8 @@ const accountSelect = {
   createdAt: true,
 } satisfies Prisma.UserSelect;
 type AccountRecord = Pick<User, "id" | "email" | "displayName" | "role" | "createdAt">;
+
+// Turns a database account into JSON, including an ISO date the browser can read.
 function dto(user: AccountRecord): AccountDTO {
   return {
     id: user.id,
@@ -35,21 +38,30 @@ function dto(user: AccountRecord): AccountDTO {
 }
 let dummyHash: Promise<string> | undefined;
 
+// The account rules: registration, login, profile changes and password changes.
+// The controller handles HTTP; these functions work with the database.
 export function createAuthService(db: PrismaClient, options: { now?: () => Date } = {}) {
   const now = options.now ?? (() => new Date());
   const consume = createRateLimiter(db, now);
+
+  // Charges this action to its quota before doing the expensive work.
   async function limit(scope: string, key: string, allowance: number) {
     const result = await consume(scope, key, allowance, 15 * 60);
     if (!result.allowed) throw new DomainError("RATE_LIMITED", undefined, result.retryAfterSeconds);
   }
   return {
+    // Creates a member account. It does not sign them in; they go to the login page next.
     async register(input: unknown, clientKey = "internal"): Promise<AccountDTO> {
+      // 1. Check the fields and the registration quota for this client.
       const data = parseInput(registerSchema, input);
       await limit("register-client", clientKey, 5);
+
+      // 2. Hash before opening the write transaction. The database never gets the password.
       const passwordHash = await hashPassword(data.password);
       try {
         return await withWriteRetry(() =>
           db.$transaction(async (tx) => {
+            // 3. Save as MEMBER; registration cannot choose an administrator role.
             const user = await tx.user.create({
               data: {
                 email: data.email,
@@ -63,23 +75,28 @@ export function createAuthService(db: PrismaClient, options: { now?: () => Date 
           }),
         );
       } catch (error) {
+        // The unique constraint catches two registrations racing for the same email.
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")
           throw new DomainError("CONFLICT", { email: ["unavailable"] });
         throw error;
       }
     },
+
+    // Checks the password and creates a session. The controller puts its token in the cookie.
     async login(input: unknown, clientKey: string) {
+      // 1. Limit attempts by client, then by the email/client pair.
       const data = parseInput(loginSchema, input);
       await limit("login-client", clientKey, 10);
       await limit("login-email-client", `${clientKey}\0${data.email}`, 5);
       const user = await db.user.findUnique({ where: { email: data.email } });
-      // Check a hash even when the email doesn't exist.
+
+      // 2. Still check a hash when the email is missing, avoiding a fast rejection path.
       dummyHash ??= hashPassword(randomBytes(32).toString("hex"));
       const valid = await verifyPassword(user?.passwordHash ?? (await dummyHash), data.password);
       if (!user || !valid) throw new DomainError("UNAUTHENTICATED");
       return withWriteRetry(() =>
         db.$transaction(async (tx) => {
-          // The password may have changed while we were checking it.
+          // 3. Recheck inside the transaction: the password may have changed in the meantime.
           const current = await tx.user.findUnique({ where: { id: user.id } });
           if (!current || current.passwordHash !== user.passwordHash)
             throw new DomainError("UNAUTHENTICATED");
@@ -88,17 +105,25 @@ export function createAuthService(db: PrismaClient, options: { now?: () => Date 
         }),
       );
     },
+
+    // Who is behind this token? Returns null for a missing, expired or unknown session.
     resolveSession(raw: string | null) {
       return resolveSessionToken(db, raw, now());
     },
+
+    // Revokes this one session. Logging out with no valid token is harmless.
     logout(raw: string | null) {
       return revokeSessionToken(db, raw);
     },
+
+    // The signed-in user's own account, including their private email address.
     async account(actor: Actor): Promise<AccountDTO> {
       const user = await db.user.findUnique({ where: { id: actor.id }, select: accountSelect });
       if (!user) throw new DomainError("UNAUTHENTICATED");
       return dto(user);
     },
+
+    // Changes the caller's display name. Email and role cannot be changed here.
     async updateAccount(actor: Actor, input: unknown): Promise<AccountDTO> {
       const data = parseInput(accountSchema, input);
       return withWriteRetry(() =>
@@ -113,6 +138,8 @@ export function createAuthService(db: PrismaClient, options: { now?: () => Date 
         }),
       );
     },
+
+    // Checks the old password, saves the new hash and signs out every session.
     async changePassword(actor: Actor, input: unknown): Promise<void> {
       const data = parseInput(passwordChangeSchema, input);
       await limit("password-change-user", actor.id, 5);
@@ -127,6 +154,7 @@ export function createAuthService(db: PrismaClient, options: { now?: () => Date 
             data: { passwordHash },
           });
           if (result.count !== 1) throw new DomainError("CONFLICT");
+
           // A password change signs out every browser session.
           await tx.session.deleteMany({ where: { userId: actor.id } });
         }),

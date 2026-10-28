@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { z } from "zod";
 import { emailSchema, passwordSchema } from "../../shared/auth-validation";
 
+// APP_ORIGIN must be an HTTPS origin only: no credentials, path, query or fragment.
 const origin = z
   .url()
   .refine((value) => {
@@ -24,6 +25,7 @@ const configSchema = z.object({
   ADMIN_PASSWORD: passwordSchema,
 });
 
+// Only local SQLite files are supported. Resolve a relative path from the working directory.
 export function resolveDatabaseUrl(value: string): string {
   if (
     !value.startsWith("file:") ||
@@ -36,6 +38,7 @@ export function resolveDatabaseUrl(value: string): string {
   return `file:${resolve(value.slice(5))}`;
 }
 
+// Validate environment values before building services or seeding the administrator.
 export function loadConfig(environment: Record<string, string | undefined>) {
   const input = configSchema.parse(environment);
   return {

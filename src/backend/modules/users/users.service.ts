@@ -10,6 +10,7 @@ import { registerSchema } from "../auth/dto/auth.schema";
 import { hashPassword } from "../auth/password";
 import { createRateLimiter } from "../../common/security/rate-limit";
 
+// Account fields the administrator may see. Never include the password hash.
 const select = {
   id: true,
   email: true,
@@ -17,6 +18,8 @@ const select = {
   role: true,
   createdAt: true,
 } satisfies Prisma.UserSelect;
+
+// Admin edits may change a name, a role, or both. An empty edit is rejected.
 const patchSchema = z
   .object({
     displayName: displayNameSchema.optional(),
@@ -24,6 +27,8 @@ const patchSchema = z
   })
   .strict()
   .refine((value) => Object.values(value).some((item) => item !== undefined));
+
+// Search text and page number for the admin list. No extra query fields are accepted.
 const querySchema = z
   .object({
     q: z.string().trim().max(100).optional(),
@@ -32,24 +37,33 @@ const querySchema = z
   .strict();
 const idSchema = z.uuid().transform((id) => id.toLowerCase());
 const createSchema = registerSchema.extend({ role: z.enum(["MEMBER", "ADMIN"]).default("MEMBER") });
+
+// Being signed in is not enough here: load the current role and require ADMIN.
 async function administrator(tx: Prisma.TransactionClient, actor: Actor | null) {
   const current = await currentActor(tx, actor);
   if (current.role !== "ADMIN") throw new DomainError("FORBIDDEN");
   return current;
 }
+
+// Turn the database date into the string the admin UI expects.
 function dto(user: Prisma.UserGetPayload<{ select: typeof select }>) {
   return { ...user, createdAt: user.createdAt.toISOString() };
 }
+
+// Read the URL filters once; duplicate keys would make the intended search ambiguous.
 export function parseUserQuery(input: URLSearchParams) {
   if (new Set(input.keys()).size !== [...input.keys()].length)
     throw new DomainError("VALIDATION", { query: ["duplicate"] });
   return parseInput(querySchema, Object.fromEntries(input));
 }
+
+// Administrator account management. Permission checks happen here as well as in the page.
 export function createUserService(
   db: PrismaClient,
   options: { publish?: (id: string, version: number) => void } = {},
 ) {
   return {
+    // Creates a user with the requested role after checking the caller is still an admin.
     async createUser(actor: Actor | null, input: unknown) {
       const data = parseInput(createSchema, input);
       await administrator(db, actor);
@@ -79,6 +93,8 @@ export function createUserService(
         throw error;
       }
     },
+
+    // Find accounts by email or display name, returning a stable page of up to 25 users.
     async listUsers(actor: Actor | null, input: unknown = {}) {
       const query = parseInput(querySchema, input);
       return db.$transaction(async (tx) => {
@@ -101,6 +117,8 @@ export function createUserService(
         };
       });
     },
+
+    // Changes a name or role. The last administrator cannot be demoted.
     async updateUser(actor: Actor | null, rawId: string, input: unknown) {
       const id = parseInput(idSchema, rawId);
       const data = parseInput(patchSchema, input);
@@ -109,6 +127,7 @@ export function createUserService(
           await administrator(tx, actor);
           const target = await tx.user.findUnique({ where: { id }, select: { role: true } });
           if (!target) throw new DomainError("NOT_FOUND");
+
           // Keep at least one administrator able to manage accounts.
           if (
             target.role === "ADMIN" &&
@@ -121,8 +140,13 @@ export function createUserService(
         }),
       );
     },
+
+    // Deletes the account and its sessions; unfinished games are resolved and saved games
+    // remain.
     async deleteUser(actor: Actor | null, rawId: string): Promise<void> {
       const id = parseInput(idSchema, rawId);
+
+      // Finish games, delete the user and clear their sessions as one database operation.
       const changed = await withWriteRetry(() =>
         db.$transaction(async (tx) => {
           await administrator(tx, actor);
@@ -133,6 +157,7 @@ export function createUserService(
           if (!target) throw new DomainError("NOT_FOUND");
           if (target.role === "ADMIN" && (await tx.user.count({ where: { role: "ADMIN" } })) <= 1)
             throw new DomainError("CONFLICT", { role: ["last_admin"] });
+
           // End unfinished games before deleting their player account.
           const games = await tx.game.findMany({ where: { OR: [{ xId: id }, { oId: id }] } });
           for (const game of games)
@@ -151,11 +176,14 @@ export function createUserService(
                 version: { increment: 1 },
               },
             });
+
           // Foreign keys clear the player's seats and remove their sessions.
           await tx.user.delete({ where: { id } });
           return games.map((game) => ({ id: game.id, version: game.version + 1 }));
         }),
       );
+
+      // Only committed changes are sent to any remaining player watching these games.
       for (const game of changed) options.publish?.(game.id, game.version);
     },
   };

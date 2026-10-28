@@ -5,6 +5,11 @@ import { Alert, Button } from "./ui";
 import type { Dictionary } from "@/shared/i18n/dictionaries";
 import type { Locale } from "@/shared/i18n/config";
 import type { RequestError } from "@/frontend/lib/api";
+
+/**
+ * Shows translated form feedback. Conflicts offer a refresh so the next action uses current
+ * data.
+ */
 export function Feedback({
   error,
   success,
@@ -26,6 +31,7 @@ export function Feedback({
         {error.fields && (
           <ul>
             {Object.keys(error.fields).map((field) => {
+              // Nested errors can name a row as well as a field, for example "items.0.name".
               const parts = field.split(".");
               const row = parts.find((part) => /^\d+$/.test(part));
               const name = parts.at(-1)!;

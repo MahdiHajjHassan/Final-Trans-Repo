@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 
+/** A table with a caption and column headings, inside a keyboard-focusable scroll region. */
 export function DataTable({
   caption,
   headings,

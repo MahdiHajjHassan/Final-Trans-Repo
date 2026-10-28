@@ -10,8 +10,14 @@ import { displayNameSchema, loginPasswordSchema, passwordSchema } from "@/shared
 import { request, useMutation } from "../../../lib/api";
 import { formText, validateFields } from "../../../lib/validation";
 
+/**
+ * Two independent forms: change the public display name, or change the password and sign in
+ * again.
+ */
 export function AccountForms({ locale, account }: { locale: Locale; account: AccountDTO }) {
   const t = dictionaries[locale];
+
+  // Each form keeps its own pending/error state, so one form doesn't overwrite the other.
   const profile = useMutation();
   const password = useMutation();
   const router = useRouter();
@@ -28,6 +34,8 @@ export function AccountForms({ locale, account }: { locale: Locale; account: Acc
             void profile.run(async () => {
               const input = { displayName: formText(form, "displayName").trim() };
               validateFields(input, { displayName: displayNameSchema });
+
+              // Save the name, then reload the server-rendered account details.
               await request("/api/account", "PATCH", input);
               router.refresh();
             });
@@ -70,6 +78,8 @@ export function AccountForms({ locale, account }: { locale: Locale; account: Acc
                 newPassword: passwordSchema,
               });
               await request("/api/account/password", "PUT", input);
+
+              // The password change revoked the sessions, including the one in this browser.
               router.push(`/${locale}/login?notice=passwordChanged`);
               router.refresh();
             });

@@ -7,6 +7,8 @@ import { createUserService } from "./modules/users/users.service";
 import { createGameService } from "./modules/games/games.service";
 import { createGameHandlers } from "./modules/games/games.controller";
 import { gameEvents } from "./modules/realtime/game-events";
+
+// Connects the database, validated settings and services. Game changes share one event bus.
 async function buildServices() {
   const db = await getDb(),
     config = loadConfig(process.env);
@@ -19,19 +21,24 @@ async function buildServices() {
   };
 }
 let services: ReturnType<typeof buildServices> | undefined;
+
+// Build once and reuse across requests. Failed startup is not kept as a permanent result.
 export function getServices() {
-  // Share services across requests, but allow another try if startup fails.
   services ??= buildServices().catch((error) => {
     services = undefined;
     throw error;
   });
   return services;
 }
+
+// For routes that need several services: load them, run the action and format any error.
 export function withServices(
   operation: (current: Awaited<ReturnType<typeof getServices>>) => Promise<Response>,
 ) {
   return handleApi(async () => operation(await getServices()));
 }
+
+// Connects the thin Next.js auth/account route files to the auth controller.
 export async function handleAuth(
   action: keyof ReturnType<typeof createAuthHandlers>,
   request: Request,
@@ -43,6 +50,8 @@ export async function handleAuth(
     return apiError(error);
   }
 }
+
+// Connects the game routes to their controller, passing a game ID only where it is needed.
 export async function handleGame(
   action: keyof ReturnType<typeof createGameHandlers>,
   request: Request,

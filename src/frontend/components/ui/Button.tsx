@@ -2,6 +2,7 @@
 
 import { type ButtonHTMLAttributes } from "react";
 
+/** The shared button styles. Normal button attributes and event handlers pass through. */
 export function Button({
   variant = "primary",
   className = "",

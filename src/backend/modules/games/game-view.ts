@@ -1,12 +1,16 @@
 import type { Prisma } from "@/generated/prisma/client";
 import type { GameDTO, GameReason, Mark, Player } from "@/shared/games";
 import { decodeBoard, evaluateBoard } from "./engine/game.engine";
-// Game responses need public names, not account emails or password hashes.
+
+// Load the players' public names with the game; their private account fields are not needed.
 export const gameInclude = {
   x: { select: { displayName: true } },
   o: { select: { displayName: true } },
 } satisfies Prisma.GameInclude;
 export type GameRecord = Prisma.GameGetPayload<{ include: typeof gameInclude }>;
+
+// The board the browser receives, with dates as strings and labels for computer/deleted
+// players.
 export function gameDto(game: GameRecord): GameDTO {
   const cells = decodeBoard(game.board);
   const human = (user: { displayName: string } | null): Player =>

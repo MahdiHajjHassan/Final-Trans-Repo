@@ -2,6 +2,8 @@
 
 import { useId, type InputHTMLAttributes } from "react";
 import { FormField } from "@/frontend/components/ui/FormField";
+
+/** A labelled input with its own stable ID and links to any hint or field error. */
 export function TextField({
   label,
   hint,

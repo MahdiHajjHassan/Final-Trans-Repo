@@ -3,6 +3,9 @@ import { readSessionToken } from "../auth/session.guard";
 import { DomainError } from "../../common/errors";
 import type { GameService } from "../games/games.service";
 import { gameEvents, type createGameEvents } from "./game-events";
+
+// An authenticated SSE connection for one game. It sends full saved boards, not individual
+// moves.
 export async function createGameStream(
   request: Request,
   id: string,
@@ -25,6 +28,8 @@ export async function createGameStream(
     unsubscribe: () => void = () => {},
     interval: ReturnType<typeof setInterval> | undefined;
   let controller: ReadableStreamDefaultController<Uint8Array>;
+
+  // Release the listener, timer and account slot when the browser leaves or loses access.
   function finish() {
     if (closed) return;
     closed = true;
@@ -36,15 +41,21 @@ export async function createGameStream(
       controller?.close();
     } catch {}
   }
+
+  // Each SSE message must be encoded as bytes before it enters the response stream.
   function send(text: string) {
     if (!closed) controller.enqueue(encoder.encode(text));
   }
   let queue = Promise.resolve();
+
+  // Read the latest board and recheck access. A newer version sends a snapshot; otherwise, a
+  // heartbeat.
   function refresh() {
     // Keep overlapping notifications from sending snapshots out of order.
     queue = queue
       .then(async () => {
         if (closed) return;
+
         // Recheck access on every update and heartbeat.
         const current = await auth.resolveSession(token);
         if (closed) return;
@@ -78,8 +89,11 @@ export async function createGameStream(
   const stream = new ReadableStream<Uint8Array>({
     start(value) {
       controller = value;
+
       // Subscribe before reading so a move can't slip between the two.
       unsubscribe = events.subscribe(canonicalId, refresh);
+
+      // Recheck access every 15 seconds even when nobody has made a move.
       interval = setInterval(refresh, 15000);
       request.signal.addEventListener("abort", finish, { once: true });
       if (request.signal.aborted) finish();

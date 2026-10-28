@@ -3,6 +3,11 @@ import { useParams } from "next/navigation";
 import { isLocale } from "@/shared/i18n/config";
 import { dictionaries } from "@/shared/i18n/dictionaries";
 import { Alert, Button } from "@/frontend/components/ui";
+
+/**
+ * The recovery screen for an unexpected page failure. Reset asks Next.js to try rendering
+ * again.
+ */
 export default function ErrorPage({ reset }: { reset: () => void }) {
   const { locale } = useParams();
   const t = dictionaries[isLocale(locale) ? locale : "en"];

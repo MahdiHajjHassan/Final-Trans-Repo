@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { isLocale } from "@/shared/i18n/config";
 import { dictionaries } from "@/shared/i18n/dictionaries";
+
+/** A missing page, using the language in the URL when it is supported. */
 export default function NotFound() {
   const params = useParams();
   const locale = isLocale(params.locale) ? params.locale : "en";

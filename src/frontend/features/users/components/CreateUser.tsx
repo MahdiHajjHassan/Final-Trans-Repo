@@ -10,6 +10,10 @@ import { displayNameSchema, emailSchema, passwordSchema } from "@/shared/auth-va
 import { request, useMutation } from "../../../lib/api";
 import { formText, validateFields } from "../../../lib/validation";
 
+/**
+ * The administrator's new-account form. It closes and reloads the user list after a
+ * successful save.
+ */
 export function CreateUser({ locale }: { locale: Locale }) {
   const t = dictionaries[locale],
     router = useRouter(),
@@ -37,6 +41,8 @@ export function CreateUser({ locale }: { locale: Locale }) {
                 password: passwordSchema,
               });
               await request("/api/admin/users", "POST", input);
+
+              // Clear the temporary password from the form once the account was created.
               form.reset();
               setOpen(false);
               router.refresh();

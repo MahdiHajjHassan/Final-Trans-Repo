@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 
+/** A small label for a role or game state, using the shared colour tokens. */
 export function Badge({
   children,
   tone = "neutral",

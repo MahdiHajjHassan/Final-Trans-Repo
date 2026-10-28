@@ -3,6 +3,8 @@ import { requestActor } from "@/backend/modules/auth/session.guard";
 import { jsonData } from "@/backend/common/http";
 import { parseUserQuery } from "@/backend/modules/users/users.service";
 import { readJson, requireSameOrigin } from "@/backend/common/security/origin";
+
+// GET /api/admin/users: an administrator's filtered, paginated account list.
 export function GET(request: Request) {
   return withServices(async ({ users, auth }) =>
     jsonData(
@@ -13,6 +15,8 @@ export function GET(request: Request) {
     ),
   );
 }
+
+// POST /api/admin/users: an administrator creates an account with a chosen role.
 export function POST(request: Request) {
   return withServices(async ({ users, auth, config }) => {
     requireSameOrigin(request, config.appOrigin);

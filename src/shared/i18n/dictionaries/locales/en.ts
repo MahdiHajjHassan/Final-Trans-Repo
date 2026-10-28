@@ -1,3 +1,4 @@
+// English UI text. Keep the keys aligned with the other two languages.
 export const en = {
   createUser: "Create user",
   brand: "Tic Tac Toe",

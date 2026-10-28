@@ -6,10 +6,14 @@ import { dictionaries } from "@/shared/i18n/dictionaries";
 import type { Locale } from "@/shared/i18n/config";
 import type { GameMode, GameView } from "@/shared/games";
 import { request, useMutation } from "../../../lib/api";
+
+/** Start a computer game, open a friend room, or join a room by its code. */
 export function GameLobby({ locale }: { locale: Locale }) {
   const t = dictionaries[locale],
     router = useRouter(),
     mutation = useMutation();
+
+  // Both modes create a saved game first, then open its page.
   async function create(mode: GameMode) {
     const result = await request<GameView>("/api/games", "POST", { mode });
     router.push("/" + locale + "/games/" + result.game.id);

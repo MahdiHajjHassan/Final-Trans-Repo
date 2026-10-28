@@ -5,6 +5,8 @@ import { isLocale, localePath, type Locale } from "@/shared/i18n/config";
 import { Button, SelectField } from "../components/ui";
 import { Feedback } from "../components/Feedback";
 import { request, useMutation } from "@/frontend/lib/api";
+
+/** Save language/theme in cookies, then refresh so the server renders the same preference. */
 export function Preferences({ locale, theme }: { locale: Locale; theme: "light" | "dark" }) {
   const t = dictionaries[locale];
   const router = useRouter();
@@ -55,6 +57,8 @@ export function Preferences({ locale, theme }: { locale: Locale; theme: "light" 
     </div>
   );
 }
+
+/** End this browser's session and refresh the public play page. */
 export function Logout({ locale }: { locale: Locale }) {
   const mutation = useMutation();
   const router = useRouter();
@@ -78,6 +82,8 @@ export function Logout({ locale }: { locale: Locale }) {
     </div>
   );
 }
+
+/** Reload server-rendered data for the current page. */
 export function Refresh({ label }: { label: string }) {
   const router = useRouter();
   return (

@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 
+// Counts actions in SQLite, so separate requests share the same fixed time window.
+// The key is hashed before storage; it may contain a client address or an email.
 export function createRateLimiter(db: PrismaClient, now: () => Date = () => new Date()) {
   let nextPruneAt = 0;
   return async function consumeLimit(
@@ -19,6 +21,7 @@ export function createRateLimiter(db: PrismaClient, now: () => Date = () => new 
     const duration = windowSeconds * 1000;
     const windowStart = Math.floor(time / duration) * duration;
     const hash = createHash("sha256").update(`${scope}\0${key}`).digest("hex");
+
     // Count in one database statement so concurrent requests share the limit.
     const rows = await db.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`
       INSERT INTO "RateLimitBucket" ("key", "windowStart", "count")

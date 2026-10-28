@@ -1,6 +1,7 @@
 import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 import { getDb } from "./db";
 
+// Ready means the five application tables exist, not just that SQLite accepted a connection.
 export async function readiness(db?: PrismaClient): Promise<{ status: "ok"; database: "ok" }> {
   const database = db ?? (await getDb());
   const tables = await database.$queryRaw<Array<{ name: string }>>(Prisma.sql`

@@ -1,4 +1,6 @@
 import type { Dictionary } from "@/shared/i18n/dictionaries";
+
+// French UI text. Keep the keys aligned with the other two languages.
 export const fr: Dictionary = {
   createUser: "Créer un utilisateur",
   brand: "Morpion",

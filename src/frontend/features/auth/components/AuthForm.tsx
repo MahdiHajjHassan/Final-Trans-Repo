@@ -15,6 +15,10 @@ import {
 import { RequestError, request, useMutation } from "../../../lib/api";
 import { formText, validateFields } from "../../../lib/validation";
 
+/**
+ * The shared sign-in and registration form. Registration also asks for a display name and
+ * accepted terms.
+ */
 export function AuthForm({
   locale,
   mode,
@@ -37,11 +41,14 @@ export function AuthForm({
         event.preventDefault();
         const form = event.currentTarget;
         void mutation.run(async () => {
+          // 1. Read the typed values before FormData can replace broken Unicode.
           const input = {
             email: formText(form, "email").trim().toLowerCase(),
             password: formText(form, "password"),
             ...(registration ? { displayName: formText(form, "displayName").trim() } : {}),
           };
+
+          // 2. Check the fields here for quick feedback. The server validates them again.
           validateFields(input, {
             email: emailSchema,
             password: registration ? passwordSchema : loginPasswordSchema,
@@ -50,10 +57,13 @@ export function AuthForm({
           try {
             await request(`/api/auth/${mode}`, "POST", input);
           } catch (error) {
+            // Unknown email and wrong password use the same sign-in message.
             if (!registration && error instanceof RequestError && error.code === "UNAUTHENTICATED")
               throw new RequestError("INVALID_CREDENTIALS");
             throw error;
           }
+
+          // 3. Registration goes to sign-in; a successful login goes straight to Play.
           router.push(registration ? `/${locale}/login?notice=registered` : `/${locale}/play`);
           router.refresh();
         });

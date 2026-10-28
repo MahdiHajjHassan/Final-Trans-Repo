@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Dictionary } from "@/shared/i18n/dictionaries";
 
+/** Previous/next links for a server-rendered list. Other search filters stay in the URL. */
 export function Pagination({
   page,
   total,

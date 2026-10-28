@@ -6,11 +6,19 @@ import {
   passwordSchema,
 } from "@/shared/auth-validation";
 export { passwordSchema } from "@/shared/auth-validation";
+
+// The fields registration accepts. Unknown fields, such as a supplied role, are rejected.
 export const registerSchema = z
   .object({ email: emailSchema, displayName: displayNameSchema, password: passwordSchema })
   .strict();
+
+// Login checks the supplied password without applying the new-password length rule.
 export const loginSchema = z.object({ email: emailSchema, password: loginPasswordSchema }).strict();
+
+// The profile form may change the display name only.
 export const accountSchema = z.object({ displayName: displayNameSchema }).strict();
+
+// Both passwords are required: the current one proves this is the account owner.
 export const passwordChangeSchema = z
   .object({ currentPassword: loginPasswordSchema, newPassword: passwordSchema })
   .strict();

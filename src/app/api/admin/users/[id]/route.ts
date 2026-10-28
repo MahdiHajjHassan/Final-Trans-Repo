@@ -5,6 +5,8 @@ import { jsonData } from "@/backend/common/http";
 import { readJson, requireSameOrigin } from "@/backend/common/security/origin";
 import { parseInput } from "@/backend/common/validation";
 type Context = { params: Promise<{ id: string }> };
+
+// PUT /api/admin/users/:id: an administrator edits the account's name or role.
 export function PUT(request: Request, context: Context) {
   return withServices(async ({ users, auth, config }) => {
     requireSameOrigin(request, config.appOrigin);
@@ -14,6 +16,8 @@ export function PUT(request: Request, context: Context) {
     );
   });
 }
+
+// DELETE /api/admin/users/:id: delete the account and safely resolve its unfinished games.
 export function DELETE(request: Request, context: Context) {
   return withServices(async ({ users, auth, config }) => {
     requireSameOrigin(request, config.appOrigin);

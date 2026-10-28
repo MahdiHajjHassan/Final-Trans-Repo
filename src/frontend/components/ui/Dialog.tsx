@@ -2,6 +2,11 @@
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { Button } from "@/frontend/components/ui/Button";
+
+/**
+ * A native modal dialog. It takes focus when opened and returns it to the trigger when
+ * closed.
+ */
 export function Dialog({
   open,
   onClose,
@@ -20,6 +25,8 @@ export function Dialog({
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog || !open) return;
+
+    // Remember the trigger before the native dialog takes keyboard focus.
     const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     dialog.showModal();
     return () => {

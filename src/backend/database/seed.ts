@@ -1,6 +1,9 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import { hashPassword } from "../modules/auth/password";
 export type SeedInput = { adminEmail: string; adminPassword: string };
+
+// Creates the first administrator only in an empty database. Existing accounts are never
+// reset.
 export async function seedDatabase(
   db: PrismaClient,
   input: SeedInput,

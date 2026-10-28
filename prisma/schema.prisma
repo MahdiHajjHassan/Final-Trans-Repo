@@ -12,6 +12,7 @@ enum Role {
   ADMIN
 }
 
+// Accounts, their sessions and their games as X or O. Passwords are stored as hashes.
 model User {
   id           String    @id @default(uuid())
   email        String    @unique
@@ -24,6 +25,7 @@ model User {
   gamesAsO     Game[]    @relation("GameO")
 }
 
+// One login per browser session. Its ID is the token hash, never the raw cookie token.
 model Session {
   id        String   @id
   userId    String
@@ -34,6 +36,7 @@ model Session {
   @@index([expiresAt])
 }
 
+// A fixed-window action counter, keyed by the hash of its scope and client/account.
 model RateLimitBucket {
   key         String   @id
   windowStart DateTime
@@ -54,19 +57,23 @@ enum GameStatus {
   CANCELLED
 }
 
+// The latest saved board and result. GameMove keeps the sequence that led to it.
 model Game {
   id         String     @id @default(uuid())
   mode       GameMode
   xId        String?
   oId        String?
+  // Deleting an account clears its seat; the saved game is kept.
   x          User?      @relation("GameX", fields: [xId], references: [id], onDelete: SetNull)
   o          User?      @relation("GameO", fields: [oId], references: [id], onDelete: SetNull)
+  // Nine characters in row order: X, O, or a dot for an empty cell.
   board      String     @default(".........")
   turn       String?    @default("X")
   status     GameStatus @default(WAITING)
   winner     String?
   reason     String?
   inviteCode String?    @unique
+  // Every game change increases this number; stale actions are rejected against it.
   version    Int        @default(1)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
@@ -77,6 +84,7 @@ model Game {
   @@index([oId, updatedAt])
 }
 
+// One committed move: its cell, mark and position in the game's move order.
 model GameMove {
   id        String   @id @default(uuid())
   gameId    String
@@ -86,6 +94,7 @@ model GameMove {
   cell      Int
   createdAt DateTime @default(now())
 
+  // A game cannot save the same move number or play the same cell twice.
   @@unique([gameId, ply])
   @@unique([gameId, cell])
 }

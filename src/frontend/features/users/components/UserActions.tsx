@@ -11,6 +11,10 @@ import { displayNameSchema } from "@/shared/auth-validation";
 import { request, useMutation } from "../../../lib/api";
 import { formText, validateFields } from "../../../lib/validation";
 
+/**
+ * Edit one account or ask to delete it. The server decides whether the role change/deletion
+ * is allowed.
+ */
 export function UserActions({ locale, user }: { locale: Locale; user: AccountDTO }) {
   const t = dictionaries[locale];
   const [editing, setEditing] = useState(false);
@@ -121,6 +125,7 @@ export function UserActions({ locale, user }: { locale: Locale; user: AccountDTO
           disabled={mutation.pending}
           onClick={() =>
             void mutation.run(async () => {
+              // This handler runs from the confirmation dialog, not the first Delete button.
               await request(`/api/admin/users/${user.id}`, "DELETE", {});
               setDeleting(false);
               router.refresh();

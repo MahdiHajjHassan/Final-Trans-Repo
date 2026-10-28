@@ -8,6 +8,8 @@ import { dictionaries } from "@/shared/i18n/dictionaries";
 import { getPageActor } from "@/backend/modules/auth/auth.pages";
 import { Logout, Preferences } from "@/frontend/layout/preferences";
 export const dynamic = "force-dynamic";
+
+/** The translated site title and description for this language section. */
 export async function generateMetadata({
   params,
 }: {
@@ -21,6 +23,8 @@ export async function generateMetadata({
     description: t.metadataDescription,
   };
 }
+
+/** The shared header/footer. Session and theme are read on the server for this request. */
 export default async function LocaleLayout({
   children,
   params,

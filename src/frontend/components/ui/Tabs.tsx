@@ -2,6 +2,7 @@
 
 import { useId, type ReactNode } from "react";
 
+/** One active tab and panel, with arrow/Home/End keys and reversed arrow directions in RTL. */
 export function Tabs({
   label,
   options,

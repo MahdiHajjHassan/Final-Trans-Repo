@@ -1,5 +1,7 @@
 import type { Cells, Mark } from "@/shared/games";
 import { DomainError } from "../../../common/errors";
+
+// The eight ways to win: three rows, three columns and the two diagonals.
 const lines = [
   [0, 1, 2],
   [3, 4, 5],
@@ -10,14 +12,19 @@ const lines = [
   [0, 4, 8],
   [2, 4, 6],
 ];
+
+// Reads the nine-character database board. A dot becomes an empty cell (null).
 export function decodeBoard(board: string): Cells {
-  // SQLite stores nine characters; the UI uses null for an empty cell.
   if (!/^[XO.]{9}$/.test(board)) throw new Error("Invalid stored board");
   return [...board].map((cell) => (cell === "." ? null : cell)) as Cells;
 }
+
+// The reverse: turns the board back into the string SQLite stores.
 export function encodeBoard(cells: Cells): string {
   return cells.map((cell) => cell ?? ".").join("");
 }
+
+// Finds a winning line first. Filling the last cell can still be a win rather than a draw.
 export function evaluateBoard(cells: Cells) {
   for (const line of lines) {
     const mark = cells[line[0]];
@@ -26,6 +33,8 @@ export function evaluateBoard(cells: Cells) {
   }
   return { winner: null, winningLine: null, draw: cells.every((cell) => cell !== null) };
 }
+
+// Places a mark on a new board and checks the result. The input board is left untouched.
 export function applyMove(cells: Cells, mark: Mark, cell: number) {
   const current = evaluateBoard(cells);
   if (!Number.isInteger(cell) || cell < 0 || cell > 8) throw new DomainError("VALIDATION");

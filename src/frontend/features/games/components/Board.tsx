@@ -2,6 +2,8 @@
 import type { Cells, Mark } from "@/shared/games";
 import type { Dictionary } from "@/shared/i18n/dictionaries";
 import type { Locale } from "@/shared/i18n/config";
+
+/** The nine board buttons. It reports the chosen cell; LiveGame sends the move to the server. */
 export function GameBoard({
   cells,
   mark,
@@ -20,6 +22,7 @@ export function GameBoard({
   locale: Locale;
 }) {
   const number = new Intl.NumberFormat(locale);
+
   // Keep cell positions the same in Arabic; only the labels change.
   return (
     <div className="game-board" role="group" aria-label={t.gameBoard} dir="ltr">
@@ -43,6 +46,7 @@ export function GameBoard({
             (cell ? "" : ". " + t.placeMark + " " + mark)
           }
           onClick={() => {
+            // aria-disabled keeps the cell focusable; this guard stops an unavailable move.
             if (!disabled && cell === null) onMove(index);
           }}
         >

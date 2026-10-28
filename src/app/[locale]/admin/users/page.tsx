@@ -13,6 +13,8 @@ import {
 } from "@/frontend/components/ui";
 import { UserActions, CreateUser } from "@/frontend/features/users";
 export const metadata = { robots: { index: false, follow: false } };
+
+/** /:locale/admin/users: check the current admin role before loading the account list. */
 export default async function Users({
   params,
   searchParams,

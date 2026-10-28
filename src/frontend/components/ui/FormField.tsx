@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 
+/** One label, its control and any hint/error. The IDs let screen readers connect them. */
 export function FormField({
   label,
   htmlFor,

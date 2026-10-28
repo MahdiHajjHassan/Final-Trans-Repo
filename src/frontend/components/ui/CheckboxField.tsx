@@ -2,6 +2,7 @@
 
 import { useId, type InputHTMLAttributes } from "react";
 
+/** Keep the checkbox and its text in one label, so clicking either toggles it. */
 export function CheckboxField({
   label,
   id: suppliedId,

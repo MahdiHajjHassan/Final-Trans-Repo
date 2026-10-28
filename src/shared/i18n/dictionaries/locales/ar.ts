@@ -1,4 +1,6 @@
 import type { Dictionary } from "@/shared/i18n/dictionaries";
+
+// Arabic UI text. Keep the keys aligned with the other two languages.
 export const ar: Dictionary = {
   createUser: "إنشاء مستخدم",
   brand: "إكس أو",

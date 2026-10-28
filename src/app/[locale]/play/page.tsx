@@ -16,6 +16,11 @@ export async function generateMetadata({
   const { t } = await pageLocale(params);
   return { title: t.brand, description: t.metadataDescription };
 }
+
+/**
+ * /:locale/play: visitors see the introduction; signed-in players also get the lobby and
+ * recent games.
+ */
 export default async function Play({
   params,
   searchParams,
@@ -35,6 +40,8 @@ export default async function Play({
       ).games.listMine(actor, raw.page === undefined ? {} : { page: raw.page });
     } catch (error) {
       if (!(error instanceof DomainError) || error.code !== "VALIDATION") throw error;
+
+      // An invalid page filter shows feedback and falls back to the first page of games.
       invalid = true;
       games = await (await getServices()).games.listMine(actor);
     }

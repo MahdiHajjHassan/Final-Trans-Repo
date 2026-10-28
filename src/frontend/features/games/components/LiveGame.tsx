@@ -10,6 +10,11 @@ import type { GameDTO, GameView, Mark, Player } from "@/shared/games";
 import { playerLabel } from "@/shared/player-label";
 import { request, RequestError, useMutation } from "../../../lib/api";
 import { GameBoard } from "./Board";
+
+/**
+ * The live match screen. It starts from the server-rendered board and follows saved state
+ * over SSE.
+ */
 export function LiveGame({ initial, locale }: { initial: GameView; locale: Locale }) {
   const t = dictionaries[locale],
     router = useRouter(),
@@ -19,8 +24,9 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
   const [connected, setConnected] = useState(false),
     [confirm, setConfirm] = useState<"resign" | "cancel" | null>(null);
   const id = initial.game.id;
+
+  // Only move forward in version; a slow response must not replace a more recent board.
   const apply = useCallback((next: GameDTO) => {
-    // An older response can arrive after a newer stream update.
     setGame((current) => (next.version > current.version ? next : current));
     if (next.status === "FINISHED" || next.status === "CANCELLED") setConfirm(null);
   }, []);
@@ -29,11 +35,16 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
       timer: ReturnType<typeof setTimeout> | undefined,
       source: EventSource | undefined,
       delay = 2000;
+
+    // Close the stream before leaving a game that this session can no longer read.
     function leave(code: string) {
       source?.close();
       stopped = true;
       window.location.replace("/" + locale + (code === "NOT_FOUND" ? "/play" : "/login"));
     }
+
+    // Disable play, read the saved board again, then reopen the stream. Failed reads back off
+    // up to ten seconds.
     function recover() {
       if (stopped) return;
       source?.close();
@@ -44,7 +55,6 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
         timer = undefined;
         if (stopped) return;
         try {
-          // Read the saved board again before reconnecting the stream.
           const result = await request<GameView>("/api/games/" + id, "GET");
           if (stopped) return;
           apply(result.game);
@@ -62,6 +72,9 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
         }
       }, delay);
     }
+
+    // Listen for full boards and access changes. A connection failure enters the recovery
+    // path.
     function connect() {
       if (stopped) return;
       source?.close();
@@ -80,6 +93,8 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
       source.addEventListener("reconnect", recover);
       source.onerror = recover;
     }
+
+    // Returning to the page or changing network state needs a fresh read before play resumes.
     function resume() {
       recover();
     }
@@ -113,6 +128,9 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
           : game.turn === viewerMark
             ? t.yourTurn
             : t.opponentTurn;
+
+  // The manual refresh after an uncertain action: ask for the board, without sending the move
+  // again.
   async function sync() {
     const result = await request<GameView>("/api/games/" + id, "GET");
     apply(result.game);
