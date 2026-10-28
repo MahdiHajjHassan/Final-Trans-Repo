@@ -19,12 +19,23 @@ for (const locale of ["en", "fr", "ar"] as const) {
         await scope.locator(`a[href="/${locale}/${document}"]`).click();
         const legalPage = await opened;
         await expect(page).toHaveURL(new RegExp(`/${locale}/register$`));
-        expect(legalPage, "Legal documents should leave registration open in its original tab").not.toBeNull();
-        await expect(legalPage!.getByRole("heading", { name: t[document], exact: true })).toBeVisible();
+        expect(
+          legalPage,
+          "Legal documents should leave registration open in its original tab",
+        ).not.toBeNull();
+        await expect(
+          legalPage!.getByRole("heading", { name: t[document], exact: true }),
+        ).toBeVisible();
         await legalPage!.close();
-        await expect(page.getByLabel(t.displayName, { exact: true })).toHaveValue("Legal review demo");
-        await expect(page.getByLabel(t.email, { exact: true })).toHaveValue("legal-review@example.com");
-        expect(await page.getByLabel(t.password, { exact: true }).inputValue() === draftPassword).toBe(true);
+        await expect(page.getByLabel(t.displayName, { exact: true })).toHaveValue(
+          "Legal review demo",
+        );
+        await expect(page.getByLabel(t.email, { exact: true })).toHaveValue(
+          "legal-review@example.com",
+        );
+        expect(
+          (await page.getByLabel(t.password, { exact: true }).inputValue()) === draftPassword,
+        ).toBe(true);
         await expect(page.getByLabel(t.acceptTerms)).toBeChecked();
       }
     }

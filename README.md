@@ -127,6 +127,24 @@ weaker legal move, allowing it to lose. The human move and any computer reply
 commit atomically. This is a local heuristic opponent, without an external model
 or service.
 
+## Source layout
+
+| Path | Responsibility |
+| --- | --- |
+| `src/app` | URL routes, server-rendered pages, and API entry points. |
+| `src/components` | Shared controls and accessible UI primitives. |
+| `src/features` | Browser forms, lobby actions, the board, and live-game recovery. |
+| `src/server` | Authentication, permissions, game rules/AI, services, persistence, and event streams. |
+| `src/shared` | Data contracts and small helpers shared across application layers. |
+| `src/i18n` | Language dictionaries, locale selection, and text direction. |
+| `prisma` | The database schema and published migrations. |
+| `scripts` | Setup, startup, HTTPS smoke checks, verification, and rehearsal. |
+| `tests/server`, `tests/browser` | Database-backed service tests and real browser journeys. |
+
+A move starts in `src/features/games/board.tsx`. The live-game feature sends it to
+`src/app/api/games/[id]/moves/route.ts`; the game handlers and service under
+`src/server/games` validate and persist it before publishing the new state.
+
 ## Database schema
 
 | Model | Key fields and relationships |
@@ -201,6 +219,10 @@ user-management module with avatars/friends, remote-player, statistics,
 tournament or public-API modules.
 
 ## Verification
+
+Run `npm run format` to apply the shared code style and `npm run format:check` to
+check it. Formatting excludes generated code, private files, vendored skills,
+documentation, lockfiles, and published migrations.
 
 ```sh
 npm test

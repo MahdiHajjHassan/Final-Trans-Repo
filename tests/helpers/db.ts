@@ -11,12 +11,25 @@ export async function createTestDb(options: { migrate?: boolean } = {}) {
     raw.pragma("foreign_keys = ON");
     try {
       const migrations = await readdir(resolve("prisma/migrations"), { withFileTypes: true });
-      for (const migration of migrations.filter((item) => item.isDirectory()).sort((a, b) => a.name.localeCompare(b.name))) {
-        raw.exec(await readFile(resolve("prisma/migrations", migration.name, "migration.sql"), "utf8"));
+      for (const migration of migrations
+        .filter((item) => item.isDirectory())
+        .sort((a, b) => a.name.localeCompare(b.name))) {
+        raw.exec(
+          await readFile(resolve("prisma/migrations", migration.name, "migration.sql"), "utf8"),
+        );
       }
-    } finally { raw.close(); }
+    } finally {
+      raw.close();
+    }
   }
   const { createDb } = await import("@/server/db");
   const db = await createDb(`file:${filename}`);
-  return { db, url: `file:${filename}`, async close() { await db.$disconnect(); await rm(dir, { recursive: true, force: true }); } };
+  return {
+    db,
+    url: `file:${filename}`,
+    async close() {
+      await db.$disconnect();
+      await rm(dir, { recursive: true, force: true });
+    },
+  };
 }

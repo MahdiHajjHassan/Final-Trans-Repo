@@ -8,4 +8,6 @@ const db = await createDb(config.databaseUrl);
 try {
   const result = await seedDatabase(db, config);
   console.log(result.created ? "Created initial administrator." : "Existing accounts preserved.");
-} finally { await db.$disconnect(); }
+} finally {
+  await db.$disconnect();
+}

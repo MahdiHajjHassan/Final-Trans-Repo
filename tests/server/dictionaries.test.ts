@@ -7,7 +7,8 @@ describe("complete locale dictionaries", () => {
     expect(englishKeys.length).toBeGreaterThan(100);
     for (const locale of ["fr", "ar"] as const) {
       expect(Object.keys(dictionaries[locale]).sort()).toEqual(englishKeys);
-      for (const value of Object.values(dictionaries[locale])) expect(value.trim().length).toBeGreaterThan(0);
+      for (const value of Object.values(dictionaries[locale]))
+        expect(value.trim().length).toBeGreaterThan(0);
       expect(dictionaries[locale].privacyBody).not.toEqual(dictionaries.en.privacyBody);
       expect(dictionaries[locale].CONFLICT).not.toEqual(dictionaries.en.CONFLICT);
     }

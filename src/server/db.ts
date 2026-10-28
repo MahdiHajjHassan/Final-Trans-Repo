@@ -22,9 +22,11 @@ export async function createDb(databaseUrl: string): Promise<PrismaClient> {
 
 const globalDb = globalThis as typeof globalThis & { taskboardDb?: Promise<PrismaClient> };
 export function getDb(): Promise<PrismaClient> {
-  globalDb.taskboardDb ??= createDb(process.env.DATABASE_URL ?? "file:./data/tictactoe.db").catch((error) => {
-    globalDb.taskboardDb = undefined;
-    throw error;
-  });
+  globalDb.taskboardDb ??= createDb(process.env.DATABASE_URL ?? "file:./data/tictactoe.db").catch(
+    (error) => {
+      globalDb.taskboardDb = undefined;
+      throw error;
+    },
+  );
   return globalDb.taskboardDb;
 }
