@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { z } from "zod";
+import { emailSchema, passwordSchema } from "../shared/auth-validation";
 
-const email = z.string().trim().toLowerCase().pipe(z.email());
 const origin = z.url().refine((value) => {
   const url = new URL(value);
   return url.protocol === "https:" && !url.username && !url.password && !url.search && !url.hash && url.pathname === "/";
@@ -10,8 +10,8 @@ const origin = z.url().refine((value) => {
 const configSchema = z.object({
   DATABASE_URL: z.string().default("file:./data/tictactoe.db"),
   APP_ORIGIN: origin,
-  ADMIN_EMAIL: email,
-  ADMIN_PASSWORD: z.string().min(12).max(128),
+  ADMIN_EMAIL: emailSchema,
+  ADMIN_PASSWORD: passwordSchema,
 });
 
 export function resolveDatabaseUrl(value: string): string {

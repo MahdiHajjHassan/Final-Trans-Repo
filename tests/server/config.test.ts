@@ -26,3 +26,13 @@ test("configuration needs only game settings, tolerates legacy keys and rejects 
   expect(() => loadConfig({...valid, PUBLIC_API_KEY:"unused-legacy-key"})).not.toThrow();
   expect(() => loadConfig({...valid,ADMIN_PASSWORD:"short"})).toThrow();
 });
+
+test("bootstrap rejects administrator email addresses that cannot use the browser login", async () => {
+  const { loadConfig } = await import("@/server/config");
+  expect(() => loadConfig({ ...valid, ADMIN_EMAIL: `a@${"a.".repeat(126)}com` })).toThrow();
+});
+
+test("bootstrap rejects malformed administrator passwords before account seeding", async () => {
+  const { loadConfig } = await import("@/server/config");
+  expect(() => loadConfig({ ...valid, ADMIN_PASSWORD: "correct-password-\ud800" })).toThrow();
+});
