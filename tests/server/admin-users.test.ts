@@ -63,3 +63,24 @@ test("competing administrators using separate connections cannot remove the fina
   expect(outcomes.filter((item) => item.status === "fulfilled")).toHaveLength(1);
   expect(await db.user.count({ where: { role: "ADMIN" } })).toBe(1);
 });
+
+test.each(["\ud800", "\udc00"])("admin updates reject malformed names %j without changing the user", async (displayName) => {
+  const { db, users, admin, member } = await fixture();
+  await expect(users.updateUser(admin, member.id, { displayName })).rejects.toMatchObject({ code: "VALIDATION" });
+  expect((await db.user.findUniqueOrThrow({ where: { id: member.id } })).displayName).toBe("Test member");
+});
+
+test.each([{ displayName: "Invalid\ud800" }, { password: "correct-password-\ud800" }])("admin account creation rejects malformed fields %j", async (invalid) => {
+  const { db, users, admin } = await fixture();
+  await expect(users.createUser(admin, { email: "new@example.test", displayName: "Valid name", password: "correct-password-for-tests", ...invalid })).rejects.toMatchObject({ code: "VALIDATION" });
+  expect(await db.user.count()).toBe(2);
+});
+
+test("admin mutations resolve valid uppercase user identifiers", async () => {
+  const { db, users, admin, member } = await fixture();
+  const id = "cccccccc-dddd-4eee-8fff-aaaaaaaaaaaa";
+  await db.user.update({ where: { id: member.id }, data: { id } });
+  await expect(users.updateUser(admin, id.toUpperCase(), { displayName: "Renamed" })).resolves.toMatchObject({ id, displayName: "Renamed" });
+  await users.deleteUser(admin, id.toUpperCase());
+  expect(await db.user.findUnique({ where: { id } })).toBeNull();
+});

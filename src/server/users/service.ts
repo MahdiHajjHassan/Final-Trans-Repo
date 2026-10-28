@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 import type { Actor } from "@/shared/auth";
+import { displayNameSchema } from "@/shared/auth-validation";
 import { currentActor } from "../auth/policy";
 import { withWriteRetry } from "../db-write";
 import { DomainError } from "../errors";
@@ -10,9 +11,9 @@ import {hashPassword} from "../auth/password";
 import {createRateLimiter} from "../security/rate-limit";
 
 const select = { id: true, email: true, displayName: true, role: true, createdAt: true } satisfies Prisma.UserSelect;
-const patchSchema = z.object({ displayName: z.string().trim().min(1).max(60).optional(), role: z.enum(["MEMBER", "ADMIN"]).optional() }).strict().refine((value) => Object.values(value).some((item) => item !== undefined));
+const patchSchema = z.object({ displayName: displayNameSchema.optional(), role: z.enum(["MEMBER", "ADMIN"]).optional() }).strict().refine((value) => Object.values(value).some((item) => item !== undefined));
 const querySchema = z.object({ q: z.string().trim().max(100).optional(), page: z.coerce.number().int().min(1).max(100000).default(1) }).strict();
-const idSchema = z.uuid();
+const idSchema = z.uuid().transform((id) => id.toLowerCase());
 const createSchema=registerSchema.extend({role:z.enum(["MEMBER","ADMIN"]).default("MEMBER")});
 async function administrator(tx: Prisma.TransactionClient, actor: Actor | null) {
   const current = await currentActor(tx, actor);
