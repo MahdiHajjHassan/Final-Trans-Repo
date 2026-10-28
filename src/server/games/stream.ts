@@ -7,7 +7,7 @@ export async function createGameStream(request:Request,id:string,dependencies:{a
   const {auth,games}=dependencies,events=dependencies.events??gameEvents;
   const token=readSessionToken(request),actor=await auth.resolveSession(token);
   if(!actor)throw new DomainError("UNAUTHENTICATED");
-  await games.read(actor,id);
+  const canonicalId=(await games.read(actor,id)).game.id;
   const release=events.acquire(actor.id),encoder=new TextEncoder();
   let closed=false,seen=0,unsubscribe:()=>void=()=>{},interval:ReturnType<typeof setInterval>|undefined;
   let controller:ReadableStreamDefaultController<Uint8Array>;
@@ -24,7 +24,7 @@ export async function createGameStream(request:Request,id:string,dependencies:{a
       const current=await auth.resolveSession(token);
       if(closed)return;
       if(!current)throw new DomainError("UNAUTHENTICATED");
-      const {game}=await games.read(current,id);
+      const {game}=await games.read(current,canonicalId);
       if(closed)return;
       if(game.version>seen){seen=game.version;send("id: "+game.version+"\nevent: state\ndata: "+JSON.stringify(game)+"\nretry: 2000\n\n");}
       else send(": heartbeat\n\n");
@@ -36,7 +36,7 @@ export async function createGameStream(request:Request,id:string,dependencies:{a
     });
   }
   const stream=new ReadableStream<Uint8Array>({
-    start(value){controller=value;unsubscribe=events.subscribe(id,refresh);interval=setInterval(refresh,15000);request.signal.addEventListener("abort",finish,{once:true});if(request.signal.aborted)finish();else refresh();},
+    start(value){controller=value;unsubscribe=events.subscribe(canonicalId,refresh);interval=setInterval(refresh,15000);request.signal.addEventListener("abort",finish,{once:true});if(request.signal.aborted)finish();else refresh();},
     cancel(){finish();},
   });
   return new Response(stream,{headers:{"Content-Type":"text/event-stream","Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff"}});

@@ -85,7 +85,7 @@ export function createGameService(db:PrismaClient,options:Options={}) {
           if(cell!==null){moved=applyMove(moved.cells,"O",cell);moves.push({gameId:game.id,ply:moves[0].ply+1,mark:"O",cell});}
         }
         const terminal=Boolean(moved.winner||moved.draw);
-        const result=await tx.game.updateMany({where:{id,version:data.expectedVersion,status:"ACTIVE"},data:{
+        const result=await tx.game.updateMany({where:{id:game.id,version:data.expectedVersion,status:"ACTIVE"},data:{
           board:encodeBoard(moved.cells),version:{increment:moves.length},
           turn:terminal?null:game.mode==="AI"?"X":mark==="X"?"O":"X",
           status:terminal?"FINISHED":"ACTIVE",winner:moved.winner,
@@ -93,7 +93,7 @@ export function createGameService(db:PrismaClient,options:Options={}) {
         }});
         if(result.count!==1)throw new DomainError("CONFLICT");
         await tx.gameMove.createMany({data:moves});
-        return gameDto((await tx.game.findUnique({where:{id},include:gameInclude}))!);
+        return gameDto((await tx.game.findUnique({where:{id:game.id},include:gameInclude}))!);
       }));
     },
     async resign(actor:Actor|null,id:string,input:unknown):Promise<GameDTO> {
@@ -101,9 +101,9 @@ export function createGameService(db:PrismaClient,options:Options={}) {
       return changed(()=>db.$transaction(async tx=>{
         const {game,mark}=await record(tx,actor,id);
         if(game.status!=="ACTIVE"||game.version!==data.expectedVersion)throw new DomainError("CONFLICT");
-        const result=await tx.game.updateMany({where:{id,version:data.expectedVersion,status:"ACTIVE"},data:{status:"FINISHED",winner:mark==="X"?"O":"X",reason:"RESIGNED",turn:null,finishedAt:new Date(),version:{increment:1}}});
+        const result=await tx.game.updateMany({where:{id:game.id,version:data.expectedVersion,status:"ACTIVE"},data:{status:"FINISHED",winner:mark==="X"?"O":"X",reason:"RESIGNED",turn:null,finishedAt:new Date(),version:{increment:1}}});
         if(result.count!==1)throw new DomainError("CONFLICT");
-        return gameDto((await tx.game.findUnique({where:{id},include:gameInclude}))!);
+        return gameDto((await tx.game.findUnique({where:{id:game.id},include:gameInclude}))!);
       }));
     },
     async cancel(actor:Actor|null,id:string,input:unknown):Promise<GameDTO> {
@@ -111,9 +111,9 @@ export function createGameService(db:PrismaClient,options:Options={}) {
       return changed(()=>db.$transaction(async tx=>{
         const {game,mark}=await record(tx,actor,id);
         if(game.status!=="WAITING"||mark!=="X"||game.version!==data.expectedVersion)throw new DomainError("CONFLICT");
-        const result=await tx.game.updateMany({where:{id,version:data.expectedVersion,status:"WAITING"},data:{status:"CANCELLED",turn:null,version:{increment:1}}});
+        const result=await tx.game.updateMany({where:{id:game.id,version:data.expectedVersion,status:"WAITING"},data:{status:"CANCELLED",turn:null,version:{increment:1}}});
         if(result.count!==1)throw new DomainError("CONFLICT");
-        return gameDto((await tx.game.findUnique({where:{id},include:gameInclude}))!);
+        return gameDto((await tx.game.findUnique({where:{id:game.id},include:gameInclude}))!);
       }));
     },
   };
