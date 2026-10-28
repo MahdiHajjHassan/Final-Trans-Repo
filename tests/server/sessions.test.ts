@@ -1,5 +1,7 @@
 import { afterEach, expect, test } from "vitest";
 import { createHash } from "node:crypto";
+import { spawn } from "node:child_process";
+import { once } from "node:events";
 import { createTestDb } from "../helpers/db";
 import { seedUser } from "../helpers/fixtures";
 
@@ -88,4 +90,60 @@ test("an old-password login racing a password change cannot retain access afterw
   expect(change.status).toBe("fulfilled");
   if (login.status === "fulfilled") await expect(auth.resolveSession(login.value.token)).resolves.toBeNull();
   else expect(login.reason).toMatchObject({ code: "UNAUTHENTICATED" });
+});
+
+async function holdWriter(filename: string) {
+  // A separate process exercises actual OS locks even when the test and Prisma
+  // load different native SQLite libraries (whose in-process lock tables differ).
+  const child = spawn(process.execPath, ["--input-type=commonjs", "-e", `
+    const Sqlite = require("better-sqlite3");
+    const db = new Sqlite(process.argv[1]);
+    db.exec("BEGIN IMMEDIATE");
+    process.on("message", () => { db.exec("ROLLBACK"); db.close(); process.exit(0); });
+    process.send("locked");
+  `, filename], { stdio: ["ignore", "ignore", "inherit", "ipc"] });
+  try { await once(child, "message", { signal: AbortSignal.timeout(5000) }); }
+  catch (error) { child.kill(); throw error; }
+  return async () => {
+    const exited = once(child, "exit", { signal: AbortSignal.timeout(5000) });
+    child.send("release");
+    try { await exited; } finally { if (child.exitCode === null) child.kill(); }
+  };
+}
+
+test("logout reports persistent SQLite contention as a retryable conflict and revokes after release", async () => {
+  const { db, url, close } = await createTestDb(); cleanup.push(close);
+  const user = await seedUser(db);
+  const { createSessionToken } = await import("@/server/auth/session");
+  const { createAuthService } = await import("@/server/auth/service");
+  const auth = createAuthService(db);
+  const session = await createSessionToken(db, user.actor.id, new Date());
+  await db.$queryRawUnsafe("PRAGMA busy_timeout = 1");
+  const release = await holdWriter(url.slice(5));
+  try {
+    await expect(auth.logout(session.token)).rejects.toMatchObject({ code: "CONFLICT", retryAfterSeconds: 1 });
+  } finally {
+    await release();
+  }
+  await expect(auth.resolveSession(session.token)).resolves.toEqual(user.actor);
+  await auth.logout(session.token);
+  await expect(auth.resolveSession(session.token)).resolves.toBeNull();
+});
+
+test("an expired session stays unauthenticated when opportunistic cleanup encounters a concurrent writer", async () => {
+  const { db, url, close } = await createTestDb(); cleanup.push(close);
+  const user = await seedUser(db);
+  const { createSessionToken, resolveSessionToken } = await import("@/server/auth/session");
+  const issued = new Date("2026-01-01T00:00:00Z");
+  const session = await createSessionToken(db, user.actor.id, issued);
+  const now = new Date("2026-01-09T00:00:00Z");
+  await db.$queryRawUnsafe("PRAGMA busy_timeout = 1");
+  const release = await holdWriter(url.slice(5));
+  try {
+    await expect(resolveSessionToken(db, session.token, now)).resolves.toBeNull();
+  } finally {
+    await release();
+  }
+  await expect(resolveSessionToken(db, session.token, now)).resolves.toBeNull();
+  expect(await db.session.count()).toBe(0);
 });

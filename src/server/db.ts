@@ -9,14 +9,22 @@ export async function createDb(databaseUrl: string): Promise<PrismaClient> {
   await mkdir(dirname(url.slice(5)), { recursive: true });
   const adapter = new PrismaBetterSqlite3({ url, timeout: 5000 });
   const db = new PrismaClient({ adapter });
-  await db.$connect();
-  await db.$queryRaw(Prisma.sql`PRAGMA journal_mode = WAL`);
-  await db.$executeRaw(Prisma.sql`PRAGMA foreign_keys = ON`);
-  return db;
+  try {
+    await db.$connect();
+    await db.$queryRaw(Prisma.sql`PRAGMA journal_mode = WAL`);
+    await db.$executeRaw(Prisma.sql`PRAGMA foreign_keys = ON`);
+    return db;
+  } catch (error) {
+    await db.$disconnect().catch(() => undefined);
+    throw error;
+  }
 }
 
 const globalDb = globalThis as typeof globalThis & { taskboardDb?: Promise<PrismaClient> };
 export function getDb(): Promise<PrismaClient> {
-  globalDb.taskboardDb ??= createDb(process.env.DATABASE_URL ?? "file:./data/tictactoe.db");
+  globalDb.taskboardDb ??= createDb(process.env.DATABASE_URL ?? "file:./data/tictactoe.db").catch((error) => {
+    globalDb.taskboardDb = undefined;
+    throw error;
+  });
   return globalDb.taskboardDb;
 }

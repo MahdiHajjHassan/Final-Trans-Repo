@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import type { Actor } from "@/shared/auth";
+import { isBusy, withWriteRetry } from "../db-write";
 
 function validToken(raw: string | null): raw is string { return raw !== null && /^[a-f0-9]{64}$/.test(raw); }
 function tokenHash(raw: string): string { return createHash("sha256").update(raw).digest("hex"); }
@@ -17,12 +18,16 @@ export async function resolveSessionToken(db: PrismaClient, raw: string | null, 
   const session = await db.session.findUnique({ where: { id: tokenHash(raw) }, include: { user: { select: { id: true, role: true } } } });
   if (!session) return null;
   if (session.expiresAt <= now) {
-    await db.session.deleteMany({ where: { id: session.id } });
+    try { await db.session.deleteMany({ where: { id: session.id } }); }
+    catch (error) {
+      // Expiration already denies access; optional cleanup can wait for a writer.
+      if (!isBusy(error)) throw error;
+    }
     return null;
   }
   return session.user;
 }
 
 export async function revokeSessionToken(db: PrismaClient, raw: string | null): Promise<void> {
-  if (validToken(raw)) await db.session.deleteMany({ where: { id: tokenHash(raw) } });
+  if (validToken(raw)) await withWriteRetry(() => db.session.deleteMany({ where: { id: tokenHash(raw) } }));
 }

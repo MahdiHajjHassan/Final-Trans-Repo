@@ -1,7 +1,7 @@
 import { setTimeout } from "node:timers/promises";
 import { DomainError } from "./errors";
 
-function isBusy(error: unknown, depth = 0): boolean {
+export function isBusy(error: unknown, depth = 0): boolean {
   if (!error || typeof error !== "object" || depth > 5 || error instanceof DomainError) return false;
   const details = error as Record<string, unknown>;
   // This helper wraps only SQLite write transactions. Prisma may translate a
