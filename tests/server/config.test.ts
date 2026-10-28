@@ -11,7 +11,7 @@ const valid = {
 };
 
 test("configuration normalizes identities and resolves one consistent SQLite location", async () => {
-  const { loadConfig } = await import("@/server/config");
+  const { loadConfig } = await import("@/backend/config/env");
   const config = loadConfig(valid);
   expect(config.adminEmail).toBe("admin@taskboard.local");
   expect(config.databaseUrl).toBe(`file:${resolve("data/test.db")}`);
@@ -24,12 +24,12 @@ test.each([
   "https://user:pass@example.test",
   "https://example.test?q=1",
 ])("configuration rejects unsafe or non-origin APP_ORIGIN %s", async (origin) => {
-  const { loadConfig } = await import("@/server/config");
+  const { loadConfig } = await import("@/backend/config/env");
   expect(() => loadConfig({ ...valid, APP_ORIGIN: origin })).toThrow();
 });
 
 test("configuration needs only game settings, tolerates legacy keys and rejects short administrator passwords", async () => {
-  const { loadConfig } = await import("@/server/config");
+  const { loadConfig } = await import("@/backend/config/env");
   expect(() =>
     loadConfig({
       APP_ORIGIN: valid.APP_ORIGIN,
@@ -42,11 +42,11 @@ test("configuration needs only game settings, tolerates legacy keys and rejects 
 });
 
 test("bootstrap rejects administrator email addresses that cannot use the browser login", async () => {
-  const { loadConfig } = await import("@/server/config");
+  const { loadConfig } = await import("@/backend/config/env");
   expect(() => loadConfig({ ...valid, ADMIN_EMAIL: `a@${"a.".repeat(126)}com` })).toThrow();
 });
 
 test("bootstrap rejects malformed administrator passwords before account seeding", async () => {
-  const { loadConfig } = await import("@/server/config");
+  const { loadConfig } = await import("@/backend/config/env");
   expect(() => loadConfig({ ...valid, ADMIN_PASSWORD: "correct-password-\ud800" })).toThrow();
 });

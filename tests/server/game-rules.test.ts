@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { applyMove, evaluateBoard, decodeBoard } from "@/server/games/rules";
-import { chooseAiMove } from "@/server/games/ai";
+import { applyMove, evaluateBoard, decodeBoard } from "@/backend/modules/games/engine/game.engine";
+import { chooseAiMove } from "@/backend/modules/games/ai/ai";
 test.each([
   "XXX......",
   "...XXX...",

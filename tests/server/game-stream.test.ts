@@ -1,12 +1,12 @@
 import { expect, test } from "vitest";
 import { createTestDb } from "../helpers/db";
 import { seedUser } from "../helpers/fixtures";
-import { createAuthService } from "@/server/auth/service";
-import { createSessionToken } from "@/server/auth/session";
-import { sessionCookieName } from "@/server/auth/policy";
-import { createGameService } from "@/server/games/service";
-import { createGameEvents } from "@/server/games/events";
-import { createGameStream } from "@/server/games/stream";
+import { createAuthService } from "@/backend/modules/auth/auth.service";
+import { createSessionToken } from "@/backend/modules/auth/sessions.service";
+import { sessionCookieName } from "@/backend/modules/auth/session.guard";
+import { createGameService } from "@/backend/modules/games/games.service";
+import { createGameEvents } from "@/backend/modules/realtime/game-events";
+import { createGameStream } from "@/backend/modules/realtime/game-stream";
 test("streams send canonical snapshots, scope updates, enforce revocation and release limits on abort", async () => {
   const f = await createTestDb();
   const aborts: AbortController[] = [];
@@ -104,7 +104,7 @@ test("deleting an active player revokes their stream and delivers an anonymized 
       await reader.read();
       readers.push(reader);
     }
-    const { createUserService } = await import("@/server/users/service");
+    const { createUserService } = await import("@/backend/modules/users/users.service");
     await createUserService(f.db, { publish: events.publish }).deleteUser(admin.actor, a.actor.id);
     const decode = new TextDecoder();
     expect(decode.decode((await readers[0].read()).value)).toContain("access-lost");

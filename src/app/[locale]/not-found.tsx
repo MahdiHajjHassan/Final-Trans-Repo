@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { isLocale } from "@/i18n/config";
-import { dictionaries } from "@/i18n/dictionaries";
+import { isLocale } from "@/shared/i18n/config";
+import { dictionaries } from "@/shared/i18n/dictionaries";
 export default function NotFound() {
   const params = useParams();
   const locale = isLocale(params.locale) ? params.locale : "en";

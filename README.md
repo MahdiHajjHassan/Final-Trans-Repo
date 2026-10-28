@@ -132,18 +132,27 @@ or service.
 | Path | Responsibility |
 | --- | --- |
 | `src/app` | URL routes, server-rendered pages, and API entry points. |
-| `src/components` | Shared controls and accessible UI primitives. |
-| `src/features` | Browser forms, lobby actions, the board, and live-game recovery. |
-| `src/server` | Authentication, permissions, game rules/AI, services, persistence, and event streams. |
+| `src/frontend/components/ui` | Shared controls, one component per file. |
+| `src/frontend/features` | Account, auth, games and user-management components. |
+| `src/frontend/layout`, `lib`, `styles` | Preferences, browser requests/form validation and shared styles. |
+| `src/backend/modules` | Auth, games, users and realtime modules. |
+| `src/backend/common` | HTTP responses, errors, validation and request security. |
+| `src/backend/config`, `database` | Environment validation, database connections, write retries and seeding. |
 | `src/shared` | Data contracts and small helpers shared across application layers. |
-| `src/i18n` | Language dictionaries, locale selection, and text direction. |
+| `src/shared/i18n` | Locale selection, text direction and separate English/French/Arabic dictionaries. |
 | `prisma` | The database schema and published migrations. |
 | `scripts` | Setup, startup, HTTPS smoke checks, verification, and rehearsal. |
 | `tests/server`, `tests/browser` | Database-backed service tests and real browser journeys. |
 
-A move starts in `src/features/games/board.tsx`. The live-game feature sends it to
-`src/app/api/games/[id]/moves/route.ts`; the game handlers and service under
-`src/server/games` validate and persist it before publishing the new state.
+The layout follows the frontend/features and backend/modules grouping in
+[tawbinho/ft_transcendence](https://github.com/tawbinho/ft_transcendence), using
+Next.js for this application's routes and server rendering.
+
+A move starts in `src/frontend/features/games/components/Board.tsx`. `LiveGame.tsx`
+sends it to `src/app/api/games/[id]/moves/route.ts`. Under `src/backend/modules/games`,
+`games.controller.ts` reads the request, `games.service.ts` saves the move and
+`engine/game.engine.ts` checks the board. The realtime module sends the saved state
+to connected players.
 
 ## Database schema
 

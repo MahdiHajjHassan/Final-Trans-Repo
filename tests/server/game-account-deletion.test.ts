@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 import { createTestDb } from "../helpers/db";
 import { seedUser } from "../helpers/fixtures";
-import { createGameService } from "@/server/games/service";
-import { createUserService } from "@/server/users/service";
+import { createGameService } from "@/backend/modules/games/games.service";
+import { createUserService } from "@/backend/modules/users/users.service";
 test("deleting a player terminates active games, cancels waiting games and anonymizes history", async () => {
   const f = await createTestDb();
   try {
@@ -55,7 +55,7 @@ test("deleting a player terminates active games, cancels waiting games and anony
 
 test("account deletion racing an independent move leaves one terminal result and valid move rows", async () => {
   const f = await createTestDb();
-  const { createDb } = await import("@/server/db");
+  const { createDb } = await import("@/backend/database/db");
   const second = await createDb(f.url);
   try {
     const admin = await seedUser(f.db, { role: "ADMIN" }),

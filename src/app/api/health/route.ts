@@ -1,4 +1,4 @@
-import { readiness } from "@/server/readiness";
+import { readiness } from "@/backend/database/readiness";
 export const dynamic = "force-dynamic";
 export async function GET() {
   try {

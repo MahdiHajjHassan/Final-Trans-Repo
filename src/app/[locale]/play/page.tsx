@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { playerLabel } from "@/shared/player-label";
 import type { Metadata } from "next";
-import { pageLocale } from "@/i18n/server";
-import { formatDate } from "@/i18n/config";
-import { getPageActor } from "@/server/auth/page";
-import { getServices } from "@/server/services";
-import { DomainError } from "@/server/errors";
-import { Alert, Badge, EmptyState, Pagination } from "@/components/ui";
-import { GameLobby } from "@/features/games/lobby";
+import { pageLocale } from "@/shared/i18n/server";
+import { formatDate } from "@/shared/i18n/config";
+import { getPageActor } from "@/backend/modules/auth/auth.pages";
+import { getServices } from "@/backend/services";
+import { DomainError } from "@/backend/common/errors";
+import { Alert, Badge, EmptyState, Pagination } from "@/frontend/components/ui";
+import { GameLobby } from "@/frontend/features/games/components/GameLobby";
 export async function generateMetadata({
   params,
 }: {

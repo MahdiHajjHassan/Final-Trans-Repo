@@ -9,8 +9,8 @@ afterEach(async () => {
 async function fixture() {
   const { db, close } = await createTestDb();
   cleanup.push(close);
-  const { createAuthService } = await import("@/server/auth/service");
-  const { createAuthHandlers } = await import("@/server/auth/http");
+  const { createAuthService } = await import("@/backend/modules/auth/auth.service");
+  const { createAuthHandlers } = await import("@/backend/modules/auth/auth.controller");
   const auth = createAuthService(db);
   return { db, auth, handlers: createAuthHandlers(auth, { appOrigin: "https://localhost" }) };
 }

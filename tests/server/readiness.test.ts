@@ -20,19 +20,19 @@ const seedInput = {
 
 test("readiness fails when the database exists without its migrations", async () => {
   const { db } = await fixture(false);
-  const { readiness } = await import("@/server/readiness");
+  const { readiness } = await import("@/backend/database/readiness");
   await expect(readiness(db)).rejects.toThrow("migrations");
 });
 
 test("migrated database is ready without exposing credentials", async () => {
   const { db } = await fixture();
-  const { readiness } = await import("@/server/readiness");
+  const { readiness } = await import("@/backend/database/readiness");
   await expect(readiness(db)).resolves.toEqual({ status: "ok", database: "ok" });
 });
 
 test("first bootstrap creates only the supplied administrator with a hashed password", async () => {
   const { db } = await fixture();
-  const { seedDatabase } = await import("@/server/seed");
+  const { seedDatabase } = await import("@/backend/database/seed");
   await expect(seedDatabase(db, seedInput)).resolves.toEqual({ created: true });
   const admin = await db.user.findUniqueOrThrow({ where: { email: seedInput.adminEmail } });
   expect(admin.role).toBe("ADMIN");
@@ -44,12 +44,12 @@ test("first bootstrap creates only the supplied administrator with a hashed pass
 
 test("restarting preserves edited credentials and never adds demonstration accounts", async () => {
   const { db, url } = await fixture();
-  const { seedDatabase } = await import("@/server/seed");
+  const { seedDatabase } = await import("@/backend/database/seed");
   await seedDatabase(db, seedInput);
   const before = await db.user.findUniqueOrThrow({ where: { email: seedInput.adminEmail } });
   await db.user.update({ where: { id: before.id }, data: { displayName: "Preserved name" } });
   await db.$disconnect();
-  const { createDb } = await import("@/server/db");
+  const { createDb } = await import("@/backend/database/db");
   const reopened = await createDb(url);
   cleanup.push(() => reopened.$disconnect());
   await expect(

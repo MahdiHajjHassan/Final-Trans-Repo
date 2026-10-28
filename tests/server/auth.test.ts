@@ -1,7 +1,7 @@
 import { afterEach, expect, test } from "vitest";
 import { createTestDb } from "../helpers/db";
 import { seedUser } from "../helpers/fixtures";
-import { DomainError } from "@/server/errors";
+import { DomainError } from "@/backend/common/errors";
 
 const cleanup: Array<() => Promise<void>> = [];
 afterEach(async () => {
@@ -10,7 +10,7 @@ afterEach(async () => {
 async function fixture() {
   const { db, close } = await createTestDb();
   cleanup.push(close);
-  const { createAuthService } = await import("@/server/auth/service");
+  const { createAuthService } = await import("@/backend/modules/auth/auth.service");
   return { db, auth: createAuthService(db) };
 }
 const input = {

@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { withServices } from "@/server/services";
-import { requestActor } from "@/server/auth/policy";
-import { jsonData } from "@/server/api/http";
-import { readJson, requireSameOrigin } from "@/server/security/origin";
-import { parseInput } from "@/server/validation";
+import { withServices } from "@/backend/services";
+import { requestActor } from "@/backend/modules/auth/session.guard";
+import { jsonData } from "@/backend/common/http";
+import { readJson, requireSameOrigin } from "@/backend/common/security/origin";
+import { parseInput } from "@/backend/common/validation";
 type Context = { params: Promise<{ id: string }> };
 export function PUT(request: Request, context: Context) {
   return withServices(async ({ users, auth, config }) => {

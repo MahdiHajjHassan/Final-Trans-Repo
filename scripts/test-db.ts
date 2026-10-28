@@ -1,7 +1,7 @@
-import { createDb } from "../src/server/db";
-import { loadConfig } from "../src/server/config";
-import { seedDatabase } from "../src/server/seed";
-import { hashPassword } from "../src/server/auth/password";
+import { createDb } from "../src/backend/database/db";
+import { loadConfig } from "../src/backend/config/env";
+import { seedDatabase } from "../src/backend/database/seed";
+import { hashPassword } from "../src/backend/modules/auth/password";
 const supplied = process.argv[process.argv.indexOf("--project") + 1],
   project = process.env.TICTACTOE_E2E_PROJECT;
 const origin = new URL(process.env.APP_ORIGIN ?? "https://invalid");

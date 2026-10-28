@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 describe("complete locale dictionaries", () => {
   it("provides the same nonempty translated keys for English, French and Arabic", async () => {
-    const { dictionaries } = await import("../../src/i18n/dictionaries");
+    const { dictionaries } = await import("../../src/shared/i18n/dictionaries");
     const englishKeys = Object.keys(dictionaries.en).sort();
     expect(englishKeys.length).toBeGreaterThan(100);
     for (const locale of ["fr", "ar"] as const) {
@@ -14,7 +14,7 @@ describe("complete locale dictionaries", () => {
     }
   });
   it("validates preferences and preserves path and query on a locale switch", async () => {
-    const { isLocale, localePath, readTheme } = await import("../../src/i18n/config");
+    const { isLocale, localePath, readTheme } = await import("../../src/shared/i18n/config");
     expect(isLocale("ar")).toBe(true);
     expect(isLocale("../en")).toBe(false);
     expect(readTheme("dark")).toBe("dark");

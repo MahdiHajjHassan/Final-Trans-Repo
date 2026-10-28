@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@/generated/prisma/client";
-import { createDb } from "@/server/db";
+import { createDb } from "@/backend/database/db";
 
 test("failed post-connect initialization closes its real SQLite handle before retry", async () => {
   const directory = await mkdtemp(join(tmpdir(), "tictactoe-init-failure-"));

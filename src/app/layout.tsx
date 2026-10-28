@@ -1,6 +1,6 @@
 import { cookies, headers } from "next/headers";
-import { isLocale, readTheme } from "@/i18n/config";
-import "./globals.css";
+import { isLocale, readTheme } from "@/shared/i18n/config";
+import "../frontend/styles/index.css";
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const candidate = (await headers()).get("x-taskboard-locale");
   const locale = isLocale(candidate) ? candidate : "en";

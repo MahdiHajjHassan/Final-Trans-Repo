@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
-import { locales } from "@/i18n/config";
-import { loadConfig } from "@/server/config";
+import { locales } from "@/shared/i18n/config";
+import { loadConfig } from "@/backend/config/env";
 export const dynamic = "force-dynamic";
 export default function sitemap(): MetadataRoute.Sitemap {
   const origin = loadConfig(process.env).appOrigin;

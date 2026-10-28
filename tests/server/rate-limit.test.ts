@@ -14,7 +14,7 @@ async function fixture() {
 
 test("atomic limits admit at most the allowance under concurrent requests", async () => {
   const { db } = await fixture();
-  const { createRateLimiter } = await import("@/server/security/rate-limit");
+  const { createRateLimiter } = await import("@/backend/common/security/rate-limit");
   const consume = createRateLimiter(db, () => new Date("2026-10-27T00:00:05Z"));
   const results = await Promise.all(
     Array.from({ length: 15 }, () => consume("test", "private@example.test", 5, 60)),
@@ -28,7 +28,7 @@ test("atomic limits admit at most the allowance under concurrent requests", asyn
 
 test("limits persist across service instances and reset only at the next window", async () => {
   const { db } = await fixture();
-  const { createRateLimiter } = await import("@/server/security/rate-limit");
+  const { createRateLimiter } = await import("@/backend/common/security/rate-limit");
   let now = new Date("2026-10-27T00:00:10Z");
   const first = createRateLimiter(db, () => now);
   expect((await first("test", "client", 1, 60)).allowed).toBe(true);
@@ -43,7 +43,7 @@ test("limits persist across service instances and reset only at the next window"
 
 test("login throttles repeated guesses for one email/client before allowing another verification", async () => {
   const { db } = await fixture();
-  const { createAuthService } = await import("@/server/auth/service");
+  const { createAuthService } = await import("@/backend/modules/auth/auth.service");
   const auth = createAuthService(db);
   const user = await seedUser(db);
   for (let i = 0; i < 5; i++)
@@ -65,7 +65,7 @@ test("limiter use prunes stale buckets while preserving current limits", async (
   await db.rateLimitBucket.create({
     data: { key: "stale-test-bucket", windowStart: new Date("2026-10-20T00:00:00Z"), count: 99 },
   });
-  const { createRateLimiter } = await import("@/server/security/rate-limit");
+  const { createRateLimiter } = await import("@/backend/common/security/rate-limit");
   const consume = createRateLimiter(db, () => new Date("2026-10-27T00:00:10Z"));
   expect((await consume("test", "client", 1, 60)).allowed).toBe(true);
   expect(await db.rateLimitBucket.findUnique({ where: { key: "stale-test-bucket" } })).toBeNull();

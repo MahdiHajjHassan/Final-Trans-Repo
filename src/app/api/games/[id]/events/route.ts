@@ -1,5 +1,5 @@
-import { withServices } from "@/server/services";
-import { createGameStream } from "@/server/games/stream";
+import { withServices } from "@/backend/services";
+import { createGameStream } from "@/backend/modules/realtime/game-stream";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {

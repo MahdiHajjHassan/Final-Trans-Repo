@@ -1,5 +1,5 @@
-import { pageLocale } from "@/i18n/server";
-import { AuthForm } from "@/features/auth";
+import { pageLocale } from "@/shared/i18n/server";
+import { AuthForm } from "@/frontend/features/auth";
 export const metadata = { robots: { index: false, follow: false } };
 export default async function Register({ params }: { params: Promise<{ locale: string }> }) {
   const { locale, t } = await pageLocale(params);

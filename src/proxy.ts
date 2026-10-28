@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isLocale } from "@/i18n/config";
+import { isLocale } from "@/shared/i18n/config";
 export function proxy(request: NextRequest) {
   const candidate = request.nextUrl.pathname.split("/")[1];
   const headers = new Headers(request.headers);

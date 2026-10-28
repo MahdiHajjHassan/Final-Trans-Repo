@@ -8,7 +8,7 @@ afterEach(async () => {
 async function fixture() {
   const { db, url, close } = await createTestDb();
   cleanup.push(close);
-  const { createUserService } = await import("@/server/users/service");
+  const { createUserService } = await import("@/backend/modules/users/users.service");
   const admin = await seedUser(db, { role: "ADMIN" });
   const member = await seedUser(db);
   return { db, url, users: createUserService(db), admin: admin.actor, member: member.actor };
@@ -34,7 +34,7 @@ test("admin creates validated member/admin accounts with hashed passwords; curre
   });
   expect(created).not.toHaveProperty("passwordHash");
   const saved = await db.user.findUniqueOrThrow({ where: { id: created.id } });
-  const { verifyPassword } = await import("@/server/auth/password");
+  const { verifyPassword } = await import("@/backend/modules/auth/password");
   expect(await verifyPassword(saved.passwordHash, input.password)).toBe(true);
   expect(saved.passwordHash).not.toBe(input.password);
   await expect(users.createUser(admin, input)).rejects.toMatchObject({ code: "CONFLICT" });
@@ -85,7 +85,7 @@ test("last admin cannot be deleted/demoted and privileged or empty patches are r
 });
 test("deleting a member revokes sessions and preserves anonymized games and other players", async () => {
   const { db, users, admin, member } = await fixture();
-  const { createSessionToken } = await import("@/server/auth/session");
+  const { createSessionToken } = await import("@/backend/modules/auth/sessions.service");
   await createSessionToken(db, member.id, new Date());
   await db.game.create({ data: { mode: "AI", xId: member.id, status: "ACTIVE" } });
   await db.game.create({ data: { mode: "AI", xId: admin.id, status: "ACTIVE" } });
@@ -98,10 +98,10 @@ test("deleting a member revokes sessions and preserves anonymized games and othe
 test("competing administrators using separate connections cannot remove the final admin", async () => {
   const { db, url, users, admin } = await fixture();
   const other = await seedUser(db, { role: "ADMIN" });
-  const { createDb } = await import("@/server/db");
+  const { createDb } = await import("@/backend/database/db");
   const secondDb = await createDb(url);
   cleanup.push(() => secondDb.$disconnect());
-  const { createUserService } = await import("@/server/users/service");
+  const { createUserService } = await import("@/backend/modules/users/users.service");
   const second = createUserService(secondDb);
   const outcomes = await Promise.allSettled([
     users.updateUser(admin, admin.id, { role: "MEMBER" }),

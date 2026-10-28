@@ -3,10 +3,10 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { isLocale, readTheme } from "@/i18n/config";
-import { dictionaries } from "@/i18n/dictionaries";
-import { getPageActor } from "@/server/auth/page";
-import { Logout, Preferences } from "@/components/preferences";
+import { isLocale, readTheme } from "@/shared/i18n/config";
+import { dictionaries } from "@/shared/i18n/dictionaries";
+import { getPageActor } from "@/backend/modules/auth/auth.pages";
+import { Logout, Preferences } from "@/frontend/layout/preferences";
 export const dynamic = "force-dynamic";
 export async function generateMetadata({
   params,

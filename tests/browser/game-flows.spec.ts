@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { test, expect, t, credentials, loginUi, loginApi } from "./fixtures";
 import { testSettings } from "../helpers/e2e-environment";
-import { dictionaries } from "../../src/i18n/dictionaries";
+import { dictionaries } from "../../src/shared/i18n/dictionaries";
 import type { Browser, Page } from "@playwright/test";
 async function peer(browser: Browser, who: "a" | "b" = "b") {
   const context = await browser.newContext({

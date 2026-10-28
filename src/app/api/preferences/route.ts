@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { isLocale, readTheme } from "@/i18n/config";
-import { readJson, requireSameOrigin } from "@/server/security/origin";
-import { loadConfig } from "@/server/config";
-import { handleApi } from "@/server/api/http";
-import { DomainError } from "@/server/errors";
+import { isLocale, readTheme } from "@/shared/i18n/config";
+import { readJson, requireSameOrigin } from "@/backend/common/security/origin";
+import { loadConfig } from "@/backend/config/env";
+import { handleApi } from "@/backend/common/http";
+import { DomainError } from "@/backend/common/errors";
 export function POST(request: Request) {
   return handleApi(async () => {
     requireSameOrigin(request, loadConfig(process.env).appOrigin);

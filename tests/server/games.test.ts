@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 import { createTestDb } from "../helpers/db";
 import { seedUser } from "../helpers/fixtures";
-import { createGameService } from "@/server/games/service";
-import { createDb } from "@/server/db";
+import { createGameService } from "@/backend/modules/games/games.service";
+import { createDb } from "@/backend/database/db";
 
 test("friends join one room, alternate moves, finish a win and cannot alter the result", async () => {
   const f = await createTestDb();

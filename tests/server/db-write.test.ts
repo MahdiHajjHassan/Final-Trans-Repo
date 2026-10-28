@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 
 test("write conflicts are retried to a bounded successful result", async () => {
-  const { withWriteRetry } = await import("@/server/db-write");
+  const { withWriteRetry } = await import("@/backend/database/write-retry");
   let attempts = 0;
   const result = await withWriteRetry(async () => {
     attempts++;
@@ -13,7 +13,7 @@ test("write conflicts are retried to a bounded successful result", async () => {
 });
 
 test("persistent SQLite busy errors become a retryable conflict after three attempts", async () => {
-  const { withWriteRetry } = await import("@/server/db-write");
+  const { withWriteRetry } = await import("@/backend/database/write-retry");
   let attempts = 0;
   await expect(
     withWriteRetry(async () => {
@@ -25,7 +25,7 @@ test("persistent SQLite busy errors become a retryable conflict after three atte
 });
 
 test("validation and unrelated failures are not retried or hidden", async () => {
-  const { withWriteRetry } = await import("@/server/db-write");
+  const { withWriteRetry } = await import("@/backend/database/write-retry");
   const failure = new Error("not a database conflict");
   let attempts = 0;
   await expect(

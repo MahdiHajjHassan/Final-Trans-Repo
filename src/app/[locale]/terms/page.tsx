@@ -1,4 +1,4 @@
-import { pageLocale } from "@/i18n/server";
+import { pageLocale } from "@/shared/i18n/server";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { t } = await pageLocale(params);
   return { title: t.terms };

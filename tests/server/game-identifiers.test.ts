@@ -1,12 +1,12 @@
 import { expect, test } from "vitest";
 import { createTestDb } from "../helpers/db";
 import { seedUser } from "../helpers/fixtures";
-import { createGameService } from "@/server/games/service";
-import { createGameEvents } from "@/server/games/events";
-import { createGameStream } from "@/server/games/stream";
-import { createAuthService } from "@/server/auth/service";
-import { createSessionToken } from "@/server/auth/session";
-import { sessionCookieName } from "@/server/auth/policy";
+import { createGameService } from "@/backend/modules/games/games.service";
+import { createGameEvents } from "@/backend/modules/realtime/game-events";
+import { createGameStream } from "@/backend/modules/realtime/game-stream";
+import { createAuthService } from "@/backend/modules/auth/auth.service";
+import { createSessionToken } from "@/backend/modules/auth/sessions.service";
+import { sessionCookieName } from "@/backend/modules/auth/session.guard";
 
 const canonicalId = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
 

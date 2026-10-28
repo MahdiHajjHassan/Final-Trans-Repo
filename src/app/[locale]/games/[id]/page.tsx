@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation";
-import { pageLocale } from "@/i18n/server";
-import { requirePageActor } from "@/server/auth/page";
-import { getServices } from "@/server/services";
-import { DomainError } from "@/server/errors";
-import { LiveGame } from "@/features/games/live-game";
+import { pageLocale } from "@/shared/i18n/server";
+import { requirePageActor } from "@/backend/modules/auth/auth.pages";
+import { getServices } from "@/backend/services";
+import { DomainError } from "@/backend/common/errors";
+import { LiveGame } from "@/frontend/features/games/components/LiveGame";
 export const metadata = { robots: { index: false, follow: false } };
 export default async function Match({
   params,

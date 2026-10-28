@@ -1,11 +1,11 @@
 import { test, expect } from "vitest";
 import { createTestDb } from "../helpers/db";
 import { seedUser } from "../helpers/fixtures";
-import { createAuthService } from "@/server/auth/service";
-import { createSessionToken } from "@/server/auth/session";
-import { sessionCookieName } from "@/server/auth/policy";
-import { createGameService } from "@/server/games/service";
-import { createGameHandlers } from "@/server/games/http";
+import { createAuthService } from "@/backend/modules/auth/auth.service";
+import { createSessionToken } from "@/backend/modules/auth/sessions.service";
+import { sessionCookieName } from "@/backend/modules/auth/session.guard";
+import { createGameService } from "@/backend/modules/games/games.service";
+import { createGameHandlers } from "@/backend/modules/games/games.controller";
 test("HTTPS game handlers enforce origin, session, bounded inputs and version conflicts", async () => {
   const f = await createTestDb();
   try {

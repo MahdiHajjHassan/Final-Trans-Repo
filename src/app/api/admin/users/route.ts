@@ -1,8 +1,8 @@
-import { withServices } from "@/server/services";
-import { requestActor } from "@/server/auth/policy";
-import { jsonData } from "@/server/api/http";
-import { parseUserQuery } from "@/server/users/service";
-import { readJson, requireSameOrigin } from "@/server/security/origin";
+import { withServices } from "@/backend/services";
+import { requestActor } from "@/backend/modules/auth/session.guard";
+import { jsonData } from "@/backend/common/http";
+import { parseUserQuery } from "@/backend/modules/users/users.service";
+import { readJson, requireSameOrigin } from "@/backend/common/security/origin";
 export function GET(request: Request) {
   return withServices(async ({ users, auth }) =>
     jsonData(

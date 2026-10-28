@@ -22,7 +22,7 @@ export async function createTestDb(options: { migrate?: boolean } = {}) {
       raw.close();
     }
   }
-  const { createDb } = await import("@/server/db");
+  const { createDb } = await import("@/backend/database/db");
   const db = await createDb(`file:${filename}`);
   return {
     db,

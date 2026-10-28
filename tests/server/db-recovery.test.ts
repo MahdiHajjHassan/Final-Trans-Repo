@@ -7,7 +7,7 @@ test("database initialization recovers after a temporary filesystem failure is r
   const directory = await mkdtemp(join(tmpdir(), "tictactoe-recovery-"));
   const blocked = join(directory, "blocked");
   const originalUrl = process.env.DATABASE_URL;
-  const { getDb } = await import("@/server/db");
+  const { getDb } = await import("@/backend/database/db");
   let connected: Awaited<ReturnType<typeof getDb>> | undefined;
   try {
     await writeFile(blocked, "temporary obstruction");

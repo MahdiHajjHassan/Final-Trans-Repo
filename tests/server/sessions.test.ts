@@ -12,7 +12,7 @@ afterEach(async () => {
 async function fixture() {
   const { db, close } = await createTestDb();
   cleanup.push(close);
-  const { createAuthService } = await import("@/server/auth/service");
+  const { createAuthService } = await import("@/backend/modules/auth/auth.service");
   let now = new Date("2026-10-27T00:00:00Z");
   return {
     db,
@@ -162,8 +162,8 @@ test("logout reports persistent SQLite contention as a retryable conflict and re
   const { db, url, close } = await createTestDb();
   cleanup.push(close);
   const user = await seedUser(db);
-  const { createSessionToken } = await import("@/server/auth/session");
-  const { createAuthService } = await import("@/server/auth/service");
+  const { createSessionToken } = await import("@/backend/modules/auth/sessions.service");
+  const { createAuthService } = await import("@/backend/modules/auth/auth.service");
   const auth = createAuthService(db);
   const session = await createSessionToken(db, user.actor.id, new Date());
   await db.$queryRawUnsafe("PRAGMA busy_timeout = 1");
@@ -185,7 +185,8 @@ test("an expired session stays unauthenticated when opportunistic cleanup encoun
   const { db, url, close } = await createTestDb();
   cleanup.push(close);
   const user = await seedUser(db);
-  const { createSessionToken, resolveSessionToken } = await import("@/server/auth/session");
+  const { createSessionToken, resolveSessionToken } =
+    await import("@/backend/modules/auth/sessions.service");
   const issued = new Date("2026-01-01T00:00:00Z");
   const session = await createSessionToken(db, user.actor.id, issued);
   const now = new Date("2026-01-09T00:00:00Z");

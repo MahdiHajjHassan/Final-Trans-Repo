@@ -1,7 +1,7 @@
-import { pageLocale } from "@/i18n/server";
-import { requirePageActor } from "@/server/auth/page";
-import { getServices } from "@/server/services";
-import { AccountForms } from "@/features/auth";
+import { pageLocale } from "@/shared/i18n/server";
+import { requirePageActor } from "@/backend/modules/auth/auth.pages";
+import { getServices } from "@/backend/services";
+import { AccountForms } from "@/frontend/features/account/components/AccountForms";
 export const metadata = { robots: { index: false, follow: false } };
 export default async function Account({ params }: { params: Promise<{ locale: string }> }) {
   const { locale, t } = await pageLocale(params);

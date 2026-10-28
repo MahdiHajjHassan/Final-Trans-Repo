@@ -2,7 +2,7 @@ import { test as base, expect, type Page, type APIRequestContext } from "@playwr
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { resetTestDb, testSettings } from "../helpers/e2e-environment";
-import { dictionaries } from "../../src/i18n/dictionaries";
+import { dictionaries } from "../../src/shared/i18n/dictionaries";
 export const t = dictionaries.en;
 type ExpectedFailure = { path: string; status: number };
 export const test = base.extend<{ isolated: void; expectedFailures: ExpectedFailure[] }>({

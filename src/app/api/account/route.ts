@@ -1,4 +1,4 @@
-import { handleAuth } from "@/server/services";
+import { handleAuth } from "@/backend/services";
 export function GET(request: Request) {
   return handleAuth("account", request);
 }

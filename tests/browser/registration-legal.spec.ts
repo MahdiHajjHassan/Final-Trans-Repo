@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { test, expect } from "@playwright/test";
-import { dictionaries } from "../../src/i18n/dictionaries";
+import { dictionaries } from "../../src/shared/i18n/dictionaries";
 
 for (const locale of ["en", "fr", "ar"] as const) {
   test(`reading registration legal documents preserves the ${locale} form`, async ({ page }) => {

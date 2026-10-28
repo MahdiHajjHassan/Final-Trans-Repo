@@ -1,8 +1,8 @@
 "use client";
 import { useParams } from "next/navigation";
-import { isLocale } from "@/i18n/config";
-import { dictionaries } from "@/i18n/dictionaries";
-import { Alert, Button } from "@/components/ui";
+import { isLocale } from "@/shared/i18n/config";
+import { dictionaries } from "@/shared/i18n/dictionaries";
+import { Alert, Button } from "@/frontend/components/ui";
 export default function ErrorPage({ reset }: { reset: () => void }) {
   const { locale } = useParams();
   const t = dictionaries[isLocale(locale) ? locale : "en"];

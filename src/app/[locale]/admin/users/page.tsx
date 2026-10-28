@@ -1,7 +1,7 @@
-import { pageLocale } from "@/i18n/server";
-import { requirePageActor } from "@/server/auth/page";
-import { getServices } from "@/server/services";
-import { DomainError } from "@/server/errors";
+import { pageLocale } from "@/shared/i18n/server";
+import { requirePageActor } from "@/backend/modules/auth/auth.pages";
+import { getServices } from "@/backend/services";
+import { DomainError } from "@/backend/common/errors";
 import {
   Alert,
   Badge,
@@ -10,8 +10,8 @@ import {
   EmptyState,
   Pagination,
   TextField,
-} from "@/components/ui";
-import { UserActions, CreateUser } from "@/features/users";
+} from "@/frontend/components/ui";
+import { UserActions, CreateUser } from "@/frontend/features/users";
 export const metadata = { robots: { index: false, follow: false } };
 export default async function Users({
   params,
