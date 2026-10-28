@@ -1,15 +1,26 @@
 import { afterEach, expect, test } from "vitest";
 import { createHash } from "node:crypto";
+import { spawn } from "node:child_process";
+import { once } from "node:events";
 import { createTestDb } from "../helpers/db";
 import { seedUser } from "../helpers/fixtures";
 
 const cleanup: Array<() => Promise<void>> = [];
-afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); });
+afterEach(async () => {
+  for (const close of cleanup.splice(0).reverse()) await close();
+});
 async function fixture() {
-  const { db, close } = await createTestDb(); cleanup.push(close);
+  const { db, close } = await createTestDb();
+  cleanup.push(close);
   const { createAuthService } = await import("@/server/auth/service");
   let now = new Date("2026-10-27T00:00:00Z");
-  return { db, auth: createAuthService(db, { now: () => now }), advanceTo(value: string) { now = new Date(value); } };
+  return {
+    db,
+    auth: createAuthService(db, { now: () => now }),
+    advanceTo(value: string) {
+      now = new Date(value);
+    },
+  };
 }
 
 test("a fresh random session stores only its hash and expires exactly after seven days", async () => {
@@ -46,7 +57,10 @@ test("a role change is immediately reflected and deleting the account revokes ac
   const user = await seedUser(db, { role: "ADMIN" });
   const login = await auth.login({ email: user.email, password: user.password }, "client");
   await db.user.update({ where: { id: user.actor.id }, data: { role: "MEMBER" } });
-  await expect(auth.resolveSession(login.token)).resolves.toEqual({ id: user.actor.id, role: "MEMBER" });
+  await expect(auth.resolveSession(login.token)).resolves.toEqual({
+    id: user.actor.id,
+    role: "MEMBER",
+  });
   await db.user.delete({ where: { id: user.actor.id } });
   await expect(auth.resolveSession(login.token)).resolves.toBeNull();
 });
@@ -56,19 +70,33 @@ test("password change verifies the old password and revokes every existing sessi
   const user = await seedUser(db);
   const a = await auth.login({ email: user.email, password: user.password }, "client-a");
   const b = await auth.login({ email: user.email, password: user.password }, "client-b");
-  await expect(auth.changePassword(user.actor, { currentPassword: "wrong-password-42", newPassword: "new-password-for-tests-42" })).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
+  await expect(
+    auth.changePassword(user.actor, {
+      currentPassword: "wrong-password-42",
+      newPassword: "new-password-for-tests-42",
+    }),
+  ).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
   expect(await db.session.count()).toBe(2);
-  await auth.changePassword(user.actor, { currentPassword: user.password, newPassword: "new-password-for-tests-42" });
+  await auth.changePassword(user.actor, {
+    currentPassword: user.password,
+    newPassword: "new-password-for-tests-42",
+  });
   await expect(auth.resolveSession(a.token)).resolves.toBeNull();
   await expect(auth.resolveSession(b.token)).resolves.toBeNull();
-  await expect(auth.login({ email: user.email, password: user.password }, "client-c")).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
-  const fresh = await auth.login({ email: user.email, password: "new-password-for-tests-42" }, "client-c");
+  await expect(
+    auth.login({ email: user.email, password: user.password }, "client-c"),
+  ).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
+  const fresh = await auth.login(
+    { email: user.email, password: "new-password-for-tests-42" },
+    "client-c",
+  );
   await expect(auth.resolveSession(fresh.token)).resolves.toEqual(user.actor);
 });
 
 test("different users can establish sessions concurrently without losing either login", async () => {
   const { db, auth } = await fixture();
-  const a = await seedUser(db); const b = await seedUser(db);
+  const a = await seedUser(db);
+  const b = await seedUser(db);
   const [first, second] = await Promise.all([
     auth.login({ email: a.email, password: a.password }, "client-a"),
     auth.login({ email: b.email, password: b.password }, "client-b"),
@@ -83,9 +111,91 @@ test("an old-password login racing a password change cannot retain access afterw
   const user = await seedUser(db);
   const [login, change] = await Promise.allSettled([
     auth.login({ email: user.email, password: user.password }, "client"),
-    auth.changePassword(user.actor, { currentPassword: user.password, newPassword: "new-correct-password-42" }),
+    auth.changePassword(user.actor, {
+      currentPassword: user.password,
+      newPassword: "new-correct-password-42",
+    }),
   ]);
   expect(change.status).toBe("fulfilled");
-  if (login.status === "fulfilled") await expect(auth.resolveSession(login.value.token)).resolves.toBeNull();
+  if (login.status === "fulfilled")
+    await expect(auth.resolveSession(login.value.token)).resolves.toBeNull();
   else expect(login.reason).toMatchObject({ code: "UNAUTHENTICATED" });
+});
+
+async function holdWriter(filename: string) {
+  // A separate process exercises actual OS locks even when the test and Prisma
+  // load different native SQLite libraries (whose in-process lock tables differ).
+  const child = spawn(
+    process.execPath,
+    [
+      "--input-type=commonjs",
+      "-e",
+      `
+    const Sqlite = require("better-sqlite3");
+    const db = new Sqlite(process.argv[1]);
+    db.exec("BEGIN IMMEDIATE");
+    process.on("message", () => { db.exec("ROLLBACK"); db.close(); process.exit(0); });
+    process.send("locked");
+  `,
+      filename,
+    ],
+    { stdio: ["ignore", "ignore", "inherit", "ipc"] },
+  );
+  try {
+    await once(child, "message", { signal: AbortSignal.timeout(5000) });
+  } catch (error) {
+    child.kill();
+    throw error;
+  }
+  return async () => {
+    const exited = once(child, "exit", { signal: AbortSignal.timeout(5000) });
+    child.send("release");
+    try {
+      await exited;
+    } finally {
+      if (child.exitCode === null) child.kill();
+    }
+  };
+}
+
+test("logout reports persistent SQLite contention as a retryable conflict and revokes after release", async () => {
+  const { db, url, close } = await createTestDb();
+  cleanup.push(close);
+  const user = await seedUser(db);
+  const { createSessionToken } = await import("@/server/auth/session");
+  const { createAuthService } = await import("@/server/auth/service");
+  const auth = createAuthService(db);
+  const session = await createSessionToken(db, user.actor.id, new Date());
+  await db.$queryRawUnsafe("PRAGMA busy_timeout = 1");
+  const release = await holdWriter(url.slice(5));
+  try {
+    await expect(auth.logout(session.token)).rejects.toMatchObject({
+      code: "CONFLICT",
+      retryAfterSeconds: 1,
+    });
+  } finally {
+    await release();
+  }
+  await expect(auth.resolveSession(session.token)).resolves.toEqual(user.actor);
+  await auth.logout(session.token);
+  await expect(auth.resolveSession(session.token)).resolves.toBeNull();
+});
+
+test("an expired session stays unauthenticated when opportunistic cleanup encounters a concurrent writer", async () => {
+  const { db, url, close } = await createTestDb();
+  cleanup.push(close);
+  const user = await seedUser(db);
+  const { createSessionToken, resolveSessionToken } = await import("@/server/auth/session");
+  const issued = new Date("2026-01-01T00:00:00Z");
+  const session = await createSessionToken(db, user.actor.id, issued);
+  const now = new Date("2026-01-09T00:00:00Z");
+  await db.$queryRawUnsafe("PRAGMA busy_timeout = 1");
+  const release = await holdWriter(url.slice(5));
+  try {
+    await expect(resolveSessionToken(db, session.token, now)).resolves.toBeNull();
+  } finally {
+    await release();
+  }
+  await expect(resolveSessionToken(db, session.token, now)).resolves.toBeNull();
+  expect(await db.session.count()).toBe(0);
 });

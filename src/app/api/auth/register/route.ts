@@ -1,2 +1,4 @@
 import { handleAuth } from "@/server/services";
-export function POST(request: Request) { return handleAuth("register", request); }
+export function POST(request: Request) {
+  return handleAuth("register", request);
+}

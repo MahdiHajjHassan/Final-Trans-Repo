@@ -24,7 +24,9 @@
     "audit:source": "node -- scripts/audit-source.mjs",
     "verify": "node -- scripts/verify.mjs",
     "rehearse": "node -- scripts/rehearse.mjs",
-    "smoke:games": "node -- scripts/smoke-games.mjs"
+    "smoke:games": "node -- scripts/smoke-games.mjs",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.{mjs,ts}\" \"tests/**/*.ts\" \"*.{ts,mjs,json,yaml,yml}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.{mjs,ts}\" \"tests/**/*.ts\" \"*.{ts,mjs,json,yaml,yml}\""
   },
   "dependencies": {
     "@node-rs/argon2": "2.2.2",
@@ -47,6 +49,7 @@
     "@types/react-dom": "19.3.0",
     "eslint": "10.13.0",
     "eslint-config-next": "16.4.3",
+    "prettier": "3.9.10",
     "prisma": "7.10.1",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
