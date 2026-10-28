@@ -1,5 +1,5 @@
 import {test,expect} from "vitest";
-import {mkdtemp,writeFile,readFile,mkdir} from "node:fs/promises";
+import {mkdtemp,writeFile,readFile,mkdir,rm} from "node:fs/promises";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {spawnSync} from "node:child_process";
@@ -24,4 +24,23 @@ test("working-source export includes uncommitted additions and edits, omits dele
   expect(await sourceFiles(target)).toEqual(manifest.files.map((f:{path:string})=>f.path));
   await writeFile(join(target,"new.ts"),"tampered");
   await expect(sourceFiles(target)).rejects.toThrow(/integrity/i);
+});
+
+test("working-source export handles a tracked route directory replaced by a static file",async()=>{
+  const root=await mkdtemp(join(tmpdir(),"game-static-source-test-"));
+  const source=join(root,"source"),target=join(root,"copy");
+  try{
+    await mkdir(join(source,"icon"),{recursive:true});
+    spawnSync("git",["init","-q",source]);
+    await writeFile(join(source,"icon","route.ts"),"old route");
+    spawnSync("git",["-C",source,"add","."]);
+    await rm(join(source,"icon"),{recursive:true});
+    const bytes=Buffer.from([0,0,1,0,1,0]);
+    await writeFile(join(source,"icon"),bytes);
+    const {copyWorkingSource,sourceFiles}=await import("../../scripts/lib/source.mjs");
+    const manifest=await copyWorkingSource(source,target);
+    expect(manifest.files.map((f:{path:string})=>f.path)).toEqual(["icon"]);
+    expect(await readFile(join(target,"icon"))).toEqual(bytes);
+    expect(await sourceFiles(target)).toEqual(["icon"]);
+  }finally{await rm(root,{recursive:true,force:true});}
 });

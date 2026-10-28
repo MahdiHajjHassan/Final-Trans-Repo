@@ -19,7 +19,7 @@ export async function sourceFiles(root=process.cwd()){
   }
   const present=[];
   for(const path of files){
-    const file=safe(root,path);let stat;try{stat=await lstat(file);}catch(error){if(error.code==="ENOENT")continue;throw error;}
+    const file=safe(root,path);let stat;try{stat=await lstat(file);}catch(error){if(error.code==="ENOENT"||error.code==="ENOTDIR")continue;throw error;}
     if(!stat.isFile()||stat.isSymbolicLink())throw new Error("Source export refuses non-file: "+path);
     present.push(path);
   }
