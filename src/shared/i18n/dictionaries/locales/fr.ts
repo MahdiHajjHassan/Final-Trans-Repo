@@ -30,6 +30,31 @@ export const fr: Dictionary = {
     "Votre nom affiché est partagé avec vos adversaires. Utilisez des données de démonstration, jamais des informations confidentielles.",
   acceptTerms: "J’accepte les conditions d’utilisation et j’ai lu la politique de confidentialité.",
   registered: "Compte créé. Connectez-vous pour continuer.",
+  verified: "Adresse vérifiée. Connectez-vous avec votre mot de passe pour continuer.",
+  verificationTitle: "Vérifiez votre e-mail",
+  verificationHelp:
+    "Confirmez cette adresse une fois, puis connectez-vous normalement avec votre mot de passe.",
+  verificationCode: "Code de vérification",
+  verificationHint:
+    "Les six chiffres du dernier e-mail, dans le navigateur utilisé pour la demande.",
+  verificationExpiry: "Les codes expirent sous 10 minutes et ne servent qu’une fois.",
+  verificationSent:
+    "Saisissez le code envoyé à cette adresse. Vérifiez aussi les courriers indésirables.",
+  verificationSending: "Votre code est en cours d’envoi. Actualisez le statut s’il ne change pas.",
+  verificationExpired: "Ce code a expiré. Demandez un nouveau code pour continuer.",
+  verificationMissing:
+    "Cette demande a expiré ou n’est pas disponible dans ce navigateur. Connectez-vous ou recommencez l’inscription.",
+  verificationRestart: "Recommencer l’inscription",
+  verificationAddressHelp:
+    "Adresse incorrecte ? Recommencez l’inscription. Pour un compte existant, demandez la correction à un administrateur de cette instance.",
+  verifyEmail: "Vérifier l’e-mail",
+  resendCode: "Renvoyer le code",
+  resendIn: "Un nouveau code sera disponible dans {seconds} secondes.",
+  EMAIL_UNVERIFIED: "Vérifiez votre adresse e-mail avant de vous connecter.",
+  EMAIL_UNAVAILABLE:
+    "Le code n’a pas pu être envoyé. Attendez la fin du compte à rebours, puis demandez un nouveau code.",
+  INVALID_CODE:
+    "Ce code est incorrect, expiré ou déjà utilisé. Utilisez le dernier e-mail ou demandez un nouveau code.",
   passwordChanged: "Mot de passe modifié. Reconnectez-vous sur chaque appareil.",
   save: "Enregistrer",
   saved: "Modifications enregistrées.",
@@ -60,10 +85,10 @@ export const fr: Dictionary = {
     "Cette action supprime le compte et ses sessions, termine les parties actives et anonymise l’historique. Le dernier administrateur ne peut pas être supprimé.",
   row: "Ligne",
   privacyBody:
-    "Ce jeu éducatif local est géré par Mahdi et Joseph. Nous conservons votre email, nom affiché, empreinte de mot de passe salée, sessions, coups et résultats. L’email n’est visible que par vous et les administrateurs autorisés ; les parties sont visibles par leurs joueurs. Seul le créateur voit le code d’invitation.\n\nDes cookies essentiels mémorisent la session, la langue et le thème. Des compteurs de sécurité limitent les abus. L’adversaire fonctionne localement, sans service d’IA externe, publicité ni envoi d’emails.\n\nLes données restent dans la base SQLite et le volume Docker de cette instance jusqu’à leur suppression par les opérateurs. Contactez-les pour supprimer un compte. Cela révoque les sessions, termine les parties actives et anonymise l’historique.",
+    "Ce jeu éducatif local est géré par Mahdi et Joseph. Nous conservons votre e-mail, nom affiché, empreinte de mot de passe salée, sessions, coups et résultats. L’e-mail n’est visible que par vous et les administrateurs autorisés ; les parties sont visibles par leurs joueurs. Seul le créateur voit le code d’invitation.\n\nL’inscription conserve temporairement une demande de vérification et l’empreinte du mot de passe avant de créer le compte. Les demandes expirent après une heure et sont supprimées lors de demandes ultérieures ou d’une confirmation réussie. Les codes et jetons du navigateur sont stockés sous forme de vérificateurs ou d’empreintes. Les messages passent par le fournisseur SMTP configuré ; avec Gmail, Google traite l’adresse destinataire et le message.\n\nDes cookies essentiels identifient la vérification en attente, la session, la langue et le thème. Des compteurs de sécurité limitent les abus. L’adversaire fonctionne localement, sans service d’IA externe ni publicité.\n\nLes données des comptes et parties restent dans la base SQLite et le volume Docker de cette instance jusqu’à leur suppression par les opérateurs. Contactez-les pour supprimer un compte. Cela révoque les sessions, termine les parties actives et anonymise l’historique.",
   termsBody:
-    "Cette instance éducative locale permet aux utilisateurs inscrits de jouer au morpion avec un autre compte ou l’ordinateur. Utilisez des données de démonstration et votre propre compte. Ne partagez pas vos mots de passe et ne contournez pas les règles.\n\nLe serveur valide les coups et résultats. L’ordinateur joue volontairement de manière imparfaite. Un abandon compte comme une défaite ; une déconnexion permet de reprendre la partie. Aucun paiement ni prix n’est prévu.\n\nLes administrateurs gèrent les comptes et rôles. Contactez les opérateurs locaux, Mahdi et Joseph, pour une suppression ou un problème. Ces conditions décrivent cette instance et ses fonctionnalités réelles.",
-  legalUpdated: "En vigueur le 27 octobre 2026.",
+    "Cette instance éducative locale permet aux utilisateurs dont l’e-mail est vérifié de jouer au morpion avec un autre compte ou l’ordinateur. Utilisez des données de démonstration et votre propre compte. Ne partagez pas vos mots de passe et ne contournez pas les règles.\n\nLe serveur valide les coups et résultats. L’ordinateur joue volontairement de manière imparfaite. Un abandon compte comme une défaite ; une déconnexion permet de reprendre la partie. Aucun paiement ni prix n’est prévu.\n\nLes administrateurs gèrent les comptes et rôles. Contactez les opérateurs locaux, Mahdi et Joseph, pour une suppression ou un problème. Ces conditions décrivent cette instance et ses fonctionnalités réelles.",
+  legalUpdated: "En vigueur le 30 octobre 2026.",
   VALIDATION: "Vérifiez les champs indiqués et réessayez.",
   UNAUTHENTICATED: "Votre session est absente ou expirée. Reconnectez-vous.",
   INVALID_CREDENTIALS: "L’adresse e-mail ou le mot de passe est incorrect.",

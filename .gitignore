@@ -25,3 +25,6 @@ playwright-report/
 playwright/.auth/
 *.tsbuildinfo
 .DS_Store
+
+# Private visual validation captures
+.impeccable/review/

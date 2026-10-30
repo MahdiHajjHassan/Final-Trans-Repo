@@ -9,11 +9,22 @@ export { passwordSchema } from "@/shared/auth-validation";
 
 // The fields registration accepts. Unknown fields, such as a supplied role, are rejected.
 export const registerSchema = z
-  .object({ email: emailSchema, displayName: displayNameSchema, password: passwordSchema })
+  .object({
+    email: emailSchema,
+    displayName: displayNameSchema,
+    password: passwordSchema,
+    locale: z.enum(["en", "fr", "ar"]).default("en"),
+  })
   .strict();
 
 // Login checks the supplied password without applying the new-password length rule.
-export const loginSchema = z.object({ email: emailSchema, password: loginPasswordSchema }).strict();
+export const loginSchema = z
+  .object({
+    email: emailSchema,
+    password: loginPasswordSchema,
+    locale: z.enum(["en", "fr", "ar"]).default("en"),
+  })
+  .strict();
 
 // The profile form may change the display name only.
 export const accountSchema = z.object({ displayName: displayNameSchema }).strict();

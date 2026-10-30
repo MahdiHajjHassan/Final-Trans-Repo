@@ -158,7 +158,8 @@ to connected players.
 
 | Model | Key fields and relationships |
 | --- | --- |
-| `User` | String ID and unique email, display name, password hash, `MEMBER`/`ADMIN` role and timestamps; owns sessions and can occupy game seats. |
+| `User` | String ID and unique email, display name, password hash, email ownership timestamp, `MEMBER`/`ADMIN` role and timestamps; owns sessions and can occupy game seats. |
+| `EmailChallenge` | Browser-bound pending signup/account proof, HMAC code verifier, expiry, generation and attempts; pending signup creates no active user. |
 | `Session` | Hashed token as the string primary key, expiry timestamp and user foreign key. |
 | `RateLimitBucket` | String key, integer action count and window-start timestamp. |
 | `Game` | String ID, friend/computer mode, encoded nine-cell board, X/O player foreign keys, turn, status/result, unique invitation code, integer version and timestamps. |
@@ -167,6 +168,56 @@ to connected players.
 Deleting an account sets historical player references to null after resolving
 active games. Moves and results remain. The schema and migration are in
 `prisma/schema.prisma` and `prisma/migrations/`.
+
+## Email verification setup
+
+Signup requires an emailed code before an account can be used. Existing accounts
+must verify too; their saved data is preserved. Future logins use the password
+normally. This feature adds no module points.
+
+The owner selected a business Gmail mailbox. Configure the following values
+only in the private `.env`, using the mailbox's App Password when account
+settings allow it. Do not put a normal Google password, App Password, or real
+sender address in repository files or chat:
+
+```dotenv
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=<your-mailbox-address>
+SMTP_PASSWORD=<your-app-password>
+SMTP_FROM_EMAIL=<your-mailbox-address>
+```
+
+The mailbox administrator may restrict SMTP/App Passwords. The application needs
+outbound SMTP access; a managed environment must grant it before a live test.
+SMTP authentication and an actual received message are separate from automated
+local-inbox checks. The website can still run on localhost.
+
+For a fresh database, set a deliverable `ADMIN_EMAIL` before seeding. If an
+existing administrator still uses `admin@taskboard.local`, run migrations and
+explicitly correct that address from the operator console:
+
+```sh
+npm run account:email -- --current-email admin@taskboard.local --new-email <your-real-address>
+```
+
+Inside Compose, run the same command with `docker compose exec app` before
+`npm run account:email`. This updates the selected account and revokes its
+sessions without changing its role, password or saved games. Normal bootstrap
+never renames or silently verifies existing accounts. Then sign in with the
+existing password, enter the emailed code, and sign in normally.
+
+Codes expire after ten minutes and work once. Resend has a one-minute cooldown
+and a five-per-hour address limit. Invalid or undelivered codes never grant
+account access. Test verification uses only the guarded, isolated Mailpit SMTP
+sidecar; its inbox UI/API binds to localhost, with separate test data. It does
+not send real messages. Real sender credentials are not needed for that suite.
+
+Run `smoke:auth` after verifying the administrator address in the browser.
+`smoke:games` also needs a separate verified account: put `SMOKE_MEMBER_EMAIL`
+and `SMOKE_MEMBER_PASSWORD` in the private environment. It signs in to those
+two accounts and preserves them; it no longer creates an instantly playable
+unverified test address or deletes an existing account afterward.
 
 ## Team and project management
 

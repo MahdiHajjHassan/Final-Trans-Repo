@@ -11,8 +11,21 @@ async function fixture() {
   cleanup.push(close);
   const { createAuthService } = await import("@/backend/modules/auth/auth.service");
   const { createAuthHandlers } = await import("@/backend/modules/auth/auth.controller");
-  const auth = createAuthService(db);
-  return { db, auth, handlers: createAuthHandlers(auth, { appOrigin: "https://localhost" }) };
+  const { createVerificationService } =
+    await import("@/backend/modules/auth/email/verification.service");
+  let code = "";
+  const verification = createVerificationService(db, {
+    send: async (message) => {
+      code = message.code;
+    },
+  });
+  const auth = createAuthService(db, { verification });
+  return {
+    db,
+    auth,
+    getCode: () => code,
+    handlers: createAuthHandlers(auth, { appOrigin: "https://localhost" }),
+  };
 }
 function request(
   path: string,
@@ -65,8 +78,21 @@ test("browser JSON endpoints reject wrong content type, malformed JSON, and over
 });
 
 test("registration and login return safe account data with the raw session only in a secure cookie", async () => {
-  const { handlers } = await fixture();
-  expect((await handlers.register(request("/api/auth/register", registration))).status).toBe(201);
+  const { handlers, getCode } = await fixture();
+  const pending = await handlers.register(request("/api/auth/register", registration));
+  expect(pending.status).toBe(202);
+  const verificationCookie = pending.headers.get("Set-Cookie")!.split(";")[0];
+  expect(
+    (
+      await handlers.verificationConfirm(
+        request(
+          "/api/auth/verification/confirm",
+          { code: getCode() },
+          { cookie: verificationCookie },
+        ),
+      )
+    ).status,
+  ).toBe(200);
   const response = await handlers.login(
     request("/api/auth/login", { email: registration.email, password: registration.password }),
   );

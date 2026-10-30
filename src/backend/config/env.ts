@@ -25,6 +25,50 @@ const configSchema = z.object({
   ADMIN_PASSWORD: passwordSchema,
 });
 
+export type MailConfig = {
+  host: string;
+  port: number;
+  user?: string;
+  password?: string;
+  from: string;
+  isolatedTest: boolean;
+};
+
+// Public SMTP always authenticates over TLS. Only the isolated mailpit sidecar is plaintext.
+function mailConfig(environment: Record<string, string | undefined>): MailConfig | undefined {
+  const keys = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD", "SMTP_FROM_EMAIL"];
+  if (!keys.some((key) => environment[key])) return undefined;
+  const host = z
+    .string()
+    .min(1)
+    .max(253)
+    .regex(/^[a-zA-Z0-9.-]+$/)
+    .parse(environment.SMTP_HOST);
+  const port = z.coerce
+    .number()
+    .int()
+    .parse(environment.SMTP_PORT || "465");
+  const isolatedTest =
+    host === "mailpit" &&
+    port === 1025 &&
+    /^tictactoe-e2e-[a-z0-9-]+$/.test(environment.TICTACTOE_E2E_PROJECT ?? "");
+  if (!isolatedTest && ![465, 587].includes(port))
+    throw new Error("Public SMTP requires port 465 or 587");
+  const from = emailSchema.parse(environment.SMTP_FROM_EMAIL);
+  return {
+    host,
+    port,
+    from,
+    isolatedTest,
+    ...(!isolatedTest
+      ? {
+          user: emailSchema.parse(environment.SMTP_USER),
+          password: z.string().min(1).max(1000).parse(environment.SMTP_PASSWORD),
+        }
+      : {}),
+  };
+}
+
 // Only local SQLite files are supported. Resolve a relative path from the working directory.
 export function resolveDatabaseUrl(value: string): string {
   if (
@@ -46,6 +90,7 @@ export function loadConfig(environment: Record<string, string | undefined>) {
     appOrigin: input.APP_ORIGIN,
     adminEmail: input.ADMIN_EMAIL,
     adminPassword: input.ADMIN_PASSWORD,
+    mail: mailConfig(environment),
   };
 }
 

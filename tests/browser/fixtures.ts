@@ -33,7 +33,7 @@ export const test = base.extend<{ isolated: void; expectedFailures: ExpectedFail
   ],
   isolated: [
     async ({}, provide) => {
-      resetTestDb();
+      await resetTestDb();
       await provide();
     },
     { auto: true },

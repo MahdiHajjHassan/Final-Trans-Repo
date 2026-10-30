@@ -5,13 +5,10 @@ import type { AccountDTO } from "@/shared/auth";
 import { DomainError } from "../../common/errors";
 import { parseInput } from "../../common/validation";
 import { createRateLimiter } from "../../common/security/rate-limit";
-import {
-  accountSchema,
-  loginSchema,
-  passwordChangeSchema,
-  registerSchema,
-} from "./dto/auth.schema";
+import { accountSchema, loginSchema, passwordChangeSchema } from "./dto/auth.schema";
 import { hashPassword, verifyPassword } from "./password";
+import { createVerificationService, type VerificationService } from "./email/verification.service";
+import { createVerificationSender } from "./email/verification-mail";
 import { createSessionToken, resolveSessionToken, revokeSessionToken } from "./sessions.service";
 import { currentActor } from "./session.guard";
 import { withWriteRetry } from "../../database/write-retry";
@@ -40,9 +37,15 @@ let dummyHash: Promise<string> | undefined;
 
 // The account rules: registration, login, profile changes and password changes.
 // The controller handles HTTP; these functions work with the database.
-export function createAuthService(db: PrismaClient, options: { now?: () => Date } = {}) {
+export function createAuthService(
+  db: PrismaClient,
+  options: { now?: () => Date; verification?: VerificationService } = {},
+) {
   const now = options.now ?? (() => new Date());
   const consume = createRateLimiter(db, now);
+  const verification =
+    options.verification ??
+    createVerificationService(db, { now, send: createVerificationSender(undefined) });
 
   // Charges this action to its quota before doing the expensive work.
   async function limit(scope: string, key: string, allowance: number) {
@@ -50,36 +53,10 @@ export function createAuthService(db: PrismaClient, options: { now?: () => Date 
     if (!result.allowed) throw new DomainError("RATE_LIMITED", undefined, result.retryAfterSeconds);
   }
   return {
-    // Creates a member account. It does not sign them in; they go to the login page next.
-    async register(input: unknown, clientKey = "internal"): Promise<AccountDTO> {
-      // 1. Check the fields and the registration quota for this client.
-      const data = parseInput(registerSchema, input);
-      await limit("register-client", clientKey, 5);
-
-      // 2. Hash before opening the write transaction. The database never gets the password.
-      const passwordHash = await hashPassword(data.password);
-      try {
-        return await withWriteRetry(() =>
-          db.$transaction(async (tx) => {
-            // 3. Save as MEMBER; registration cannot choose an administrator role.
-            const user = await tx.user.create({
-              data: {
-                email: data.email,
-                displayName: data.displayName,
-                passwordHash,
-                role: "MEMBER",
-              },
-              select: accountSelect,
-            });
-            return dto(user);
-          }),
-        );
-      } catch (error) {
-        // The unique constraint catches two registrations racing for the same email.
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")
-          throw new DomainError("CONFLICT", { email: ["unavailable"] });
-        throw error;
-      }
+    verification,
+    // Signup remains pending until the browser proves ownership with its emailed code.
+    register(input: unknown, clientKey = "internal") {
+      return verification.startSignup(input, clientKey);
     },
 
     // Checks the password and creates a session. The controller puts its token in the cookie.
@@ -94,11 +71,12 @@ export function createAuthService(db: PrismaClient, options: { now?: () => Date 
       dummyHash ??= hashPassword(randomBytes(32).toString("hex"));
       const valid = await verifyPassword(user?.passwordHash ?? (await dummyHash), data.password);
       if (!user || !valid) throw new DomainError("UNAUTHENTICATED");
+      if (!user.emailVerifiedAt) throw new DomainError("EMAIL_UNVERIFIED");
       return withWriteRetry(() =>
         db.$transaction(async (tx) => {
           // 3. Recheck inside the transaction: the password may have changed in the meantime.
           const current = await tx.user.findUnique({ where: { id: user.id } });
-          if (!current || current.passwordHash !== user.passwordHash)
+          if (!current || current.passwordHash !== user.passwordHash || !current.emailVerifiedAt)
             throw new DomainError("UNAUTHENTICATED");
           const session = await createSessionToken(tx, current.id, now());
           return { user: dto(current), ...session };
@@ -149,6 +127,7 @@ export function createAuthService(db: PrismaClient, options: { now?: () => Date 
       const passwordHash = await hashPassword(data.newPassword);
       await withWriteRetry(() =>
         db.$transaction(async (tx) => {
+          await currentActor(tx, actor);
           const result = await tx.user.updateMany({
             where: { id: actor.id, passwordHash: user.passwordHash },
             data: { passwordHash },

@@ -3,9 +3,10 @@ FROM node:24.19.0-bookworm@sha256:4196d66a565c6f195728d9952f161f4adfe2ad753052a0
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1 npm_config_nodedir=/usr/local
 COPY package.json package-lock.json ./
-RUN --mount=type=secret,id=proxy_ca \
+RUN --mount=type=secret,id=proxy_ca --mount=type=cache,target=/root/.npm \
     if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi; \
-    npm ci
+    npm ci --include=optional --maxsockets=10 --fetch-timeout=600000 && \
+    node -e "require('@tailwindcss/oxide'); require('lightningcss')"
 COPY . .
 RUN --mount=type=secret,id=proxy_ca \
     if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi; \

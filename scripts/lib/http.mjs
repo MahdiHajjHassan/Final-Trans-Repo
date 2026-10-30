@@ -45,6 +45,8 @@ export function call(path, { method = "GET", body, cookie } = {}) {
 }
 export async function login(credentials) {
   const result = await call("/api/auth/login", { method: "POST", body: credentials });
+  if (result.status === 202)
+    throw new Error("Verify this account's email in the browser before running smoke checks");
   if (result.status !== 200) throw new Error("Smoke sign-in failed; credentials omitted");
   const cookie = result.headers["set-cookie"]?.[0]?.split(";")[0];
   if (!cookie) throw new Error("Session cookie missing");

@@ -1,3 +1,11 @@
+import { z } from "zod";
+import { DomainError } from "../../common/errors";
+import { parseInput } from "../../common/validation";
+import {
+  readVerificationToken,
+  verificationCookie,
+  clearedVerificationCookie,
+} from "./email/verification-cookie";
 import type { AuthService } from "./auth.service";
 import type { ServerConfig } from "../../config/env";
 import { clientKey, readJson, requireSameOrigin } from "../../common/security/origin";
@@ -38,18 +46,60 @@ export function createAuthHandlers(auth: AuthService, config: Pick<ServerConfig,
     return readJson(request);
   }
   return {
-    // POST /api/auth/register: create the account, without starting a session.
+    // POST /api/auth/register: start verification, without creating an account or session.
     register(request: Request) {
-      return handleApi(async () =>
-        jsonData(await auth.register(await body(request), clientKey(request)), 201),
-      );
+      return handleApi(async () => {
+        const pending = await auth.register(await body(request), clientKey(request));
+        const response = jsonData({ verificationRequired: true }, 202);
+        response.headers.set("Set-Cookie", verificationCookie(pending.token, pending.expiresAt));
+        return response;
+      });
     },
 
     // POST /api/auth/login: return the account and set its session cookie.
     login(request: Request) {
       return handleApi(async () => {
-        const result = await auth.login(await body(request), clientKey(request));
-        return setSession(jsonData(result.user), result.token, result.expiresAt);
+        const input = await body(request);
+        try {
+          const result = await auth.login(input, clientKey(request));
+          return setSession(jsonData(result.user), result.token, result.expiresAt);
+        } catch (error) {
+          if (!(error instanceof DomainError) || error.code !== "EMAIL_UNVERIFIED") throw error;
+          const pending = await auth.verification.startExisting(input, clientKey(request));
+          const response = jsonData({ verificationRequired: true }, 202);
+          response.headers.set("Set-Cookie", verificationCookie(pending.token, pending.expiresAt));
+          return response;
+        }
+      });
+    },
+
+    // GET /api/auth/verification: safe metadata for this browser's pending attempt.
+    verificationRead(request: Request) {
+      return handleApi(async () =>
+        jsonData(await auth.verification.read(readVerificationToken(request))),
+      );
+    },
+    // POST /api/auth/verification/confirm: consume the code without creating a login session.
+    verificationConfirm(request: Request) {
+      return handleApi(async () => {
+        const input = parseInput(z.object({ code: z.string() }).strict(), await body(request));
+        const result = await auth.verification.confirm(
+          readVerificationToken(request),
+          input.code,
+          clientKey(request),
+        );
+        const response = jsonData(result);
+        response.headers.set("Set-Cookie", clearedVerificationCookie);
+        return response;
+      });
+    },
+    // POST /api/auth/verification/resend: rotate the code under persistent address/client quotas.
+    verificationResend(request: Request) {
+      return handleApi(async () => {
+        parseInput(z.object({}).strict(), await body(request));
+        const raw = readVerificationToken(request);
+        await auth.verification.resend(raw, clientKey(request));
+        return jsonData(await auth.verification.read(raw));
       });
     },
 

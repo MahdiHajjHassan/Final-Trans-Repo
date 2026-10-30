@@ -29,8 +29,8 @@ export async function currentActor(
   if (!supplied) throw new DomainError("UNAUTHENTICATED");
   const actor = await tx.user.findUnique({
     where: { id: supplied.id },
-    select: { id: true, role: true },
+    select: { id: true, role: true, emailVerifiedAt: true },
   });
-  if (!actor) throw new DomainError("UNAUTHENTICATED");
-  return actor;
+  if (!actor?.emailVerifiedAt) throw new DomainError("UNAUTHENTICATED");
+  return { id: actor.id, role: actor.role };
 }

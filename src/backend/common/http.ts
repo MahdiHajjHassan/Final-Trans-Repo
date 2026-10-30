@@ -9,6 +9,9 @@ const statuses: Record<ErrorCode, number> = {
   NOT_FOUND: 404,
   CONFLICT: 409,
   RATE_LIMITED: 429,
+  EMAIL_UNVERIFIED: 403,
+  EMAIL_UNAVAILABLE: 503,
+  INVALID_CODE: 400,
 };
 
 // These success responses use { data }. Private answers are not cached.

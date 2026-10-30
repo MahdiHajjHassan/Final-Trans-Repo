@@ -1629,3 +1629,12 @@ tbody tr:hover th {
   inline-size: 20px;
   block-size: 20px;
 }
+
+.verification-address {
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+.verification-code {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.2em;
+}

@@ -13,6 +13,11 @@ export function testSettings() {
     port > 65535
   )
     throw new Error("Refusing a non-isolated test project or port");
+  const mailPort = Number(
+    process.env.TICTACTOE_E2E_MAIL_PORT ?? (port === 65535 ? 65534 : port + 1),
+  );
+  if (!Number.isInteger(mailPort) || mailPort < 1024 || mailPort > 65535 || mailPort === port)
+    throw new Error("Refusing an invalid or overlapping isolated mailbox port");
   const envFile = resolve(process.env.TICTACTOE_E2E_ENV_FILE ?? ".env.e2e");
   const envName = relative(process.cwd(), envFile);
   if (
@@ -21,7 +26,7 @@ export function testSettings() {
     (existsSync(envFile) && !lstatSync(envFile).isFile())
   )
     throw new Error("Test credentials must use a separate ignored .env.* file");
-  const logDir = resolve(".logs");
+  const logDir = resolve(process.env.TICTACTOE_E2E_LOG_DIR ?? ".logs");
   mkdirSync(logDir, { recursive: true });
   const values = existsSync(envFile) ? parse(readFileSync(envFile)) : {};
   const files = [
@@ -32,6 +37,7 @@ export function testSettings() {
   return {
     project,
     port,
+    mailPort,
     envFile,
     logDir,
     values,
@@ -39,6 +45,7 @@ export function testSettings() {
       ...process.env,
       ...values,
       TICTACTOE_E2E_PROJECT: project,
+      TICTACTOE_E2E_MAIL_PORT: String(mailPort),
       TICTACTOE_E2E_CA_VOLUME: process.env.TICTACTOE_E2E_CA_VOLUME ?? `${project}_caddy-data`,
       COMPOSE_FILE: files.join(delimiter),
       COMPOSE_PATH_SEPARATOR: delimiter,
@@ -66,7 +73,7 @@ export function composeArgs(args: string[]) {
   const { project, envFile } = testSettings();
   return ["compose", "--project-name", project, "--env-file", envFile, ...args];
 }
-export function resetTestDb() {
+export async function resetTestDb() {
   const { project } = testSettings();
   const label = runTestCommand("docker", [
     "inspect",
@@ -88,4 +95,8 @@ export function resetTestDb() {
       project,
     ]),
   );
+  const response = await fetch(`http://127.0.0.1:${testSettings().mailPort}/api/v1/messages`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Cannot reset the isolated test mailbox");
 }

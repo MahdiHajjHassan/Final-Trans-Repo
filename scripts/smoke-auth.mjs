@@ -62,6 +62,8 @@ assert.equal(
 );
 assert.equal((await call("/api/account")).status, 401);
 const login = await call("/api/auth/login", { method: "POST", body: credentials });
+if (login.status === 202)
+  throw new Error("Verify the administrator email in the browser before running auth smoke");
 assert.equal(login.status, 200);
 const header = login.headers["set-cookie"]?.[0] ?? "";
 if (

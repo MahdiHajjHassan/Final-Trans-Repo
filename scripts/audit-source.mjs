@@ -11,7 +11,7 @@ for (const path of await sourceFiles()) {
   )
     throw new Error(`Private/generated artifact in source: ${path}`);
 }
-const secrets = ["ADMIN_PASSWORD", "PUBLIC_API_KEY"]
+const secrets = ["ADMIN_PASSWORD", "PUBLIC_API_KEY", "SMTP_PASSWORD"]
   .map((name) => [name, process.env[name]])
   .filter(([, value]) => value);
 async function inspect(dir) {

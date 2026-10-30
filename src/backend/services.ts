@@ -1,3 +1,5 @@
+import { createVerificationService } from "./modules/auth/email/verification.service";
+import { createVerificationSender } from "./modules/auth/email/verification-mail";
 import { getDb } from "./database/db";
 import { loadConfig } from "./config/env";
 import { createAuthService } from "./modules/auth/auth.service";
@@ -15,7 +17,9 @@ async function buildServices() {
   return {
     db,
     config,
-    auth: createAuthService(db),
+    auth: createAuthService(db, {
+      verification: createVerificationService(db, { send: createVerificationSender(config.mail) }),
+    }),
     games: createGameService(db, { publish: gameEvents.publish }),
     users: createUserService(db, { publish: gameEvents.publish }),
   };

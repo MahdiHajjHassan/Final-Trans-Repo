@@ -11,7 +11,23 @@ async function fixture() {
   const { db, close } = await createTestDb();
   cleanup.push(close);
   const { createAuthService } = await import("@/backend/modules/auth/auth.service");
-  return { db, auth: createAuthService(db) };
+  const { createVerificationService } =
+    await import("@/backend/modules/auth/email/verification.service");
+  let code = "";
+  const verification = createVerificationService(db, {
+    send: async (message) => {
+      code = message.code;
+    },
+  });
+  const auth = createAuthService(db, { verification });
+  async function registerVerified(input: unknown) {
+    const pending = await auth.register(input);
+    const view = await verification.read(pending.token);
+    await verification.confirm(pending.token, code, "fixture");
+    const user = await db.user.findUniqueOrThrow({ where: { email: view.email } });
+    return auth.account({ id: user.id, role: user.role });
+  }
+  return { db, auth, registerVerified };
 }
 const input = {
   email: " MEMBER@EXAMPLE.TEST ",
@@ -27,8 +43,8 @@ test("registration rejects addresses longer than the browser-supported email lim
 });
 
 test("registration normalizes email, trims display name, creates only MEMBER, and returns no password hash", async () => {
-  const { db, auth } = await fixture();
-  const user = await auth.register(input);
+  const { db, registerVerified } = await fixture();
+  const user = await registerVerified(input);
   expect(user).toMatchObject({
     email: "member@example.test",
     displayName: "Member One",
@@ -41,12 +57,12 @@ test("registration normalizes email, trims display name, creates only MEMBER, an
 });
 
 test("registration rejects client-supplied role and case-equivalent duplicate emails", async () => {
-  const { db, auth } = await fixture();
+  const { db, auth, registerVerified } = await fixture();
   await expect(auth.register({ ...input, role: "ADMIN" })).rejects.toMatchObject({
     code: "VALIDATION",
   });
   expect(await db.user.count()).toBe(0);
-  await auth.register(input);
+  await registerVerified(input);
   await expect(auth.register({ ...input, email: "member@example.test" })).rejects.toMatchObject({
     code: "CONFLICT",
   });
@@ -144,8 +160,8 @@ test("a malformed password cannot authenticate as the Unicode replacement charac
 });
 
 test("valid accented, Arabic and emoji account text remains usable", async () => {
-  const { auth } = await fixture();
-  const account = await auth.register({
+  const { auth, registerVerified } = await fixture();
+  const account = await registerVerified({
     ...input,
     displayName: "Équipe العربية 🚀",
     password: "Valide العربية 🚀 42",

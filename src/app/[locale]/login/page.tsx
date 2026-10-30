@@ -24,7 +24,11 @@ export default async function Login({
       <AuthForm
         locale={locale}
         mode="login"
-        notice={notice === "registered" || notice === "passwordChanged" ? notice : undefined}
+        notice={
+          notice === "registered" || notice === "verified" || notice === "passwordChanged"
+            ? notice
+            : undefined
+        }
       />
     </AuthLayout>
   );

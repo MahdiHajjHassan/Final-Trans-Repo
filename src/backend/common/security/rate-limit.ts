@@ -3,7 +3,10 @@ import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 
 // Counts actions in SQLite, so separate requests share the same fixed time window.
 // The key is hashed before storage; it may contain a client address or an email.
-export function createRateLimiter(db: PrismaClient, now: () => Date = () => new Date()) {
+export function createRateLimiter(
+  db: Pick<PrismaClient, "rateLimitBucket" | "$queryRaw">,
+  now: () => Date = () => new Date(),
+) {
   let nextPruneAt = 0;
   return async function consumeLimit(
     scope: string,

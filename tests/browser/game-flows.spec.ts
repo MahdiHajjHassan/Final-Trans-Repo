@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { test, expect, t, credentials, loginUi, loginApi } from "./fixtures";
 import { testSettings } from "../helpers/e2e-environment";
+import { verifyEmailUi } from "../helpers/mailbox";
 import { dictionaries } from "../../src/shared/i18n/dictionaries";
 import type { Browser, Page } from "@playwright/test";
 async function peer(browser: Browser, who: "a" | "b" = "b") {
@@ -130,7 +131,7 @@ test("registration, profile changes, secure cookies, password revocation and log
   await page.getByLabel(t.password, { exact: true }).fill(credentials().password);
   await page.getByLabel(t.acceptTerms).check();
   await page.getByRole("button", { name: t.register, exact: true }).click();
-  await expect(page).toHaveURL(/\/en\/login\?notice=registered$/);
+  await verifyEmailUi(page, "new-player@example.test");
   await page.getByLabel(t.email, { exact: true }).fill("new-player@example.test");
   await page.getByLabel(t.password, { exact: true }).fill(credentials().password);
   await page.getByRole("button", { name: t.login, exact: true }).click();

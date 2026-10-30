@@ -26,7 +26,7 @@ export function AuthForm({
 }: {
   locale: Locale;
   mode: "login" | "register";
-  notice?: "registered" | "passwordChanged";
+  notice?: "registered" | "verified" | "passwordChanged";
 }) {
   const t = dictionaries[locale];
   const mutation = useMutation();
@@ -43,6 +43,7 @@ export function AuthForm({
         void mutation.run(async () => {
           // 1. Read the typed values before FormData can replace broken Unicode.
           const input = {
+            locale,
             email: formText(form, "email").trim().toLowerCase(),
             password: formText(form, "password"),
             ...(registration ? { displayName: formText(form, "displayName").trim() } : {}),
@@ -55,7 +56,16 @@ export function AuthForm({
             ...(registration ? { displayName: displayNameSchema } : {}),
           });
           try {
-            await request(`/api/auth/${mode}`, "POST", input);
+            const result = await request<{ verificationRequired?: boolean }>(
+              `/api/auth/${mode}`,
+              "POST",
+              input,
+            );
+            if (result.verificationRequired) {
+              router.push(`/${locale}/verify-email`);
+              router.refresh();
+              return;
+            }
           } catch (error) {
             // Unknown email and wrong password use the same sign-in message.
             if (!registration && error instanceof RequestError && error.code === "UNAUTHENTICATED")
@@ -63,7 +73,7 @@ export function AuthForm({
             throw error;
           }
 
-          // 3. Registration goes to sign-in; a successful login goes straight to Play.
+          // 3. Verified password login goes to Play; pending requests use the separate code form.
           router.push(registration ? `/${locale}/login?notice=registered` : `/${locale}/play`);
           router.refresh();
         });

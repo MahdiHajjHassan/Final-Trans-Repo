@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { test, expect, t, loginUi, loginApi, credentials } from "./fixtures";
 import { testSettings } from "../helpers/e2e-environment";
+import { verifyEmailApi, verifyEmailUi } from "../helpers/mailbox";
 
 async function contrast(locator: Locator) {
   return locator.evaluate((element) => {
@@ -115,7 +116,8 @@ test("sign-in rejects a malformed password before serialization can authenticate
     headers: { Origin: testSettings().values.APP_ORIGIN },
     data: { email, displayName: "Unicode password example", password: "correct-password-\ufffd" },
   });
-  expect(created.status()).toBe(201);
+  expect(created.status()).toBe(202);
+  await verifyEmailApi(page.request, email);
   await page.goto("/en/login");
   await page.getByLabel(t.email, { exact: true }).fill(email);
   const password = page.getByLabel(t.password, { exact: true });
@@ -171,6 +173,7 @@ test("password changes reject malformed replacements before sending a request", 
 
 test("registration and profile editing preserve valid accented, Arabic and emoji names", async ({
   page,
+  context,
 }) => {
   await page.goto("/en/register");
   await page.getByLabel(t.displayName, { exact: true }).fill("  Joël جوزيف 🎲  ");
@@ -178,7 +181,7 @@ test("registration and profile editing preserve valid accented, Arabic and emoji
   await page.getByLabel(t.password, { exact: true }).fill(credentials().password);
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: t.register, exact: true }).click();
-  await expect(page).toHaveURL(/\/en\/login\?notice=registered$/);
+  await verifyEmailUi(page, "valid-unicode@example.test");
   await page.getByLabel(t.email, { exact: true }).fill("valid-unicode@example.test");
   await page.getByLabel(t.password, { exact: true }).fill(credentials().password);
   await page.getByRole("button", { name: t.login, exact: true }).click();
@@ -189,8 +192,14 @@ test("registration and profile editing preserve valid accented, Arabic and emoji
   await name.fill("  Léa مها 🌍  ");
   await page.getByRole("button", { name: t.save, exact: true }).click();
   await expect(page.getByText(t.saved, { exact: true })).toBeVisible();
-  await page.reload();
-  await expect(page.getByLabel(t.displayName, { exact: true })).toHaveValue("Léa مها 🌍");
+  // Read a fresh server page without interrupting the original page's in-flight refresh.
+  const persisted = await context.newPage();
+  try {
+    await persisted.goto("/en/account");
+    await expect(persisted.getByLabel(t.displayName, { exact: true })).toHaveValue("Léa مها 🌍");
+  } finally {
+    await persisted.close();
+  }
 });
 
 test("admin creation rejects whitespace-only names before sending a request", async ({

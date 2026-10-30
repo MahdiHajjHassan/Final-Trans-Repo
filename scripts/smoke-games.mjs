@@ -1,20 +1,23 @@
 import assert from "node:assert/strict";
-import { randomBytes, randomUUID } from "node:crypto";
 import { call, login } from "./lib/http.mjs";
 if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD)
   throw new Error("Private administrator settings missing");
-let admin, member, memberId;
+if (!process.env.SMOKE_MEMBER_EMAIL || !process.env.SMOKE_MEMBER_PASSWORD)
+  throw new Error(
+    "Set private SMOKE_MEMBER_EMAIL and SMOKE_MEMBER_PASSWORD for a separate, already verified account",
+  );
+let admin, member;
 try {
   admin = await login({ email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD });
-  const credentials = {
-    email: "smoke-" + randomUUID() + "@example.test",
-    password: randomBytes(24).toString("hex"),
-    displayName: "Smoke opponent",
-  };
-  const registered = await call("/api/auth/register", { method: "POST", body: credentials });
-  assert.equal(registered.status, 201);
-  memberId = registered.data.id;
-  member = await login({ email: credentials.email, password: credentials.password });
+  member = await login({
+    email: process.env.SMOKE_MEMBER_EMAIL,
+    password: process.env.SMOKE_MEMBER_PASSWORD,
+  });
+  assert.notEqual(
+    admin.account.id,
+    member.account.id,
+    "Game smoke requires two distinct verified accounts",
+  );
   const room = await call("/api/games", {
     method: "POST",
     cookie: admin.cookie,
@@ -92,15 +95,6 @@ try {
     "Verified trusted-HTTPS friend win, AI reply, stale-move and access rejection, resignation and cancellation. Credentials omitted.",
   );
 } finally {
-  if (admin && memberId) {
-    const deleted = await call("/api/admin/users/" + memberId, {
-      method: "DELETE",
-      cookie: admin.cookie,
-      body: {},
-    });
-    if (deleted.status !== 204)
-      throw new Error("Temporary smoke opponent cleanup failed; identifier omitted");
-  }
   for (const session of [member, admin])
     if (session)
       await call("/api/auth/logout", { method: "POST", cookie: session.cookie, body: {} });

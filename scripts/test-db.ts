@@ -18,6 +18,7 @@ const config = loadConfig(process.env),
   db = await createDb(config.databaseUrl);
 try {
   await db.$transaction([
+    db.emailChallenge.deleteMany(),
     db.gameMove.deleteMany(),
     db.game.deleteMany(),
     db.session.deleteMany(),
@@ -25,11 +26,22 @@ try {
     db.user.deleteMany(),
   ]);
   await seedDatabase(db, config);
+  await db.user.updateMany({ data: { emailVerifiedAt: new Date() } });
   const passwordHash = await hashPassword(config.adminPassword);
   await db.user.createMany({
     data: [
-      { email: "member-a@example.test", displayName: "Member A", passwordHash },
-      { email: "member-b@example.test", displayName: "Member B", passwordHash },
+      {
+        email: "member-a@example.test",
+        displayName: "Member A",
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      },
+      {
+        email: "member-b@example.test",
+        displayName: "Member B",
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      },
     ],
   });
   console.log("Reset only the guarded isolated game database with three demonstration accounts.");

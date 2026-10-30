@@ -36,9 +36,9 @@ export async function resolveSessionToken(
   if (!validToken(raw)) return null;
   const session = await db.session.findUnique({
     where: { id: tokenHash(raw) },
-    include: { user: { select: { id: true, role: true } } },
+    include: { user: { select: { id: true, role: true, emailVerifiedAt: true } } },
   });
-  if (!session) return null;
+  if (!session || !session.user.emailVerifiedAt) return null;
   if (session.expiresAt <= now) {
     try {
       await db.session.deleteMany({ where: { id: session.id } });
@@ -48,7 +48,7 @@ export async function resolveSessionToken(
     }
     return null;
   }
-  return session.user;
+  return { id: session.user.id, role: session.user.role };
 }
 
 // Ends this session immediately. An absent or malformed token needs no database work.

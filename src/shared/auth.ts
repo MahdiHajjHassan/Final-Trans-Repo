@@ -14,3 +14,12 @@ export type AccountDTO = {
   role: Role;
   createdAt: string;
 };
+
+/** Safe verification state; the browser token, password hash and code stay out of this DTO. */
+export type VerificationMetadata = {
+  email: string;
+  serverNow: string;
+  expiresAt: string;
+  resendAt: string;
+  status: "PENDING" | "SENT" | "FAILED";
+};

@@ -1,6 +1,9 @@
 .git
 .worktrees
 .logs
+.superpowers
+.impeccable/review
+.agents
 node_modules
 .next
 .env*

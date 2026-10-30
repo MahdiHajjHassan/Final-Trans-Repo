@@ -18,11 +18,35 @@ model User {
   email        String    @unique
   displayName  String
   passwordHash String
+  emailVerifiedAt DateTime?
   role         Role      @default(MEMBER)
   createdAt    DateTime  @default(now())
   sessions     Session[]
   gamesAsX     Game[]    @relation("GameX")
   gamesAsO     Game[]    @relation("GameO")
+  emailChallenges EmailChallenge[]
+}
+
+// A verification-only browser attempt. No active user is created for a pending signup.
+model EmailChallenge {
+  id String @id
+  userId String?
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email String
+  displayName String
+  passwordHash String
+  locale String
+  generation String
+  codeHash String
+  status String @default("PENDING")
+  attempts Int @default(0)
+  expiresAt DateTime
+  pendingUntil DateTime
+  resendAt DateTime
+  createdAt DateTime @default(now())
+  @@index([email])
+  @@index([userId])
+  @@index([pendingUntil])
 }
 
 // One login per browser session. Its ID is the token hash, never the raw cookie token.
