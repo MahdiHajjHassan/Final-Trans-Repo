@@ -125,6 +125,10 @@ textarea {
     border-color 150ms,
     background-color 150ms;
 }
+select option {
+  background-color: var(--surface);
+  color: var(--text);
+}
 input:hover,
 select:hover,
 textarea:hover {
