@@ -1,0 +1,748 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-30T00:41:32.229080Z",
+  "title": "Design System: Tic Tac Toe",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Rose Ivory Ground",
+        "tonalRamp": [
+          "oklch(15% 0.0025 345.2)",
+          "oklch(27% 0.0025 345.2)",
+          "oklch(39% 0.0025 345.2)",
+          "oklch(51% 0.0025 345.2)",
+          "oklch(63% 0.0025 345.2)",
+          "oklch(75% 0.0025 345.2)",
+          "oklch(87% 0.0025 345.2)",
+          "oklch(95% 0.0025 345.2)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Ivory Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0055 3.3)",
+          "oklch(27% 0.0055 3.3)",
+          "oklch(39% 0.0055 3.3)",
+          "oklch(51% 0.0055 3.3)",
+          "oklch(63% 0.0055 3.3)",
+          "oklch(75% 0.0055 3.3)",
+          "oklch(87% 0.0055 3.3)",
+          "oklch(95% 0.0055 3.3)"
+        ]
+      },
+      "muted-surface": {
+        "role": "neutral",
+        "displayName": "Muted Rose Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0130 353.2)",
+          "oklch(27% 0.0130 353.2)",
+          "oklch(39% 0.0130 353.2)",
+          "oklch(51% 0.0130 353.2)",
+          "oklch(63% 0.0130 353.2)",
+          "oklch(75% 0.0130 353.2)",
+          "oklch(87% 0.0130 353.2)",
+          "oklch(95% 0.0130 353.2)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Wine Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0298 346.1)",
+          "oklch(27% 0.0298 346.1)",
+          "oklch(39% 0.0298 346.1)",
+          "oklch(51% 0.0298 346.1)",
+          "oklch(63% 0.0298 346.1)",
+          "oklch(75% 0.0298 346.1)",
+          "oklch(87% 0.0298 346.1)",
+          "oklch(95% 0.0225 346.1)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Quiet Rose Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0335 350.5)",
+          "oklch(27% 0.0335 350.5)",
+          "oklch(39% 0.0335 350.5)",
+          "oklch(51% 0.0335 350.5)",
+          "oklch(63% 0.0335 350.5)",
+          "oklch(75% 0.0335 350.5)",
+          "oklch(87% 0.0335 350.5)",
+          "oklch(95% 0.0225 350.5)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Rose Divider",
+        "tonalRamp": [
+          "oklch(15% 0.0227 348.8)",
+          "oklch(27% 0.0227 348.8)",
+          "oklch(39% 0.0227 348.8)",
+          "oklch(51% 0.0227 348.8)",
+          "oklch(63% 0.0227 348.8)",
+          "oklch(75% 0.0227 348.8)",
+          "oklch(87% 0.0227 348.8)",
+          "oklch(95% 0.0225 348.8)"
+        ]
+      },
+      "control-border": {
+        "role": "neutral",
+        "displayName": "Control Edge",
+        "tonalRamp": [
+          "oklch(15% 0.0463 349.6)",
+          "oklch(27% 0.0463 349.6)",
+          "oklch(39% 0.0463 349.6)",
+          "oklch(51% 0.0463 349.6)",
+          "oklch(63% 0.0463 349.6)",
+          "oklch(75% 0.0463 349.6)",
+          "oklch(87% 0.0463 349.6)",
+          "oklch(95% 0.0225 349.6)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Burgundy Accent",
+        "tonalRamp": [
+          "oklch(15% 0.0675 5.2)",
+          "oklch(27% 0.1072 5.2)",
+          "oklch(39% 0.1072 5.2)",
+          "oklch(51% 0.1072 5.2)",
+          "oklch(63% 0.1072 5.2)",
+          "oklch(75% 0.1072 5.2)",
+          "oklch(87% 0.0585 5.2)",
+          "oklch(95% 0.0225 5.2)"
+        ]
+      },
+      "action": {
+        "role": "primary",
+        "displayName": "Burgundy Action",
+        "tonalRamp": [
+          "oklch(15% 0.0675 5.2)",
+          "oklch(27% 0.1072 5.2)",
+          "oklch(39% 0.1072 5.2)",
+          "oklch(51% 0.1072 5.2)",
+          "oklch(63% 0.1072 5.2)",
+          "oklch(75% 0.1072 5.2)",
+          "oklch(87% 0.0585 5.2)",
+          "oklch(95% 0.0225 5.2)"
+        ]
+      },
+      "action-hover": {
+        "role": "primary",
+        "displayName": "Action Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0675 2.7)",
+          "oklch(27% 0.0940 2.7)",
+          "oklch(39% 0.0940 2.7)",
+          "oklch(51% 0.0940 2.7)",
+          "oklch(63% 0.0940 2.7)",
+          "oklch(75% 0.0940 2.7)",
+          "oklch(87% 0.0585 2.7)",
+          "oklch(95% 0.0225 2.7)"
+        ]
+      },
+      "on-action": {
+        "role": "primary",
+        "displayName": "Action Foreground",
+        "tonalRamp": [
+          "oklch(15% 0.0084 349.2)",
+          "oklch(27% 0.0084 349.2)",
+          "oklch(39% 0.0084 349.2)",
+          "oklch(51% 0.0084 349.2)",
+          "oklch(63% 0.0084 349.2)",
+          "oklch(75% 0.0084 349.2)",
+          "oklch(87% 0.0084 349.2)",
+          "oklch(95% 0.0084 349.2)"
+        ]
+      },
+      "club": {
+        "role": "primary",
+        "displayName": "Deep Wine",
+        "tonalRamp": [
+          "oklch(15% 0.0569 353.6)",
+          "oklch(27% 0.0569 353.6)",
+          "oklch(39% 0.0569 353.6)",
+          "oklch(51% 0.0569 353.6)",
+          "oklch(63% 0.0569 353.6)",
+          "oklch(75% 0.0569 353.6)",
+          "oklch(87% 0.0569 353.6)",
+          "oklch(95% 0.0225 353.6)"
+        ]
+      },
+      "on-club": {
+        "role": "primary",
+        "displayName": "Wine Panel Foreground",
+        "tonalRamp": [
+          "oklch(15% 0.0129 353.1)",
+          "oklch(27% 0.0129 353.1)",
+          "oklch(39% 0.0129 353.1)",
+          "oklch(51% 0.0129 353.1)",
+          "oklch(63% 0.0129 353.1)",
+          "oklch(75% 0.0129 353.1)",
+          "oklch(87% 0.0129 353.1)",
+          "oklch(95% 0.0129 353.1)"
+        ]
+      },
+      "club-muted": {
+        "role": "primary",
+        "displayName": "Wine Panel Supporting Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0412 352.3)",
+          "oklch(27% 0.0412 352.3)",
+          "oklch(39% 0.0412 352.3)",
+          "oklch(51% 0.0412 352.3)",
+          "oklch(63% 0.0412 352.3)",
+          "oklch(75% 0.0412 352.3)",
+          "oklch(87% 0.0412 352.3)",
+          "oklch(95% 0.0225 352.3)"
+        ]
+      },
+      "x": {
+        "role": "secondary",
+        "displayName": "Burgundy X",
+        "tonalRamp": [
+          "oklch(15% 0.0675 2.5)",
+          "oklch(27% 0.1215 2.5)",
+          "oklch(39% 0.1248 2.5)",
+          "oklch(51% 0.1248 2.5)",
+          "oklch(63% 0.1248 2.5)",
+          "oklch(75% 0.1125 2.5)",
+          "oklch(87% 0.0585 2.5)",
+          "oklch(95% 0.0225 2.5)"
+        ]
+      },
+      "o": {
+        "role": "secondary",
+        "displayName": "Slate Violet O",
+        "tonalRamp": [
+          "oklch(15% 0.0366 291.0)",
+          "oklch(27% 0.0366 291.0)",
+          "oklch(39% 0.0366 291.0)",
+          "oklch(51% 0.0366 291.0)",
+          "oklch(63% 0.0366 291.0)",
+          "oklch(75% 0.0366 291.0)",
+          "oklch(87% 0.0366 291.0)",
+          "oklch(95% 0.0225 291.0)"
+        ]
+      },
+      "error": {
+        "role": "tertiary",
+        "displayName": "Error Rose",
+        "tonalRamp": [
+          "oklch(15% 0.0675 16.4)",
+          "oklch(27% 0.1215 16.4)",
+          "oklch(39% 0.1709 16.4)",
+          "oklch(51% 0.1709 16.4)",
+          "oklch(63% 0.1665 16.4)",
+          "oklch(75% 0.1125 16.4)",
+          "oklch(87% 0.0585 16.4)",
+          "oklch(95% 0.0225 16.4)"
+        ]
+      },
+      "on-error": {
+        "role": "tertiary",
+        "displayName": "Error Foreground",
+        "tonalRamp": [
+          "oklch(15% 0.0000 0.0)",
+          "oklch(27% 0.0000 0.0)",
+          "oklch(39% 0.0000 0.0)",
+          "oklch(51% 0.0000 0.0)",
+          "oklch(63% 0.0000 0.0)",
+          "oklch(75% 0.0000 0.0)",
+          "oklch(87% 0.0000 0.0)",
+          "oklch(95% 0.0000 0.0)"
+        ]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Success Violet",
+        "tonalRamp": [
+          "oklch(15% 0.0675 310.4)",
+          "oklch(27% 0.0868 310.4)",
+          "oklch(39% 0.0868 310.4)",
+          "oklch(51% 0.0868 310.4)",
+          "oklch(63% 0.0868 310.4)",
+          "oklch(75% 0.0868 310.4)",
+          "oklch(87% 0.0585 310.4)",
+          "oklch(95% 0.0225 310.4)"
+        ]
+      },
+      "dark-bg": {
+        "role": "neutral",
+        "displayName": "Dark Rose Ivory Ground",
+        "tonalRamp": [
+          "oklch(15% 0.0112 332.8)",
+          "oklch(27% 0.0112 332.8)",
+          "oklch(39% 0.0112 332.8)",
+          "oklch(51% 0.0112 332.8)",
+          "oklch(63% 0.0112 332.8)",
+          "oklch(75% 0.0112 332.8)",
+          "oklch(87% 0.0112 332.8)",
+          "oklch(95% 0.0112 332.8)"
+        ]
+      },
+      "dark-surface": {
+        "role": "neutral",
+        "displayName": "Dark Ivory Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0211 340.3)",
+          "oklch(27% 0.0211 340.3)",
+          "oklch(39% 0.0211 340.3)",
+          "oklch(51% 0.0211 340.3)",
+          "oklch(63% 0.0211 340.3)",
+          "oklch(75% 0.0211 340.3)",
+          "oklch(87% 0.0211 340.3)",
+          "oklch(95% 0.0211 340.3)"
+        ]
+      },
+      "dark-muted-surface": {
+        "role": "neutral",
+        "displayName": "Dark Muted Rose Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0317 344.8)",
+          "oklch(27% 0.0317 344.8)",
+          "oklch(39% 0.0317 344.8)",
+          "oklch(51% 0.0317 344.8)",
+          "oklch(63% 0.0317 344.8)",
+          "oklch(75% 0.0317 344.8)",
+          "oklch(87% 0.0317 344.8)",
+          "oklch(95% 0.0225 344.8)"
+        ]
+      },
+      "dark-text": {
+        "role": "neutral",
+        "displayName": "Dark Wine Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0155 352.0)",
+          "oklch(27% 0.0155 352.0)",
+          "oklch(39% 0.0155 352.0)",
+          "oklch(51% 0.0155 352.0)",
+          "oklch(63% 0.0155 352.0)",
+          "oklch(75% 0.0155 352.0)",
+          "oklch(87% 0.0155 352.0)",
+          "oklch(95% 0.0155 352.0)"
+        ]
+      },
+      "dark-muted": {
+        "role": "neutral",
+        "displayName": "Dark Quiet Rose Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0339 348.3)",
+          "oklch(27% 0.0339 348.3)",
+          "oklch(39% 0.0339 348.3)",
+          "oklch(51% 0.0339 348.3)",
+          "oklch(63% 0.0339 348.3)",
+          "oklch(75% 0.0339 348.3)",
+          "oklch(87% 0.0339 348.3)",
+          "oklch(95% 0.0225 348.3)"
+        ]
+      },
+      "dark-line": {
+        "role": "neutral",
+        "displayName": "Dark Rose Divider",
+        "tonalRamp": [
+          "oklch(15% 0.0400 346.5)",
+          "oklch(27% 0.0400 346.5)",
+          "oklch(39% 0.0400 346.5)",
+          "oklch(51% 0.0400 346.5)",
+          "oklch(63% 0.0400 346.5)",
+          "oklch(75% 0.0400 346.5)",
+          "oklch(87% 0.0400 346.5)",
+          "oklch(95% 0.0225 346.5)"
+        ]
+      },
+      "dark-control-border": {
+        "role": "neutral",
+        "displayName": "Dark Control Edge",
+        "tonalRamp": [
+          "oklch(15% 0.0538 345.7)",
+          "oklch(27% 0.0538 345.7)",
+          "oklch(39% 0.0538 345.7)",
+          "oklch(51% 0.0538 345.7)",
+          "oklch(63% 0.0538 345.7)",
+          "oklch(75% 0.0538 345.7)",
+          "oklch(87% 0.0538 345.7)",
+          "oklch(95% 0.0225 345.7)"
+        ]
+      },
+      "dark-accent": {
+        "role": "primary",
+        "displayName": "Dark Burgundy Accent",
+        "tonalRamp": [
+          "oklch(15% 0.0577 354.4)",
+          "oklch(27% 0.0577 354.4)",
+          "oklch(39% 0.0577 354.4)",
+          "oklch(51% 0.0577 354.4)",
+          "oklch(63% 0.0577 354.4)",
+          "oklch(75% 0.0577 354.4)",
+          "oklch(87% 0.0577 354.4)",
+          "oklch(95% 0.0225 354.4)"
+        ]
+      },
+      "dark-action": {
+        "role": "primary",
+        "displayName": "Dark Burgundy Action",
+        "tonalRamp": [
+          "oklch(15% 0.0577 354.4)",
+          "oklch(27% 0.0577 354.4)",
+          "oklch(39% 0.0577 354.4)",
+          "oklch(51% 0.0577 354.4)",
+          "oklch(63% 0.0577 354.4)",
+          "oklch(75% 0.0577 354.4)",
+          "oklch(87% 0.0577 354.4)",
+          "oklch(95% 0.0225 354.4)"
+        ]
+      },
+      "dark-action-hover": {
+        "role": "primary",
+        "displayName": "Dark Action Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0438 354.3)",
+          "oklch(27% 0.0438 354.3)",
+          "oklch(39% 0.0438 354.3)",
+          "oklch(51% 0.0438 354.3)",
+          "oklch(63% 0.0438 354.3)",
+          "oklch(75% 0.0438 354.3)",
+          "oklch(87% 0.0438 354.3)",
+          "oklch(95% 0.0225 354.3)"
+        ]
+      },
+      "dark-on-action": {
+        "role": "primary",
+        "displayName": "Dark Action Foreground",
+        "tonalRamp": [
+          "oklch(15% 0.0540 355.9)",
+          "oklch(27% 0.0540 355.9)",
+          "oklch(39% 0.0540 355.9)",
+          "oklch(51% 0.0540 355.9)",
+          "oklch(63% 0.0540 355.9)",
+          "oklch(75% 0.0540 355.9)",
+          "oklch(87% 0.0540 355.9)",
+          "oklch(95% 0.0225 355.9)"
+        ]
+      },
+      "dark-club": {
+        "role": "primary",
+        "displayName": "Dark Deep Wine",
+        "tonalRamp": [
+          "oklch(15% 0.0420 349.0)",
+          "oklch(27% 0.0420 349.0)",
+          "oklch(39% 0.0420 349.0)",
+          "oklch(51% 0.0420 349.0)",
+          "oklch(63% 0.0420 349.0)",
+          "oklch(75% 0.0420 349.0)",
+          "oklch(87% 0.0420 349.0)",
+          "oklch(95% 0.0225 349.0)"
+        ]
+      },
+      "dark-x": {
+        "role": "secondary",
+        "displayName": "Dark Burgundy X",
+        "tonalRamp": [
+          "oklch(15% 0.0675 352.5)",
+          "oklch(27% 0.0688 352.5)",
+          "oklch(39% 0.0688 352.5)",
+          "oklch(51% 0.0688 352.5)",
+          "oklch(63% 0.0688 352.5)",
+          "oklch(75% 0.0688 352.5)",
+          "oklch(87% 0.0585 352.5)",
+          "oklch(95% 0.0225 352.5)"
+        ]
+      },
+      "dark-o": {
+        "role": "secondary",
+        "displayName": "Dark Slate Violet O",
+        "tonalRamp": [
+          "oklch(15% 0.0369 297.9)",
+          "oklch(27% 0.0369 297.9)",
+          "oklch(39% 0.0369 297.9)",
+          "oklch(51% 0.0369 297.9)",
+          "oklch(63% 0.0369 297.9)",
+          "oklch(75% 0.0369 297.9)",
+          "oklch(87% 0.0369 297.9)",
+          "oklch(95% 0.0225 297.9)"
+        ]
+      },
+      "dark-error": {
+        "role": "tertiary",
+        "displayName": "Dark Error Rose",
+        "tonalRamp": [
+          "oklch(15% 0.0675 8.9)",
+          "oklch(27% 0.1077 8.9)",
+          "oklch(39% 0.1077 8.9)",
+          "oklch(51% 0.1077 8.9)",
+          "oklch(63% 0.1077 8.9)",
+          "oklch(75% 0.1077 8.9)",
+          "oklch(87% 0.0585 8.9)",
+          "oklch(95% 0.0225 8.9)"
+        ]
+      },
+      "dark-on-error": {
+        "role": "tertiary",
+        "displayName": "Dark Error Foreground",
+        "tonalRamp": [
+          "oklch(15% 0.0609 5.7)",
+          "oklch(27% 0.0609 5.7)",
+          "oklch(39% 0.0609 5.7)",
+          "oklch(51% 0.0609 5.7)",
+          "oklch(63% 0.0609 5.7)",
+          "oklch(75% 0.0609 5.7)",
+          "oklch(87% 0.0585 5.7)",
+          "oklch(95% 0.0225 5.7)"
+        ]
+      },
+      "dark-success": {
+        "role": "tertiary",
+        "displayName": "Dark Success Violet",
+        "tonalRamp": [
+          "oklch(15% 0.0645 313.5)",
+          "oklch(27% 0.0645 313.5)",
+          "oklch(39% 0.0645 313.5)",
+          "oklch(51% 0.0645 313.5)",
+          "oklch(63% 0.0645 313.5)",
+          "oklch(75% 0.0645 313.5)",
+          "oklch(87% 0.0585 313.5)",
+          "oklch(95% 0.0225 313.5)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Lobby Display",
+        "purpose": "Guest introduction; responsive overrides keep it usable on small screens."
+      },
+      "headline": {
+        "displayName": "Page Headline",
+        "purpose": "Page headings with quieter authentication and live-status variants."
+      },
+      "title": {
+        "displayName": "Section Title",
+        "purpose": "Group related tasks and content."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Shared text for Latin and Arabic."
+      },
+      "label": {
+        "displayName": "Field Label",
+        "purpose": "Compact native field labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "active-player",
+        "value": "inset 0 -3px 0 var(--accent)",
+        "purpose": "Underline the active player."
+      },
+      {
+        "name": "playable-cell-hover",
+        "value": "inset 0 0 0 2px var(--accent)",
+        "purpose": "Show a playable cell on hover."
+      },
+      {
+        "name": "modal",
+        "value": "0 24px 100px #170d1440",
+        "purpose": "Lift the native dialog over its dim backdrop."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Shared easing for buttons and bounded arrivals."
+      },
+      {
+        "name": "control-transition",
+        "value": "150ms",
+        "purpose": "Input borders and navigation color changes."
+      },
+      {
+        "name": "button-transition",
+        "value": "180ms",
+        "purpose": "Button movement and color; board cell state transitions."
+      },
+      {
+        "name": "player-transition",
+        "value": "240ms",
+        "purpose": "Active-player background and inset underline."
+      },
+      {
+        "name": "mark-draw",
+        "value": "320ms var(--ease); second X stroke delay 100ms",
+        "purpose": "Draw newly confirmed SVG marks."
+      },
+      {
+        "name": "winning-line",
+        "value": "550ms var(--ease) 160ms",
+        "purpose": "Draw a newly confirmed winning line."
+      },
+      {
+        "name": "result-arrive",
+        "value": "450ms var(--ease)",
+        "purpose": "Reveal a new result with a short translation and clipping change."
+      },
+      {
+        "name": "dialog-arrive",
+        "value": "220ms var(--ease)",
+        "purpose": "Bring an opened native modal into view."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation: none; transition: none; stroke-dashoffset: 0",
+        "purpose": "Present finished states immediately when reduced motion is requested."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "header-wrap",
+        "value": "1100px"
+      },
+      {
+        "name": "stacked-sections",
+        "value": "760px"
+      },
+      {
+        "name": "compact",
+        "value": "520px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Burgundy action in light mode and rose action in dark mode.",
+      "html": "<button class=\"ds-button ds-button-primary\" type=\"button\">Play computer</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:.65rem;min-height:48px;padding:.7rem 1.25rem;border:1px solid transparent;border-radius:var(--radius,.75rem);font-family:\"Readex Pro\",system-ui,sans-serif;font-weight:500;font-size:.875rem;line-height:1.5;text-align:center;cursor:pointer;transition:transform 180ms var(--ease,cubic-bezier(.16,1,.3,1)),background-color 180ms,border-color 180ms}.ds-button:hover:not(:disabled){transform:translateY(-2px)}.ds-button:active:not(:disabled){transform:translateY(0) scale(.98)}.ds-button:focus-visible{outline:3px solid var(--accent,#74293f);outline-offset:4px}.ds-button:disabled{cursor:wait;opacity:.6}@media(prefers-reduced-motion:reduce){.ds-button{transition:none}}.ds-button-primary{background:var(--action,#74293f);color:var(--on-action,#fff8fb);border-color:var(--on-action,#fff8fb)}.ds-button-primary:hover:not(:disabled){background:var(--action-hover,#5f2035)}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Bordered action for supporting choices.",
+      "html": "<button class=\"ds-button ds-button-secondary\" type=\"button\">Create friend game</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:.65rem;min-height:48px;padding:.7rem 1.25rem;border:1px solid transparent;border-radius:var(--radius,.75rem);font-family:\"Readex Pro\",system-ui,sans-serif;font-weight:500;font-size:.875rem;line-height:1.5;text-align:center;cursor:pointer;transition:transform 180ms var(--ease,cubic-bezier(.16,1,.3,1)),background-color 180ms,border-color 180ms}.ds-button:hover:not(:disabled){transform:translateY(-2px)}.ds-button:active:not(:disabled){transform:translateY(0) scale(.98)}.ds-button:focus-visible{outline:3px solid var(--accent,#74293f);outline-offset:4px}.ds-button:disabled{cursor:wait;opacity:.6}@media(prefers-reduced-motion:reduce){.ds-button{transition:none}}.ds-button-secondary{background:var(--surface,#fffafb);color:var(--text,#35242d);border-color:var(--control-border,#957483)}.ds-button-secondary:hover:not(:disabled){background:var(--muted-surface,#efe4e8)}"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive action shown inside confirmation.",
+      "html": "<button class=\"ds-button ds-button-danger\" type=\"button\">Resign</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:.65rem;min-height:48px;padding:.7rem 1.25rem;border:1px solid transparent;border-radius:var(--radius,.75rem);font-family:\"Readex Pro\",system-ui,sans-serif;font-weight:500;font-size:.875rem;line-height:1.5;text-align:center;cursor:pointer;transition:transform 180ms var(--ease,cubic-bezier(.16,1,.3,1)),background-color 180ms,border-color 180ms}.ds-button:hover:not(:disabled){transform:translateY(-2px)}.ds-button:active:not(:disabled){transform:translateY(0) scale(.98)}.ds-button:focus-visible{outline:3px solid var(--accent,#74293f);outline-offset:4px}.ds-button:disabled{cursor:wait;opacity:.6}@media(prefers-reduced-motion:reduce){.ds-button{transition:none}}.ds-button-danger{background:var(--error,#ae263f);color:var(--on-error,#fff);border-color:transparent}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "A labelled native input with linked hint text.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-room-code\">Room code</label><input id=\"ds-room-code\" type=\"text\" dir=\"ltr\" placeholder=\"Enter room code\" aria-describedby=\"ds-room-hint\"><small id=\"ds-room-hint\">Ask your friend for the room code.</small></div>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:.45rem;font-family:\"Readex Pro\",system-ui,sans-serif;color:var(--text,#35242d)}.ds-field label{font-size:.8125rem;font-weight:500}.ds-field input{background:var(--surface,#fffafb);border:1px solid var(--control-border,#957483);border-radius:var(--radius,.75rem);color:var(--text,#35242d);min-height:48px;padding:.75rem .875rem;font:inherit;transition:border-color 150ms,background-color 150ms}.ds-field input:hover{border-color:var(--accent,#74293f)}.ds-field input:focus-visible{outline:3px solid var(--accent,#74293f);outline-offset:4px}.ds-field input[aria-invalid=\"true\"]{border-color:var(--error,#ae263f)}.ds-field input:read-only{background:var(--muted-surface,#efe4e8)}.ds-field input::placeholder,.ds-field small{color:var(--muted,#705963)}.ds-field small{font-size:.8125rem}@media(prefers-reduced-motion:reduce){.ds-field input{transition:none}}"
+    },
+    {
+      "name": "Main Navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Compact page links with explicit current-page state.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Main navigation\"><a href=\"#play\" aria-current=\"page\">Play</a><a href=\"#account\">Account</a></nav>",
+      "css": ".ds-nav{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem;font-family:\"Readex Pro\",system-ui,sans-serif}.ds-nav a{display:inline-flex;align-items:center;min-height:44px;color:var(--muted,#705963);text-decoration:none;padding:.65rem .9rem;border-radius:.6rem;font-size:.8125rem;transition:color 150ms,background-color 150ms}.ds-nav a:hover,.ds-nav a[aria-current=\"page\"]{background:var(--muted-surface,#efe4e8);color:var(--text,#35242d)}.ds-nav a[aria-current=\"page\"]{font-weight:600}.ds-nav a:focus-visible{outline:3px solid var(--accent,#74293f);outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-nav a{display:inline-flex;align-items:center;min-height:44px;transition:none}}"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Text status with an accent dot for connection feedback.",
+      "html": "<span class=\"ds-badge\">Connected</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.25rem .65rem;border-radius:2rem;background:var(--muted-surface,#efe4e8);color:var(--accent,#74293f);font-family:\"Readex Pro\",system-ui,sans-serif;font-size:.75rem;font-weight:500;white-space:nowrap}.ds-badge::before{content:\"\";width:6px;height:6px;border-radius:50%;background:currentColor}"
+    },
+    {
+      "name": "Club Play Panel",
+      "kind": "card",
+      "refersTo": "club-panel",
+      "description": "The deep-wine enclosure used for the computer play choice.",
+      "html": "<section class=\"ds-club-panel\"><h2>Computer</h2><p>Play a game against the computer.</p></section>",
+      "css": ".ds-club-panel{display:flex;flex-direction:column;align-items:start;gap:1rem;min-width:0;padding:2rem;background:var(--club,#3e1c2b);color:var(--on-club,#fff4f8);border-radius:1rem;font-family:\"Readex Pro\",system-ui,sans-serif}.ds-club-panel h2{margin:0;font-size:2rem;line-height:1.35;font-weight:600;letter-spacing:-.025em}.ds-club-panel p{margin:0;color:var(--club-muted,#dfbecb);max-width:40ch;font-size:.875rem;line-height:1.7}@media(max-width:760px){.ds-club-panel{padding:1.75rem}}@media(max-width:520px){.ds-club-panel{padding:1.5rem}.ds-club-panel h2{font-size:1.75rem}}"
+    },
+    {
+      "name": "Game Cell",
+      "kind": "custom",
+      "refersTo": "game-cell",
+      "description": "A stable native cell button with an authored SVG X mark.",
+      "html": "<button class=\"ds-game-cell\" type=\"button\" aria-disabled=\"true\" aria-label=\"Row 1, column 1: X\"><svg class=\"ds-mark\" viewBox=\"0 0 100 100\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"9\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M24 24 76 76\"/><path d=\"M76 24 24 76\"/></svg></button>",
+      "css": ".ds-game-cell{aspect-ratio:1;width:140px;min-height:60px;border:1px solid var(--control-border,#957483);border-radius:0;background:var(--surface,#fffafb);display:grid;place-items:center;padding:0;transition:background-color 180ms,box-shadow 180ms}.ds-game-cell[aria-disabled=\"true\"]{opacity:1;cursor:default}.ds-game-cell[aria-disabled=\"false\"]:hover{background:var(--muted-surface,#efe4e8);box-shadow:inset 0 0 0 2px var(--accent,#74293f)}.ds-game-cell[aria-disabled=\"false\"]:active{background:var(--muted-surface,#efe4e8)}.ds-game-cell:focus-visible{position:relative;outline:3px solid var(--accent,#74293f);outline-offset:-5px}.ds-mark{width:65%;height:65%;max-height:110px;color:var(--x,#842b4a)}@media(prefers-reduced-motion:reduce){.ds-game-cell{transition:none}}"
+    },
+    {
+      "name": "Error Alert",
+      "kind": "custom",
+      "refersTo": "alert",
+      "description": "Explicit recovery feedback with an alert role.",
+      "html": "<div class=\"ds-alert\" role=\"alert\">Connection lost. Refresh to read the saved game.</div>",
+      "css": ".ds-alert{border:1px solid var(--error,#ae263f);border-radius:var(--radius,.75rem);background:var(--muted-surface,#efe4e8);color:var(--error,#ae263f);padding:1rem 1.125rem;font-family:\"Readex Pro\",system-ui,sans-serif;font-size:.875rem;line-height:1.7}"
+    },
+    {
+      "name": "Decorative Board",
+      "kind": "custom",
+      "refersTo": "decorative-board",
+      "description": "A tilted finished-board illustration with bold round marks and a muted center tile.",
+      "html": "<div class=\"ds-artwork\" aria-hidden=\"true\"><div class=\"ds-artwork-board\" dir=\"ltr\"><span class=\"ds-artwork-cell ds-artwork-x\"><svg viewBox=\"0 0 100 100\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"10\" stroke-linecap=\"round\"><path d=\"m28 28 44 44m0-44L28 72\"/></svg></span><span class=\"ds-artwork-cell ds-artwork-o\"><svg viewBox=\"0 0 100 100\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"10\" stroke-linecap=\"round\"><circle cx=\"50\" cy=\"50\" r=\"28\"/></svg></span><span class=\"ds-artwork-cell\"></span><span class=\"ds-artwork-cell\"></span><span class=\"ds-artwork-cell ds-artwork-x\"><svg viewBox=\"0 0 100 100\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"10\" stroke-linecap=\"round\"><path d=\"m28 28 44 44m0-44L28 72\"/></svg></span><span class=\"ds-artwork-cell ds-artwork-o\"><svg viewBox=\"0 0 100 100\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"10\" stroke-linecap=\"round\"><circle cx=\"50\" cy=\"50\" r=\"28\"/></svg></span><span class=\"ds-artwork-cell ds-artwork-o\"><svg viewBox=\"0 0 100 100\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"10\" stroke-linecap=\"round\"><circle cx=\"50\" cy=\"50\" r=\"28\"/></svg></span><span class=\"ds-artwork-cell\"></span><span class=\"ds-artwork-cell ds-artwork-x\"><svg viewBox=\"0 0 100 100\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"10\" stroke-linecap=\"round\"><path d=\"m28 28 44 44m0-44L28 72\"/></svg></span><svg class=\"ds-artwork-line\" viewBox=\"0 0 300 300\" fill=\"none\"><path d=\"M44 44 256 256\" stroke=\"currentColor\" stroke-width=\"7\" stroke-linecap=\"round\"/></svg></div></div>",
+      "css": ".ds-artwork{box-sizing:border-box;background:var(--club,#3e1c2b);border-radius:1.5rem;padding:2.5rem;width:100%;max-width:29rem;aspect-ratio:1;display:grid;place-items:center}.ds-artwork-board{display:grid;grid-template-columns:repeat(3,1fr);position:relative;width:100%;aspect-ratio:1;transform:rotate(-7deg);gap:4px}.ds-artwork-cell{display:grid;place-items:center;background:var(--surface,#fffafb);border-radius:8px}.ds-artwork-cell svg{width:100%;height:100%}.ds-artwork-x{color:var(--x,#842b4a)}.ds-artwork-o{color:var(--o,#605d74)}.ds-artwork-cell:nth-child(5){background:var(--muted-surface,#efe4e8)}.ds-artwork-line{position:absolute;inset:0;width:100%;height:100%;color:var(--text,#35242d);pointer-events:none}@media(max-width:760px){.ds-artwork{padding:1.25rem;border-radius:1rem}}@media(max-width:520px){.ds-artwork{padding:2rem}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Modern Game Club",
+    "overview": "Ivory surfaces and deep wine framing make the game welcoming; burgundy actions and rose accents define both themes. Burgundy X and slate-violet O give the board its own visual language. Flat color, geometric marks and a locally hosted typeface carry the identity across the lobby, live game, forms, tables and legal pages.\n\nExpressive scale belongs to the introduction and the board. Supporting screens use the same controls with quieter type and clear reading order. Authored SVG supplies the game artwork and icons; motion describes confirmed state changes, then stops. The system uses no gradients, remote fonts or decorative loops.",
+    "keyCharacteristics": [
+      "Ivory surfaces with wine framing and burgundy/rose actions.",
+      "One local type family for Latin and Arabic.",
+      "Geometric X/O marks with distinct shape and color.",
+      "Flat everyday surfaces and deliberate modal depth.",
+      "Bounded motion, stable controls and explicit state feedback."
+    ],
+    "rules": [
+      {
+        "name": "The Shape Before Color Rule",
+        "body": "Keep X/O geometry, text labels and active-state cues alongside color; color alone must never carry the game state.",
+        "section": "colors"
+      },
+      {
+        "name": "The Shared Script Rule",
+        "body": "Use the same local family for English, French and Arabic; preserve translated labels and natural wrapping rather than forcing uppercase interface copy.",
+        "section": "typography"
+      },
+      {
+        "name": "The Logical Flow Rule",
+        "body": "Use logical spacing and isolated player names for RTL; keep the physical game board and invitation codes LTR so positions remain consistent across languages.",
+        "section": "layout"
+      },
+      {
+        "name": "The Modal Depth Rule",
+        "body": "Reserve floating elevation for modal interruption; use tonal surfaces and borders for normal content.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Confirmed Motion Rule",
+        "body": "Animate committed state without delaying input, retrying uncertain moves, replaying initial marks or replacing focused cell buttons.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** reuse burgundy/rose semantic colors in both themes and preserve the body-text contrast requirement (4.5:1).",
+      "**Do** preserve translated labels, logical layout, LTR board positions and isolated player names.",
+      "**Do** retain native controls, visible focus, stable board buttons and explicit connection recovery.",
+      "**Do** use short SVG/CSS state motion that finishes and respects reduced motion.",
+      "**Do** verify rendered desktop, 360px and narrow 320px reflow, both themes, French and Arabic RTL when changing the interface."
+    ],
+    "donts": [
+      "**Don't** introduce green or orange accents or restore the superseded serif/fine-line styling.",
+      "**Don't** add gradients, remote font requests or decorative animation loops.",
+      "**Don't** replace game labels or shape cues with color alone.",
+      "**Don't** place ordinary content on floating shadows or turn every section into an enclosed card.",
+      "**Don't** delay rematch navigation or invent optimistic board state for an animation.",
+      "**Don't** infer completed visual or accessibility verification from this source-based design record."
+    ]
+  }
+}

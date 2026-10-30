@@ -1638,3 +1638,225 @@ tbody tr:hover th {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.2em;
 }
+
+/* Member identity and relationship lists extend the existing rounded surfaces. */
+.member-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+}
+.member-heading {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-block-end: 2rem;
+  min-width: 0;
+}
+.member-heading > div {
+  min-width: 0;
+}
+.member-heading h1 {
+  overflow-wrap: anywhere;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+}
+.member-list {
+  list-style: none;
+  padding: 0;
+  margin-block: 1.5rem;
+}
+.member-list > li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-block: 1rem;
+  border-block-end: 1px solid var(--line);
+}
+.member-detail {
+  flex: 1;
+  min-width: 8rem;
+  overflow-wrap: anywhere;
+}
+.member-detail > span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.section-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-block-end: 1.5rem;
+}
+.section-tabs [aria-current="page"] {
+  font-weight: 650;
+  text-decoration-thickness: 2px;
+}
+.avatar-editor {
+  display: grid;
+  grid-template-columns: 10rem minmax(0, 32rem);
+  gap: 2rem;
+  align-items: start;
+}
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+  max-width: 38rem;
+}
+.search-form > .field {
+  flex: 1;
+  min-width: 12rem;
+}
+@media (max-width: 520px) {
+  .avatar-editor {
+    grid-template-columns: 1fr;
+  }
+  .member-heading {
+    align-items: start;
+    gap: 1rem;
+  }
+  .member-heading .member-avatar {
+    width: 64px;
+    height: 64px;
+  }
+  .member-list .actions {
+    width: 100%;
+  }
+}
+
+/* Fixed bracket: the two semifinals lead into one final, then stack in reading order. */
+.tournament-bracket {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 3rem;
+  margin-block: 2rem;
+}
+.match-node {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.match-node[data-slot="SF1"] {
+  grid-column: 1;
+  grid-row: 1;
+}
+.match-node[data-slot="SF2"] {
+  grid-column: 1;
+  grid-row: 2;
+}
+.match-node[data-slot="FINAL"] {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+.match-node h2 {
+  font-size: 1.4rem;
+}
+.tournament-champion strong {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  overflow-wrap: anywhere;
+}
+.tournament-roster > li {
+  justify-content: space-between;
+}
+@media (max-width: 760px) {
+  .tournament-bracket {
+    display: block;
+  }
+  .match-node {
+    margin-block: 1rem;
+  }
+}
+
+.stats-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 2rem;
+  max-width: 44rem;
+  margin-block: 1.5rem;
+}
+.stats-facts > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+  border-block-end: 1px solid var(--line);
+  padding-block: 0.75rem;
+}
+.stats-facts dt {
+  color: var(--muted);
+}
+.stats-facts dd {
+  margin: 0;
+  font-weight: 650;
+}
+.level-progress {
+  appearance: none;
+  display: block;
+  width: min(100%, 22rem);
+  height: 0.75rem;
+  border: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-block: 0.75rem;
+  accent-color: var(--accent);
+  background: var(--muted-surface);
+  color: var(--accent);
+}
+.level-progress::-webkit-progress-bar {
+  background: var(--muted-surface);
+}
+.level-progress::-webkit-progress-value {
+  background: var(--accent);
+}
+.level-progress::-moz-progress-bar {
+  background: var(--accent);
+}
+.stats-summary {
+  margin-block-end: 2rem;
+}
+.stats-group {
+  margin-block-start: 2rem;
+}
+.stats-group h3 {
+  margin-block-end: 0.75rem;
+}
+.achievement-list {
+  list-style: none;
+  padding: 0;
+  max-width: 44rem;
+}
+.achievement-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  border-block-end: 1px solid var(--line);
+  padding-block: 0.75rem;
+}
+.achievement-list span,
+.result-reason {
+  color: var(--muted);
+}
+.result-reason {
+  display: block;
+  margin-block-start: 0.25rem;
+}
+.leaderboard-player {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 10rem;
+}
+@media (max-width: 520px) {
+  .stats-facts {
+    grid-template-columns: 1fr;
+  }
+}

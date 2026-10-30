@@ -9,6 +9,12 @@ import { createUserService } from "./modules/users/users.service";
 import { createGameService } from "./modules/games/games.service";
 import { createGameHandlers } from "./modules/games/games.controller";
 import { gameEvents } from "./modules/realtime/game-events";
+import { createProfileService } from "./modules/profiles/profiles.service";
+import { createAvatarService } from "./modules/profiles/avatar.service";
+import { createFriendService } from "./modules/friends/friends.service";
+import { createPresenceService } from "./modules/presence/presence.service";
+import { createTournamentService } from "./modules/tournaments/tournaments.service";
+import { createStatisticsService } from "./modules/statistics/statistics.service";
 
 // Connects the database, validated settings and services. Game changes share one event bus.
 async function buildServices() {
@@ -22,6 +28,12 @@ async function buildServices() {
     }),
     games: createGameService(db, { publish: gameEvents.publish }),
     users: createUserService(db, { publish: gameEvents.publish }),
+    profiles: createProfileService(db),
+    avatars: createAvatarService(db),
+    friends: createFriendService(db),
+    presence: createPresenceService(db),
+    tournaments: createTournamentService(db),
+    statistics: createStatisticsService(db),
   };
 }
 let services: ReturnType<typeof buildServices> | undefined;

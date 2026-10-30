@@ -25,6 +25,21 @@ model User {
   gamesAsX     Game[]    @relation("GameX")
   gamesAsO     Game[]    @relation("GameO")
   emailChallenges EmailChallenge[]
+  avatar       UserAvatar?
+  friendshipsA Friendship[] @relation("FriendA")
+  friendshipsB Friendship[] @relation("FriendB")
+  requestsSent Friendship[] @relation("FriendRequester")
+  hostedTournaments Tournament[]
+  tournamentEntries TournamentEntry[]
+}
+
+// Canonical avatar pixels share the account's persistent database and cascade on deletion.
+model UserAvatar {
+  userId String @id
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data Bytes
+  revision Int @default(1)
+  updatedAt DateTime @updatedAt
 }
 
 // A verification-only browser attempt. No active user is created for a pending signup.
@@ -54,10 +69,32 @@ model Session {
   id        String   @id
   userId    String
   expiresAt DateTime
+  lastSeenAt DateTime?
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+// A canonical pair has one request and requires the recipient's explicit acceptance.
+model Friendship {
+  id String @id @default(uuid())
+  userAId String
+  userBId String
+  requestedById String
+  userA User @relation("FriendA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB User @relation("FriendB", fields: [userBId], references: [id], onDelete: Cascade)
+  requestedBy User @relation("FriendRequester", fields: [requestedById], references: [id], onDelete: Cascade)
+  status FriendshipStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userAId,userBId])
+  @@index([userBId,status])
 }
 
 // A fixed-window action counter, keyed by the hash of its scope and client/account.
@@ -103,9 +140,79 @@ model Game {
   updatedAt  DateTime   @updatedAt
   finishedAt DateTime?
   moves      GameMove[]
+  tournamentMatchId String?
+  tournamentAttempt Int?
+  tournamentMatch TournamentMatch? @relation(fields: [tournamentMatchId], references: [id], onDelete: Restrict)
+
+  @@unique([tournamentMatchId,tournamentAttempt])
 
   @@index([xId, updatedAt])
   @@index([oId, updatedAt])
+}
+
+enum TournamentStatus {
+  LOBBY
+  RUNNING
+  FINISHED
+  CANCELLED
+}
+enum TournamentMatchStatus {
+  PENDING
+  ACTIVE
+  FINISHED
+  CANCELLED
+}
+enum TournamentSlot {
+  SF1
+  SF2
+  FINAL
+}
+
+// Fixed-capacity events keep registration, bracket and champion separate from game moves.
+model Tournament {
+  id String @id @default(uuid())
+  hostId String?
+  host User? @relation(fields: [hostId], references: [id], onDelete: SetNull)
+  joinCode String @unique
+  status TournamentStatus @default(LOBBY)
+  version Int @default(1)
+  championSlot Int?
+  createdAt DateTime @default(now())
+  finishedAt DateTime?
+  entries TournamentEntry[]
+  matches TournamentMatch[]
+  @@index([hostId,createdAt])
+}
+model TournamentEntry {
+  id String @id @default(uuid())
+  tournamentId String
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  slot Int
+  userId String?
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  matchesA TournamentMatch[] @relation("EntryA")
+  matchesB TournamentMatch[] @relation("EntryB")
+  wonMatches TournamentMatch[] @relation("EntryWinner")
+  @@unique([tournamentId,slot])
+  @@unique([tournamentId,userId])
+  @@index([userId])
+}
+model TournamentMatch {
+  id String @id @default(uuid())
+  tournamentId String
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  slot TournamentSlot
+  entryAId String?
+  entryBId String?
+  winnerEntryId String?
+  entryA TournamentEntry? @relation("EntryA", fields: [entryAId], references: [id], onDelete: SetNull)
+  entryB TournamentEntry? @relation("EntryB", fields: [entryBId], references: [id], onDelete: SetNull)
+  winnerEntry TournamentEntry? @relation("EntryWinner", fields: [winnerEntryId], references: [id], onDelete: SetNull)
+  status TournamentMatchStatus @default(PENDING)
+  attempt Int @default(0)
+  version Int @default(1)
+  games Game[]
+  @@unique([tournamentId,slot])
 }
 
 // One committed move: its cell, mark and position in the game's move order.

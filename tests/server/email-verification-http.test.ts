@@ -38,7 +38,7 @@ function req(
     headers: {
       Origin: origin,
       "Content-Type": "application/json",
-          "X-Taskboard-Client-IP": "127.0.0.1",
+      "X-Taskboard-Client-IP": "127.0.0.1",
       ...(cookie ? { Cookie: cookie } : {}),
     },
     ...(method === "GET" ? {} : { body: JSON.stringify(data) }),

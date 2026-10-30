@@ -21,7 +21,12 @@ export const test = base.extend<{ isolated: void; expectedFailures: ExpectedFail
           } catch (error) {
             // Docker bridge creation can notify Chrome after Compose is healthy.
             // Retry only this initial idempotent health GET, never test actions.
-            if (attempt !== 0 || !String(error).includes("ERR_NETWORK_CHANGED")) throw error;
+            const transient =
+              String(error).includes("ERR_NETWORK_CHANGED") ||
+              String(error).includes(
+                'interrupted by another navigation to "chrome-error://chromewebdata/"',
+              );
+            if (attempt !== 0 || !transient) throw error;
           }
         }
       } finally {
@@ -75,14 +80,17 @@ export const test = base.extend<{ isolated: void; expectedFailures: ExpectedFail
   },
 });
 export { expect };
-export function credentials(who: "admin" | "a" | "b" = "a") {
+export function credentials(who: "admin" | "a" | "b" | "c" | "d" = "a") {
   const { values } = testSettings();
   return {
     email: who === "admin" ? values.ADMIN_EMAIL : `member-${who}@example.test`,
     password: values.ADMIN_PASSWORD,
   };
 }
-export async function loginApi(request: APIRequestContext, who: "admin" | "a" | "b" = "a") {
+export async function loginApi(
+  request: APIRequestContext,
+  who: "admin" | "a" | "b" | "c" | "d" = "a",
+) {
   const { values } = testSettings();
   const response = await request.post("/api/auth/login", {
     data: credentials(who),
@@ -91,7 +99,7 @@ export async function loginApi(request: APIRequestContext, who: "admin" | "a" | 
   expect(response.status()).toBe(200);
   return (await response.json()).data as { id: string };
 }
-export async function loginUi(page: Page, who: "admin" | "a" | "b" = "a") {
+export async function loginUi(page: Page, who: "admin" | "a" | "b" | "c" | "d" = "a") {
   await page.goto("/en/login");
   const input = credentials(who);
   await page.getByLabel(t.email, { exact: true }).fill(input.email);

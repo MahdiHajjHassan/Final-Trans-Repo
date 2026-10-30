@@ -8,6 +8,7 @@ import { dictionaries } from "@/shared/i18n/dictionaries";
 import { getPageActor } from "@/backend/modules/auth/auth.pages";
 import { Preferences } from "@/frontend/layout/preferences";
 import { Navigation } from "@/frontend/layout/Navigation";
+import { PresenceHeartbeat } from "@/frontend/features/account/components/PresenceHeartbeat";
 export const dynamic = "force-dynamic";
 
 /** The translated site title and description for this language section. */
@@ -40,6 +41,7 @@ export default async function LocaleLayout({
     theme = readTheme((await cookies()).get("__Host-taskboard_theme")?.value);
   return (
     <>
+      {actor && <PresenceHeartbeat />}
       <a className="skip-link" href="#main">
         {t.skip}
       </a>

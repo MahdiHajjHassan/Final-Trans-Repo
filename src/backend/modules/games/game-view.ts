@@ -6,6 +6,7 @@ import { decodeBoard, evaluateBoard } from "./engine/game.engine";
 export const gameInclude = {
   x: { select: { displayName: true } },
   o: { select: { displayName: true } },
+  tournamentMatch: { select: { id: true, tournamentId: true } },
 } satisfies Prisma.GameInclude;
 export type GameRecord = Prisma.GameGetPayload<{ include: typeof gameInclude }>;
 
@@ -19,6 +20,9 @@ export function gameDto(game: GameRecord): GameDTO {
       : { displayName: "Deleted player", kind: "DELETED" };
   return {
     id: game.id,
+    tournament: game.tournamentMatch
+      ? { id: game.tournamentMatch.tournamentId, matchId: game.tournamentMatch.id }
+      : null,
     mode: game.mode,
     cells,
     players: {

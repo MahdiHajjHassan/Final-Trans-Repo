@@ -1,30 +1,26 @@
-*This project has been created as part of the 42 curriculum by mahajj-h, jboustan.*
+*This project has been created as part of the 42 curriculum by mahajj-h, jboustan, ksayour.*
 
 # Tic Tac Toe
 
-## Description
+A complete web game for two signed-in friends using separate browser sessions on
+one computer, or one player against the computer. X starts; three in a line wins.
+Accounts and committed matches survive restarts. The server owns every move.
+Members can edit profiles and avatars, accept friends, see friend presence,
+register for a fixed four-player tournament, and inspect saved history,
+achievements, progression and competitive standings.
 
-Tic Tac Toe is a web application for two friends using separate browser sessions
-on one computer, or one signed-in player against the computer. X starts; three
-marks in a row, column or diagonal win. Accounts, moves and results are stored in
-SQLite, and the server validates every action.
-
-The application includes registration, login, account editing, administrator user
-management, invitation codes, live game updates, recent matches, English/French/
-Arabic, right-to-left layouts, and remembered light/dark themes. Privacy and terms
-pages are available from every page's footer.
+This is the **Final-Trans-Repo production-compatible module branch**, prepared
+from production history and hosted in [Transcendence2 (ppd)](https://github.com/MahdiHajjHassan/Transcendence2)
+for Khalid to verify and promote. Production destination is
+[MahdiHajjHassan/Final-Trans-Repo](https://github.com/MahdiHajjHassan/Final-Trans-Repo).
+The team is Mahdi (`mahajj-h`), Joseph (`jboustan`) and Khalid (`ksayour`, 42 campus login). Khalid’s GitHub username is `ksayour-42`, authenticated for this integration.
 
 ## Instructions
 
-### Prerequisites and startup
-
-Install Git, Node.js **24**, npm, Docker with Compose, current Google Chrome and
-Brave. Install Playwright's Firefox build with `npx playwright install firefox`.
-Native Windows dependency installation may require
-Python and Visual Studio C++ Build Tools for `better-sqlite3`. Git Bash is useful
-for the supplied POSIX scripts.
-
-From the repository root:
+Use Git, Node.js **24**, npm and Docker with Compose. On Windows, native npm
+installation needs Python and Visual Studio C++ Build Tools for better-sqlite3.
+Dependencies, including the container base images, are pinned. Use normal GitHub
+authentication; no token belongs in this repository or a chat.
 
 ```sh
 npm ci
@@ -32,100 +28,104 @@ npm run setup
 docker compose up --build -d --force-recreate
 ```
 
-Open **https://localhost/en/play** after trusting the local public certificate
-authority as described below. The complete application starts through the single
-Compose command; it deploys migrations and creates the initial administrator.
+Open **https://localhost/en/play**. Setup generates a Git-ignored `.env` with
+this computer's random administrator password. Read **ADMIN_EMAIL** and
+**ADMIN_PASSWORD** privately there. Setup refuses to replace an existing file;
+startup does not reset an existing administrator's password. Register additional
+players in the interface. Signup creates a pending attempt; the requesting
+browser must confirm the six-digit email code before the account exists.
+Existing unverified accounts prove email ownership after a correct password,
+then return to password login. No verification bypass is provided.
 
-Setup creates a Git-ignored `.env` containing random credentials and refuses to
-overwrite an existing file. Read `ADMIN_EMAIL` and `ADMIN_PASSWORD` privately from
-that file. `.env.example` documents the variables with placeholders. Existing
-accounts and passwords are preserved on subsequent startups. Register another
-account through the interface for friend play. Mailbox ownership is not verified
-and the application sends no email.
+Only Caddy publishes a port, bound to loopback HTTPS. The Node process runs as
+non-root. Startup deploys migrations and seeds the administrator. Named volumes
+retain game data and certificates across recreation. Do not delete volumes.
+The `game-data` volume stores `file:/data/tictactoe.db`.
 
-For a different port, use `npm run setup -- --port 8443` before the first startup.
-An existing `.env` must keep `HTTPS_PORT` and `APP_ORIGIN` consistent. Use the same
-`COMPOSE_PROJECT_NAME` for every command belonging to an instance. Named volumes
-preserve SQLite data and certificates across recreation; do not remove volumes
-when restarting the application.
-
-### Local HTTPS trust
-
-Only Caddy publishes a host port, bound to loopback. The application container
-runs as a non-root user. Export and verify the instance's **public** root CA:
+Verify the real certificate chain and hostname:
 
 ```sh
 ./scripts/verify-tls.sh
 ```
 
-Run this script with Git Bash on Windows. The PowerShell equivalent is:
+Run that POSIX script from Git Bash on Windows. Or from PowerShell:
 
 ```powershell
-New-Item -ItemType Directory -Force local-certs | Out-Null
-docker compose exec -T proxy cat /data/caddy/pki/authorities/local/root.crt |
-    Set-Content -Encoding ascii local-certs/root.crt
+docker compose cp proxy:/data/caddy/pki/authorities/local/root.crt local-certs/root.crt
 npm run smoke
 ```
 
-For browser access, import `local-certs/root.crt` into Windows Current User
-Trusted Root Certification Authorities, the macOS trusted system keychain, or
-the Linux system/browser trust store. Firefox may require importing it under
-Settings > Privacy & Security > Certificates > Authorities. Reload the page and
-confirm a valid HTTPS connection. Never export the CA's private key or bypass
-certificate checks.
+Create `local-certs` first if needed. Trust only the public `root.crt`:
+Windows Current User > Trusted Root Certification Authorities for Chrome/Edge;
+Firefox Settings > Privacy & Security > Certificates > Authorities may need a
+separate import, or enterprise root trust. Then reload without a certificate
+warning. Never copy Caddy's private CA key. The verifier uses explicit CA trust
+and hostname verification; no insecure TLS flags are needed.
 
-`compose.cloud.yaml` is an optional build-only override for an environment that
-supplies a public network proxy CA through `CODEX_PROXY_CERT`. Normal local builds
-use `compose.yaml`. Keep private values out of shell output, Git and screenshots.
+For a different port, generate an environment with
+`npm run setup -- --port 8443`. With an existing `.env`, keep `HTTPS_PORT` and
+`APP_ORIGIN` consistent. Keep `COMPOSE_PROJECT_NAME` consistent for all runtime
+and TLS commands, so recreation reuses the same certificates and data.
+In a managed cloud needing its public network proxy CA, set `CODEX_PROXY_CERT`
+and include `compose.cloud.yaml` using the OS-specific COMPOSE_FILE separator.
+That CA is a build secret, never an application credential.
 
-### Play and administration
+## Play and demonstrate
 
-1. Register and sign in. Select **Play computer**, choose an empty square, and
-   finish a game. **Play again** starts a separate saved match.
-2. For friend play, use two browser profiles or a private window with different
-   accounts. One player selects **Create friend game** and shares its invitation
-   code; the other enters it under **Join with code**.
-3. Take turns, show a win or draw, then reload or reconnect. The saved board is
-   restored before moves are enabled. After a lost response or conflict, refresh
-   canonical state before trying a new move; uncertain moves are not blindly
-   retried. Cancel an unjoined room or confirm resignation from an active game.
-4. Change language and theme from the header. Board cells support Tab and
-   Enter/Space; the turn/result heading announces changes. The board remains LTR
-   inside an Arabic page so cell coordinates remain consistent.
-5. The administrator's **Users** page can search, create, edit roles/names and
-   delete users. Members cannot administer accounts. The last administrator
-   cannot be deleted or demoted. Account deletion revokes sessions, ends active
-   games safely and anonymizes historical player references.
+1. Register and sign in. Choose **Play computer**, place a mark and finish a game.
+   **Play again** creates a separate saved match; **Resign** confirms a loss.
+2. For a friend, use two separate browser profiles or one private window. Sign in
+   with different accounts. First player chooses **Create friend game**, shares
+   the displayed code; second enters it under **Join with code**. Play alternately.
+3. Show a win or draw in both sessions. Reload, briefly disconnect/reconnect,
+   or recreate containers: the committed board returns. An uncertain move is
+   never retried automatically. Refresh after a conflict before trying again.
+4. Switch English/French/Arabic, theme and phone width. Cells work with Tab and
+   Enter/Space, preserve focus and announce turns/results. X/O differ by shape.
+5. Administrator > **Users** demonstrates user creation, editing, roles and
+   deletion. Members cannot administer users. The final administrator cannot
+   be deleted or demoted. Deleting a player ends active games and anonymizes
+   their historical references.
+6. Registration Privacy/Terms links open a separate tab and preserve the form,
+   including the typed password, in the original tab. Passwords are not saved
+   to browser storage.
 
-Privacy/terms links open a separate tab during registration, preserving the form
-in its original tab. Passwords are not persisted in browser storage.
+7. Open **Friends** to find players and send/accept requests. Presence is visible
+   only for accepted friends. Upload a PNG/JPEG/WebP avatar under **Account**.
+8. For a tournament, use **four independent browser profiles/contexts**, each
+   signed into a different account. Ordinary tabs share cookies. The host creates
+   a tournament and shares its code; three players join. Confirm the displayed
+   semifinals, start, finish both rounds and the final. Draws replay with seats
+   swapped. No LAN or separate PCs are needed.
+9. **History** shows your own results and progression; **Leaderboard** ranks
+   completed human games. AI, cancellation and account-deletion forfeits do not
+   earn competitive points. See the [demo manual](docs/team/khalid-module-manual.md).
 
-## Technical stack and choices
+## Architecture and technical choices
 
-| Area | Technology and reason |
-| --- | --- |
-| Frontend and backend | Next.js App Router, React and TypeScript provide server-rendered pages, client interactions and route handlers in one application. |
-| Styling | Tailwind CSS and shared semantic CSS tokens provide reusable components, responsive layouts and both themes. |
-| Persistence | Prisma with SQLite provides typed data access and transactional persistence for a small, single-instance application. |
-| Validation and security | Zod schemas, Argon2id password hashing, hashed session tokens, origin checks, current-role authorization and persistent rate limits. |
-| Live updates | Authenticated server-sent events over HTTPS deliver versioned game snapshots and reconnect recovery. |
-| Runtime and tests | Node.js 24, Docker Compose, Caddy, Vitest and Playwright. |
+Next.js App Router provides frontend React/TypeScript and backend route handlers;
+Tailwind plus semantic CSS tokens provide styling. Prisma with SQLite keeps this
+single-computer delivery small and transactional. Caddy provides local HTTPS.
+Zod validates client inputs and backend bodies independently. The backend reloads
+current session/role and checks Origin, membership, turn, cell and version.
 
-The server checks the session, game membership, turn, cell and expected version.
-Transactions prevent competing joins or moves from both claiming the same state.
-Events are published after commit. A process-wide event bus supports one running
-application process; multiple replicas would require a shared event broker.
+Passwords use Argon2id. Sessions are random, stored only as hashes server-side,
+and sent in Secure, HttpOnly, SameSite=Lax cookies. Password changes revoke all
+sessions. Auth and game actions are rate-limited. Private game projections contain
+player display names, never email, passwords or tokens. Production preserves the existing `__Host-taskboard_` cookie namespace and
+`X-Taskboard-Client-IP` proxy convention. This port does not rename existing
+session or preference cookies.
 
-Sessions use random tokens in Secure, HttpOnly, SameSite=Lax cookies; only token
-hashes are stored in the database. Password changes revoke sessions. Game views
-contain display names rather than email addresses or credentials. Existing
-internal cookie/header names are shared across the application and proxy.
+Game state is committed before publication. Scoped HTTPS server-sent events send
+full snapshots, with monotonic versions and 15-second authorization heartbeats.
+On reconnection the client reads canonical state before enabling moves. A
+process-wide bus supports this **single application process**; a multi-instance
+service would require a shared broker and is outside this delivery.
 
-The computer plays O. It takes an immediate win, usually blocks an immediate
-threat, then prefers the center and corners. A 15% imperfect branch can select a
-weaker legal move, allowing it to lose. The human move and any computer reply
-commit atomically. This is a local heuristic opponent, without an external model
-or service.
+The computer plays O. It takes an immediate win; otherwise it usually blocks a
+threat, then prefers center/corners. A 15% imperfect branch permits legal weaker
+choices. It can beat weak play and can lose; it is not perfect minimax. The human
+move and computer reply commit in one transaction, with no external AI service.
 
 ## Source layout
 
@@ -133,9 +133,9 @@ or service.
 | --- | --- |
 | `src/app` | URL routes, server-rendered pages, and API entry points. |
 | `src/frontend/components/ui` | Shared controls, one component per file. |
-| `src/frontend/features` | Account, auth, games and user-management components. |
+| `src/frontend/features` | Accounts, profiles, friends, tournaments, statistics, auth and game components. |
 | `src/frontend/layout`, `lib`, `styles` | Preferences, browser requests/form validation and shared styles. |
-| `src/backend/modules` | Auth, games, users and realtime modules. |
+| `src/backend/modules` | Auth, games, users, profiles, friends, presence, tournaments, statistics and realtime. |
 | `src/backend/common` | HTTP responses, errors, validation and request security. |
 | `src/backend/config`, `database` | Environment validation, database connections, write retries and seeding. |
 | `src/shared` | Data contracts and small helpers shared across application layers. |
@@ -156,18 +156,94 @@ to connected players.
 
 ## Database schema
 
-| Model | Key fields and relationships |
+| Model | Purpose and relationships |
 | --- | --- |
-| `User` | String ID and unique email, display name, password hash, email ownership timestamp, `MEMBER`/`ADMIN` role and timestamps; owns sessions and can occupy game seats. |
-| `EmailChallenge` | Browser-bound pending signup/account proof, HMAC code verifier, expiry, generation and attempts; pending signup creates no active user. |
-| `Session` | Hashed token as the string primary key, expiry timestamp and user foreign key. |
-| `RateLimitBucket` | String key, integer action count and window-start timestamp. |
-| `Game` | String ID, friend/computer mode, encoded nine-cell board, X/O player foreign keys, turn, status/result, unique invitation code, integer version and timestamps. |
-| `GameMove` | String ID, game foreign key, mark, integer cell and ply; unique constraints on game+cell and game+ply. |
+| User | Unique email, public name, password hash, MEMBER/ADMIN role; sessions and X/O game seats |
+| Session | Hash-only token, expiry, nullable lastSeenAt, User foreign key; revoked on password change/deletion |
+| RateLimitBucket | Persistent per-action quotas and reset times |
+| Game | Mode, nine-cell board, seats, turn, status/result, unique invitation, version/times |
+| GameMove | Game foreign key, mark/cell/ply; unique game+cell and game+ply |
+| UserAvatar | User primary/foreign key, canonical 256px WebP bytes, revision; cascades on deletion |
+| Friendship | Canonical user pair, requester, pending/accepted state; unique pair and cascading user references |
+| Tournament | Host, code, state/version, champion slot and timestamps |
+| TournamentEntry | Tournament and nullable user, unique numbered seat; historical seats survive deletion |
+| TournamentMatch | SF1/SF2/final, entry/winner references, current game/attempt/version; Game links uniquely to match+attempt |
 
-Deleting an account sets historical player references to null after resolving
-active games. Moves and results remain. The schema and migration are in
-`prisma/schema.prisma` and `prisma/migrations/`.
+Game seats become null when an account is deleted, after the game is safely
+resolved. Moves/results remain. Transactions and version predicates ensure two
+concurrent joins or conflicting actions cannot both claim the same state.
+
+## Features and candidate modules
+
+Mandatory frontend/backend/database, secure accounts, concurrent use, HTTPS,
+responsive access, legal pages and one-command container startup apply separately.
+
+| ID | Candidate module | Points |
+| --- | --- | ---: |
+| G01 | Frontend/backend frameworks | 2 |
+| G02 | Complete web game | 2 |
+| G03 | Computer opponent | 2 |
+| G04 | Real-time updates | 2 |
+| G05 | ORM | 1 |
+| G06 | Shared design system | 1 |
+| G07 | English, French, Arabic | 1 |
+| G08 | RTL support | 1 |
+| G09 | Additional browsers: Chrome, Firefox and Brave | 1 |
+| G10 | Meaningful server rendering | 1 |
+| | Core candidate target | **14** |
+| G11 | Advanced permissions | 2 |
+| | Verified baseline with permissions | **16** |
+| G12 | Full profiles, avatars, friends and online status | 2 |
+| G13 | Fixed four-player tournament | 1 |
+| G14 | Statistics, history, achievements/progression and leaderboard | 1 |
+| | Complete candidate target after the recorded verification | **20** |
+
+These are candidate mappings, not official awarded points. Theme switching and
+basic authentication do not add points. No remote-player, public API, 2FA or notification module is claimed.
+Email ownership verification is integrated from current production and earns no point here. See
+[traceability](docs/requirements/module-matrix.md) and
+[current evidence](docs/evaluation/tic-tac-toe-evidence.md).
+
+## Verification and fresh setup
+
+Run `npm run format` to apply the shared code style and `npm run format:check` to
+check it. Formatting excludes generated code, private files, vendored skills,
+documentation, lockfiles, and published migrations.
+
+```sh
+npm test
+npm run typecheck
+npm run lint
+npm run build
+npm run audit:source
+npm run smoke:auth
+npm run smoke:games
+npm run test:e2e
+npm run verify
+npm run rehearse
+```
+
+Smoke checks use validated local HTTPS, temporary demonstration accounts and
+normal game actions; game records remain on the administrator account.
+`verify` runs sequential checks including actual Chrome, Firefox and Brave.
+The earlier Windows Firefox startup failure is historical; the Linux matrix
+restored the browser point. Current module results and exact limits are in
+[the current production evidence](docs/evaluation/2026-10-30-khalid-production.md). Install
+actual Chrome, Firefox and Brave; `npx playwright install chrome firefox` installs
+the managed versions where available. Brave uses its installed product executable; Chromium alone does not count as Brave.
+Browser tests use project `tictactoe-e2e-mahdi`, port 8443 and own ignored
+`.env.e2e`. Their guarded reset affects only that isolated database. Normal
+runtime data and certificates are never reset. The test public CA must also be
+trusted. Certificate validation remains enabled in both browsers and Node API
+requests. Override `TICTACTOE_E2E_PROJECT`, `TICTACTOE_E2E_PORT` and
+`TICTACTOE_E2E_ENV_FILE` consistently if needed.
+
+`rehearse` exports the exact uncommitted working source (including new files,
+excluding ignored credentials/builds/databases), hashes it and performs a fresh
+npm install/setup/migration/seed/check/build plus isolated HTTPS Chrome flows on
+9443. It makes no commit. Only the already trusted test certificate volume is
+reused; rehearsal game data is separate. Ignored logs, traces and screenshots
+may contain private test inputs and must never be shared unredacted.
 
 ## Email verification setup
 
@@ -219,135 +295,33 @@ and `SMOKE_MEMBER_PASSWORD` in the private environment. It signs in to those
 two accounts and preserves them; it no longer creates an instantly playable
 unverified test address or deletes an existing account afterward.
 
-## Team and project management
+## Team, project management and AI use
 
-| Member | Roles and responsibilities |
-| --- | --- |
-| Mahdi Hajj Hassan — `mahajj-h`, GitHub `MahdiHajjHassan` | Product Owner, Project Manager and Technical Lead/Architect; backend/security, database/container foundation, integration, accessibility corrections, documentation and final verification. |
-| Joseph Boustany — `jboustan`, GitHub `josephboustany` | Frontend and test developer; UI/localization integration, account/game/admin pages, browser suites and Linux certificate-export adaptation. |
+Mahdi (`mahajj-h`), Joseph (`jboustan`) and Khalid (`ksayour`) are the owner-confirmed roster.
+The owner authorized Mahdi/Codex to complete staging implementation. Current game work is a Mahdi/Codex-assisted implementation authorized for
+staging delivery; it must not be relabeled as Joseph's original implementation. Record Joseph's actual review, adaptation and
+explanation only after they occur. No human understanding is inferred from tests.
 
-Work was organized through feature branches and GitHub pull requests, with
-dependent interfaces integrated in order. Email was used for coordination and
-handoffs. Type checks, lint, server tests and browser flows support review before
-merging. Each member is responsible for explaining the implementation and their
-own contributions during evaluation.
+The design/spec and ordered implementation plan are in `docs/superpowers/`.
+Superpowers supplied the planning/TDD/debugging/review workflow; the vendored
+Impeccable 4.7.1 guided the UI. Codex assisted architecture, implementation, tests
+and documentation. All three students must understand the code and honestly explain
+AI assistance during evaluation. See [contributions](docs/team/contributions/mahdi.md)
+and [delivery map](docs/delivery/PUSH-MAP.md). The new modules retain their actual
+Mahdi/Codex implementation authorship. Khalid’s [production manual](docs/delivery/KHALID-PRODUCTION.md)
+explains his own verification/integration/push using the prepared prod-compatible
+branch; his future actions are not claimed as completed contributions.
 
-## Features and individual contributions
+## Resources
 
-| Feature | Contribution |
-| --- | --- |
-| Database, migrations, container startup and HTTPS | Mahdi developed and integrated the foundation. |
-| Authentication, account security and role enforcement | Mahdi developed the services and tests; Joseph integrated the account/preferences/admin interfaces. |
-| Rules, computer opponent, persistence and concurrent moves | Mahdi developed the shared implementation and services; Joseph integrated the rules and complete game interface. |
-| Live updates and recovery | Mahdi supplied the event/stream services; Joseph integrated the live client and reconnection flows. |
-| Design system, themes, languages, RTL and server-rendered pages | Joseph integrated and adapted the shared frontend; Mahdi corrected control-border contrast and obsolete copy. |
-| Automated verification | Mahdi supplied server/testing infrastructure and final integration; Joseph integrated the browser suites and fixed public-CA extraction on Linux Docker hosts. |
+- [Original subject](docs/reference/en.subject.pdf) and [evaluation sheet](docs/reference/EVALUATION-SHEET.pdf), unchanged.
+- [Next.js documentation](https://nextjs.org/docs), [Prisma documentation](https://www.prisma.io/docs), [Caddy documentation](https://caddyserver.com/docs/).
+- [Game API](docs/api/games.md), [auth contract](docs/api/auth.md), [profiles/friends/presence](docs/api/profiles.md), [tournaments](docs/api/tournaments.md), [statistics](docs/api/statistics.md), [design system](DESIGN.md).
 
-The code and tests were developed with AI assistance, as described under
-Resources. Reuse and integration of shared source are included in these
-contributions; the table does not claim independent authorship of every line.
 
-Challenges included preventing races and lost-response duplicate moves,
-recovering live sessions safely, keeping localized/legal flows consistent, and
-trusting local HTTPS without disabling certificate validation. Version predicates
-and transactions address concurrent writes; canonical snapshots address recovery;
-shared dictionaries and components keep UI behavior aligned; explicit public-CA
-trust addresses browser and script HTTPS access.
-
-## Modules and point justification
-
-| Chosen module | Type / points | Implementation | Member responsibilities |
-| --- | ---: | --- | --- |
-| Frontend and backend frameworks | Major / 2 | React pages and Next.js server route handlers | Mahdi backend; Joseph frontend |
-| Complete web game | Major / 2 | Friend/computer Tic Tac Toe with rules, results and recovery | Mahdi services; Joseph rules/UI integration |
-| AI opponent | Major / 2 | Local imperfect win/block/position policy | Mahdi shared implementation; Joseph integration |
-| Real-time features | Major / 2 | Scoped HTTPS event streams, versions and reconnection | Mahdi service; Joseph live client |
-| Advanced permissions | Major / 2 | Guest/member/admin boundaries and protected administrator user CRUD | Mahdi backend; Joseph admin UI |
-| ORM | Minor / 1 | Prisma schema, relationships and transactions | Mahdi |
-| Custom design system | Minor / 1 | At least ten used primitives, semantic palette, typography, SVG marks and shared states | Joseph integration; Mahdi accessibility fixes |
-| Multiple languages | Minor / 1 | Complete English, French and Arabic dictionaries and switcher | Joseph |
-| RTL | Minor / 1 | Arabic mirroring, logical spacing and isolated game coordinates | Joseph |
-| Additional browsers | Minor / 1 | Firefox and Brave evaluation projects; complete flows must pass on the evaluation host | Both |
-| SSR | Minor / 1 | Server-rendered account, lobby and authorized saved-game content, including board HTML without JavaScript | Joseph pages; Mahdi services |
-| **Total proposed** | **16** | Five major and six minor modules | Both |
-
-The final module score is awarded during evaluation, after the mandatory
-requirements and demonstrations pass. The additional-browser point is proposed
-for Firefox and Brave beyond the required Chrome. All features must work in both
-additional browsers; configuring projects alone is not compatibility evidence.
-Theme switching and basic email/password authentication are included features
-without separate extra points. This project does not claim the larger standard
-user-management module with avatars/friends, remote-player, statistics,
-tournament or public-API modules.
-
-## Verification
-
-Run `npm run format` to apply the shared code style and `npm run format:check` to
-check it. Formatting excludes generated code, private files, vendored skills,
-documentation, lockfiles, and published migrations.
-
-```sh
-npm test
-npm run typecheck
-npm run lint
-npm run build
-npm run audit:source
-npm run smoke:auth
-npm run smoke:games
-npm run test:e2e
-./scripts/verify-tls.sh
-```
-
-`npm run verify` runs the main checks sequentially. Page-generation builds use
-one worker to limit local memory spikes. The default end-to-end command runs
-Chrome, Brave and Firefox. Install Chrome and Brave as browser products and
-install Playwright's Firefox build with `npx playwright install firefox`.
-
-The Brave project launches the installed Brave executable using Playwright's
-Chromium driver. Standard Linux, macOS and Windows installation paths are detected.
-For another installation path, set `TICTACTOE_BRAVE_EXECUTABLE`, for example:
-
-```sh
-TICTACTOE_BRAVE_EXECUTABLE=/usr/bin/brave-browser npm run test:e2e
-```
-
-In PowerShell, set `$env:TICTACTOE_BRAVE_EXECUTABLE` to the full path to
-`brave.exe` before running the command. To run one browser independently, use
-`npx playwright test --project=brave` or `--project=firefox`. A browser runner that
-cannot start does not establish compatibility; record actual successful runs on
-the evaluation host with certificate validation enabled.
-
-Browser tests use a separate Compose project and `.env.e2e`, with guarded reset
-logic for that isolated test database. Override `TICTACTOE_E2E_PROJECT`,
-`TICTACTOE_E2E_PORT` and `TICTACTOE_E2E_ENV_FILE` together when sharing a Docker
-host. The suite exports its separate public test CA to
-`local-certs/<TICTACTOE_E2E_PROJECT>.crt`. Windows setup attempts a Current User
-Root import; first-time trust can require interactive approval. For an unattended
-run, `TICTACTOE_E2E_CA_VOLUME` may select an already-trusted **test** CA volume;
-the project's game-data volume remains separate. Linux/macOS runners must
-prepare the isolated stack and trust that CA in the
-relevant system/browser store before running browser cases. Trusting the normal
-instance's `local-certs/root.crt` does not automatically trust this test instance.
-Browser and Node certificate/hostname validation remain enabled.
-
-`npm run rehearse` copies the current source to a private temporary directory and
-performs fresh setup/checks and isolated Chrome flows. Logs and browser artifacts
-are ignored under `.logs`, `test-results` and `playwright-report`; they can contain
-test inputs and should be kept private. Server tests use disposable SQLite files.
-
-## Resources and AI use
-
-- [Next.js documentation](https://nextjs.org/docs) — App Router, rendering, route handlers and cookies.
-- [React documentation](https://react.dev/) — components, state and client interactions.
-- [Prisma documentation](https://www.prisma.io/docs) and [SQLite documentation](https://www.sqlite.org/docs.html) — schema, constraints and transactions.
-- [Tailwind CSS documentation](https://tailwindcss.com/docs) — the styling framework.
-- [Caddy documentation](https://caddyserver.com/docs/) — local HTTPS and reverse proxying.
-- [Playwright documentation](https://playwright.dev/docs/intro) and [Vitest documentation](https://vitest.dev/guide/) — browser and server testing.
-- [Argon2 specification, RFC 9106](https://www.rfc-editor.org/rfc/rfc9106.html) — password hashing.
-
-Codex assisted Mahdi with architecture, implementation, debugging, tests,
-accessibility checks and documentation. Claude assisted Joseph with frontend
-integration, testing and the Linux Docker certificate-export fix. AI-generated
-suggestions were used across both application and test code. This assistance is
-separate from the local computer opponent described above. Both team members
-remain responsible for reviewing, understanding and demonstrating the result.
+Current production integration preserves the completed email feature and selects
+actual Chrome, Firefox and Brave for evaluation. Historical Edge results remain
+in their dated reports; they are not claimed as current Brave results. Original
+module implementation remains Mahdi/Codex-assisted source. Khalid's authenticated
+GitHub account, ksayour-42, performs the integration described in the
+[production receipt](docs/evaluation/2026-10-30-khalid-production.md).

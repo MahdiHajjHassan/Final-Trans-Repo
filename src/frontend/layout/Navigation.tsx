@@ -14,6 +14,9 @@ export function Navigation({ locale, role }: { locale: Locale; role?: "ADMIN" | 
     ? [
         { route: "play", label: t.board },
         { route: "account", label: t.account },
+        { route: "friends", label: t.friends },
+        { route: "tournaments", label: t.tournaments },
+        { route: "history", label: t.history },
         ...(role === "ADMIN" ? [{ route: "admin/users", label: t.users }] : []),
       ]
     : [
@@ -25,7 +28,12 @@ export function Navigation({ locale, role }: { locale: Locale; role?: "ADMIN" | 
     <nav aria-label={t.mainNavigation} className="main-nav">
       {items.map(({ route, label }) => {
         const href = `/${locale}/${route}`;
-        const active = path === href || (route === "play" && path.startsWith(`/${locale}/games/`));
+        const active =
+          path === href ||
+          (route === "play" && path.startsWith(`/${locale}/games/`)) ||
+          (route === "history" && path === `/${locale}/leaderboard`) ||
+          (route === "tournaments" && path.startsWith(`/${locale}/tournaments/`)) ||
+          (route === "friends" && path.startsWith(`/${locale}/profiles/`));
         return (
           <Link key={route} href={href} aria-current={active ? "page" : undefined}>
             {label}

@@ -5,7 +5,8 @@ export type Cell = Mark | null;
 export type Cells = [Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell];
 export type GameMode = "HUMAN" | "AI";
 export type GameStatus = "WAITING" | "ACTIVE" | "FINISHED" | "CANCELLED";
-export type GameReason = "LINE" | "FULL_BOARD" | "RESIGNED" | "ACCOUNT_DELETED" | null;
+export type GameReason =
+  "LINE" | "FULL_BOARD" | "RESIGNED" | "ACCOUNT_DELETED" | "TOURNAMENT_CANCELLED" | null;
 
 /** Null is an empty seat. A deleted player keeps a placeholder in the saved game. */
 export type Player = { displayName: string; kind: "HUMAN" | "AI" | "DELETED" } | null;
@@ -13,6 +14,7 @@ export type Player = { displayName: string; kind: "HUMAN" | "AI" | "DELETED" } |
 /** The saved board sent to players. It contains public names rather than account details. */
 export type GameDTO = {
   id: string;
+  tournament: { id: string; matchId: string } | null;
   mode: GameMode;
   cells: Cells;
   players: { X: Player; O: Player };
