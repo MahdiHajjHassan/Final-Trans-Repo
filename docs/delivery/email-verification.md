@@ -49,3 +49,14 @@ environment while preserving its original settings. They are not part of Git.
 Codex assisted the implementation and verification under Mahdi's normal author
 identity. No Khalid or Joseph review/integration is invented. This delivery is
 Git promotion; no external deployment or normal database reset is included.
+
+## Concurrent production-main update
+
+Before publishing, a fresh fetch found main4904423 (PR10), which changed only
+README, the browser-test script and Playwright configuration to use Brave. That
+update was merged without changing the tested application, schema, dependencies
+or container runtime. Types and lint passed after the merge. The installed Brave
+156.0.8078.74 then passed all six focused email journeys with normal TLS checks.
+The current Chrome/Firefox/Brave evaluation selection is preserved; the earlier
+six Edge journeys remain additional port evidence. No extra module points or
+human understanding are inferred from any browser automation.

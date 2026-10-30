@@ -14,7 +14,7 @@
     "lint": "eslint . --max-warnings 0",
     "test": "prisma generate && vitest run --maxWorkers=1",
     "test:server": "prisma generate && vitest run --maxWorkers=1",
-    "test:e2e": "playwright test --project=chrome --project=edge",
+    "test:e2e": "playwright test --project=chrome --project=brave --project=firefox",
     "db:generate": "prisma generate",
     "db:migrate": "node -- scripts/migrate.mjs",
     "db:seed": "prisma generate && tsx scripts/seed.ts",
