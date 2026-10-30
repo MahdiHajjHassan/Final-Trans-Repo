@@ -18,9 +18,9 @@ pages are available from every page's footer.
 
 ### Prerequisites and startup
 
-Install Git, Node.js **24**, npm, Docker with Compose, and current Google Chrome.
-Edge is used by the default browser test suite; the optional Firefox project uses
-Playwright's Firefox build. Native Windows dependency installation may require
+Install Git, Node.js **24**, npm, Docker with Compose, current Google Chrome and
+Brave. Install Playwright's Firefox build with `npx playwright install firefox`.
+Native Windows dependency installation may require
 Python and Visual Studio C++ Build Tools for `better-sqlite3`. Git Bash is useful
 for the supplied POSIX scripts.
 
@@ -216,12 +216,14 @@ trust addresses browser and script HTTPS access.
 | Custom design system | Minor / 1 | At least ten used primitives, semantic palette, typography, SVG marks and shared states | Joseph integration; Mahdi accessibility fixes |
 | Multiple languages | Minor / 1 | Complete English, French and Arabic dictionaries and switcher | Joseph |
 | RTL | Minor / 1 | Arabic mirroring, logical spacing and isolated game coordinates | Joseph |
+| Additional browsers | Minor / 1 | Firefox and Brave evaluation projects; complete flows must pass on the evaluation host | Both |
 | SSR | Minor / 1 | Server-rendered account, lobby and authorized saved-game content, including board HTML without JavaScript | Joseph pages; Mahdi services |
-| **Total proposed** | **15** | Five major and five minor modules | Both |
+| **Total proposed** | **16** | Five major and six minor modules | Both |
 
 The final module score is awarded during evaluation, after the mandatory
-requirements and demonstrations pass. The additional-browser module is not
-included in this total: it requires two additional browsers beyond Chrome.
+requirements and demonstrations pass. The additional-browser point is proposed
+for Firefox and Brave beyond the required Chrome. All features must work in both
+additional browsers; configuring projects alone is not compatibility evidence.
 Theme switching and basic email/password authentication are included features
 without separate extra points. This project does not claim the larger standard
 user-management module with avatars/friends, remote-player, statistics,
@@ -245,13 +247,24 @@ npm run test:e2e
 ./scripts/verify-tls.sh
 ```
 
-`npm run verify` runs the main checks sequentially. The default end-to-end command
-runs page-generation builds with one worker to limit local memory spikes and
-runs actual Chrome and Edge. Run `npx playwright test --project=firefox` separately
-after installing Playwright's Firefox build with `npx playwright install firefox`.
-A runner that cannot start is not a browser-compatibility pass. The installed
-Windows Firefox runner failed to start during verification (`spawn UNKNOWN`);
-Firefox compatibility is therefore unclaimed on that host.
+`npm run verify` runs the main checks sequentially. Page-generation builds use
+one worker to limit local memory spikes. The default end-to-end command runs
+Chrome, Brave and Firefox. Install Chrome and Brave as browser products and
+install Playwright's Firefox build with `npx playwright install firefox`.
+
+The Brave project launches the installed Brave executable using Playwright's
+Chromium driver. Standard Linux, macOS and Windows installation paths are detected.
+For another installation path, set `TICTACTOE_BRAVE_EXECUTABLE`, for example:
+
+```sh
+TICTACTOE_BRAVE_EXECUTABLE=/usr/bin/brave-browser npm run test:e2e
+```
+
+In PowerShell, set `$env:TICTACTOE_BRAVE_EXECUTABLE` to the full path to
+`brave.exe` before running the command. To run one browser independently, use
+`npx playwright test --project=brave` or `--project=firefox`. A browser runner that
+cannot start does not establish compatibility; record actual successful runs on
+the evaluation host with certificate validation enabled.
 
 Browser tests use a separate Compose project and `.env.e2e`, with guarded reset
 logic for that isolated test database. Override `TICTACTOE_E2E_PROJECT`,
