@@ -144,7 +144,15 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
       data-result={terminal && game.status !== initialStatus ? "new" : undefined}
     >
       <div className="game-top">
-        <Link href={"/" + locale + "/play"}>{t.backToPlay}</Link>
+        <Link
+          href={
+            game.tournament
+              ? `/${locale}/tournaments/${game.tournament.id}`
+              : "/" + locale + "/play"
+          }
+        >
+          {game.tournament ? t.backToTournament : t.backToPlay}
+        </Link>
         <Badge tone={connected ? "accent" : "neutral"}>
           {connected ? t.connected : t.connecting}
         </Badge>
@@ -233,7 +241,14 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
         />
       )}
       <div className="game-actions">
-        {terminal ? (
+        {terminal && game.tournament ? (
+          <Link
+            className="button button-secondary"
+            href={`/${locale}/tournaments/${game.tournament.id}`}
+          >
+            {t.backToTournament}
+          </Link>
+        ) : terminal ? (
           <Button
             disabled={mutation.pending}
             onClick={() =>

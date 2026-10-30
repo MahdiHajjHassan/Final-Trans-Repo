@@ -1,0 +1,7 @@
+CREATE TABLE "UserAvatar" (
+ "userId" TEXT NOT NULL PRIMARY KEY,
+ "data" BLOB NOT NULL CHECK(length("data") <= 98304),
+ "revision" INTEGER NOT NULL DEFAULT 1,
+ "updatedAt" DATETIME NOT NULL,
+ CONSTRAINT "UserAvatar_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);

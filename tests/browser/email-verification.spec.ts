@@ -103,7 +103,8 @@ test("SMTP failure remains unverified and recovers through an explicit resend", 
     await page.getByRole("checkbox").check();
     // A deliberately stopped SMTP host uses the bounded connection timeout.
     const delivery = page.waitForResponse(
-      (response) => response.url().endsWith("/api/auth/register") && response.request().method() === "POST",
+      (response) =>
+        response.url().endsWith("/api/auth/register") && response.request().method() === "POST",
       { timeout: 30000 },
     );
     await page.getByRole("button", { name: t.register, exact: true }).click();

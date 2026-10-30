@@ -192,7 +192,7 @@ test("registration and profile editing preserve valid accented, Arabic and emoji
   await name.fill("  Léa مها 🌍  ");
   await page.getByRole("button", { name: t.save, exact: true }).click();
   await expect(page.getByText(t.saved, { exact: true })).toBeVisible();
-  // Read a fresh server page without interrupting the original page's in-flight refresh.
+  // Verify saved data on a fresh page without aborting the original router refresh.
   const persisted = await context.newPage();
   try {
     await persisted.goto("/en/account");

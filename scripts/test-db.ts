@@ -21,6 +21,9 @@ try {
     db.emailChallenge.deleteMany(),
     db.gameMove.deleteMany(),
     db.game.deleteMany(),
+    db.tournamentMatch.deleteMany(),
+    db.tournamentEntry.deleteMany(),
+    db.tournament.deleteMany(),
     db.session.deleteMany(),
     db.rateLimitBucket.deleteMany(),
     db.user.deleteMany(),
@@ -42,9 +45,21 @@ try {
         passwordHash,
         emailVerifiedAt: new Date(),
       },
+      {
+        email: "member-c@example.test",
+        displayName: "Member C",
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      },
+      {
+        email: "member-d@example.test",
+        displayName: "Member D",
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      },
     ],
   });
-  console.log("Reset only the guarded isolated game database with three demonstration accounts.");
+  console.log("Reset only the guarded isolated game database with five demonstration accounts.");
 } finally {
   await db.$disconnect();
 }

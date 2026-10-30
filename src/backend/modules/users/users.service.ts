@@ -9,6 +9,7 @@ import { parseInput } from "../../common/validation";
 import { registerSchema } from "../auth/dto/auth.schema";
 import { hashPassword } from "../auth/password";
 import { createRateLimiter } from "../../common/security/rate-limit";
+import { cancelTournamentsForUser } from "../tournaments/tournament-deletion";
 
 // Account fields the administrator may see. Never include the password hash.
 const select = {
@@ -159,6 +160,7 @@ export function createUserService(
             throw new DomainError("CONFLICT", { role: ["last_admin"] });
 
           // End unfinished games before deleting their player account.
+          const tournamentChanges = await cancelTournamentsForUser(tx, id);
           const games = await tx.game.findMany({ where: { OR: [{ xId: id }, { oId: id }] } });
           for (const game of games)
             await tx.game.update({
@@ -179,7 +181,9 @@ export function createUserService(
 
           // Foreign keys clear the player's seats and remove their sessions.
           await tx.user.delete({ where: { id } });
-          return games.map((game) => ({ id: game.id, version: game.version + 1 }));
+          const versions = new Map(tournamentChanges.map((game) => [game.id, game.version]));
+          for (const game of games) versions.set(game.id, game.version + 1);
+          return [...versions].map(([id, version]) => ({ id, version }));
         }),
       );
 

@@ -1,4 +1,4 @@
-import { randomInt } from "node:crypto";
+import { invitation } from "../../common/security/invitation";
 import { Prisma, type PrismaClient } from "@/generated/prisma/client";
 import type { Actor } from "@/shared/auth";
 import type { GameDTO, GameList, GameView, Mark } from "@/shared/games";
@@ -18,13 +18,8 @@ import {
 import { gameDto, gameInclude, type GameRecord } from "./game-view";
 import { applyMove, decodeBoard, encodeBoard } from "./engine/game.engine";
 import { chooseAiMove } from "./ai/ai";
+import { settleTournamentGame } from "../tournaments/tournament-results";
 type Options = { random?: () => number; publish?: (id: string, version: number) => void };
-
-// An eight-character room code, leaving out letters and digits that are easy to confuse.
-function invitation() {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  return Array.from({ length: 8 }, () => alphabet[randomInt(alphabet.length)]).join("");
-}
 
 // The rules around saved games: create, join, read, play, resign and cancel.
 // The engine checks the board; this service checks players and saves the result.
@@ -213,6 +208,7 @@ export function createGameService(db: PrismaClient, options: Options = {}) {
 
           // If storing the move history fails, the board update rolls back with it.
           await tx.gameMove.createMany({ data: moves });
+          if (terminal) await settleTournamentGame(tx, game.id);
           return gameDto(
             (await tx.game.findUnique({ where: { id: game.id }, include: gameInclude }))!,
           );
@@ -241,6 +237,7 @@ export function createGameService(db: PrismaClient, options: Options = {}) {
             },
           });
           if (result.count !== 1) throw new DomainError("CONFLICT");
+          await settleTournamentGame(tx, game.id);
           return gameDto(
             (await tx.game.findUnique({ where: { id: game.id }, include: gameInclude }))!,
           );

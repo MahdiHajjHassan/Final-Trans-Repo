@@ -26,5 +26,10 @@ playwright/.auth/
 *.tsbuildinfo
 .DS_Store
 
-# Private visual validation captures
-.impeccable/review/
+# Approved skills and isolated implementation/review artifacts
+.superpowers/
+.impeccable/*
+!.impeccable/surfaces/
+
+# Local email-verification runtime overrides
+.env.smtp-validation.compose.yaml
