@@ -1,7 +1,11 @@
-# Khalid — contribution record
+# Khalid Sayour — contribution record
 
 42 campus login: **ksayour**, confirmed by the owner. GitHub username: **ksayour-42**, separately confirmed and authenticated (GitHub
 user id 177610220).
+
+Assigned modules: **G12 full user management (2)**, **G13 four-player tournament
+(1)** and **G14 statistics/history (1)**, totaling **four candidate points**.
+See the [package plan](../../superpowers/plans/2026-10-30-khalid-modules.md).
 
 ## New module package — 2026-10-30
 
@@ -11,9 +15,10 @@ package on preprod; the actual implementation authors remain in Git history.
 No Khalid-authored implementation, independent review, demonstration or prod
 push is claimed by this record before it occurs.
 
-Khalid's next work is to review/explain the modules, run the verification and
-manual demonstration, perform any real fixes, and integrate/promote from his
-own authenticated GitHub account using docs/delivery/KHALID-PRODUCTION.md.
+At the original package handoff, Khalid's next work included review/explanation,
+verification, manual demonstration and authenticated production integration.
+The completed integration is recorded below. Personal review, demonstration
+and any later fixes still require their own actual contribution entries.
 
 Append actual GitHub identity, work/understanding demonstrated, commands/results,
 commit hashes and PR/delivery URLs here after performing them. Keep original
@@ -41,6 +46,8 @@ when they actually occur.
 The authenticated account published production branch `khalid/modules-production`
 and opened [PR #11](https://github.com/MahdiHajjHassan/Final-Trans-Repo/pull/11).
 The integration commit is 465a49cda4ccf7d3848bdc3c44063d1867456f91; GitHub reports
-Khaled Sayour as author/committer. Use the PR's actual state for final delivery.
-This is the recorded Git integration; original implementation and human-review
+Khaled Sayour as author/committer; the owner-confirmed team name is Khalid Sayour.
+PR #11 was merged into production `main` as
+`61611fc4f91446835f13876aaa5e8ddd7268af1f`.
+This records completed Git integration; original implementation and human-review
 limits above remain unchanged.

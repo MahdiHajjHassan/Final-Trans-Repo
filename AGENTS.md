@@ -1,7 +1,9 @@
 # Current production integration
 
-This branch integrates Final-Trans-Repo b1d0381 with the selected module source
-from prepared port ac97d86. The owner explicitly authorized production Git delivery
+Production main includes the integration of Final-Trans-Repo b1d0381 with the
+selected module source from prepared port ac97d86. PR #11 merged as
+61611fc4f91446835f13876aaa5e8ddd7268af1f. The owner explicitly authorized
+production Git delivery
 using Khalid's authenticated GitHub account ksayour-42 (id177610220, 42 login
 ksayour). That specific instruction supersedes earlier prep-only/no-prod scope.
 No external runtime deployment or normal data reset is authorized here.
@@ -9,7 +11,7 @@ No external runtime deployment or normal data reset is authorized here.
 Preserve production taskboard session/preferences/verification cookies,
 X-Taskboard-Client-IP, x-taskboard-locale, taskboardDb and private settings.
 Preserve the completed email-ownership guards and Chrome/Firefox/Brave selection.
-Original module implementation is Mahdi/Codex; the current authenticated-account
+Original module implementation is Mahdi/Codex; the authenticated-account
 operation records actual integration, not original authorship or human review.
 The general source-project guide below retains historical context. Current
 production evidence is docs/evaluation/2026-10-30-khalid-production.md.
@@ -18,24 +20,28 @@ production evidence is docs/evaluation/2026-10-30-khalid-production.md.
 
 ## Product and current scope — 2026-10-30
 
-This is MahdiHajjHassan/Transcendence2, the staging repository for a 42
-ft_transcendence tic-tac-toe application. The owner-confirmed team is Mahdi
-(mahajj-h), Joseph (jboustan), and Khalid, who joined on 2026-10-29. Khalid's
-owner-confirmed 42 campus login is ksayour; his GitHub username is ksayour-42, confirmed by the owner and authenticated. Do not reopen
-generic 4–5-person wording in the reference PDFs as an unresolved gate.
+This is MahdiHajjHassan/Final-Trans-Repo, the production source repository for a
+42 ft_transcendence tic-tac-toe application. Development remains in
+MahdiHajjHassan/Transcendence2 (ppd). The owner-confirmed team is Mahdi Hajj Hassan
+(mahajj-h), Joseph Boustany (jboustan), and Khalid Sayour (ksayour), who joined on
+2026-10-29. Khalid's GitHub username is ksayour-42, confirmed by the owner and
+authenticated. Do not reopen generic 4–5-person wording in the reference PDFs as
+an unresolved gate.
 
 The owner approved friend play in separate browser sessions on one computer,
 a local computer opponent, secure accounts, administrator CRUD, scoped SSE,
-SSR, English/French/Arabic/RTL and both themes. The implementation is complete
-in staging. Use README.md, docs/requirements/module-matrix.md and
- docs/evaluation/tic-tac-toe-evidence.md for actual commands and evidence.
+SSR, English/French/Arabic/RTL and both themes. These features, email ownership
+verification and the module package are integrated in production source. Use
+README.md, docs/requirements/module-matrix.md and
+docs/evaluation/2026-10-30-khalid-production.md for current commands and evidence.
 The baseline demonstrated target is 16 candidate points. The 2026-10-30 package
-adds full user management (2), fixed four-player tournaments (1) and full
+adds G12 full user management (2), G13 fixed four-player tournaments (1) and G14
 statistics/history/progression/leaderboard (1), making 20 candidate points after
 the dated verification. See docs/evaluation/2026-10-30-khalid-modules.md and
 docs/delivery/KHALID-PRODUCTION.md for the actual release and promotion commands.
-Khalid's 42 login is ksayour and his separately verified GitHub login is ksayour-42. G09 was restored after
-the 2026-10-29 Linux Chrome/Firefox/Edge matrix passed all 72 checks. The earlier
+G09 was restored after the 2026-10-29 Linux Chrome/Firefox/Edge matrix passed all
+72 checks. The current production selection is Chrome/Firefox/Brave, with
+135/135 browser cases recorded in the production receipt. The earlier
 Windows Firefox startup failure remains historical evidence, not a claim that
 the Windows installation was repaired. No official score or human understanding
 is inferred from automation. Reverify all three browsers after new features.
@@ -52,18 +58,21 @@ superseded product material from the current source tree, including historical
 plans, manifests, contracts and evaluation reports. Original work and authorship
 remain in Git history. No compatibility with a previous product is required.
 
-On 2026-10-30 the owner selected Khalid's prospective four-point package:
+On 2026-10-30 the owner selected Khalid's four-point package:
 standard user management (2), a fixed four-player tournament (1), and statistics
-with match history, achievements/progression and leaderboard (1). The owner now authorizes complete implementation and delivery to ppd, plus a
-manual for Khalid (42 login ksayour) to verify and promote to prod from his own account. The owner subsequently authorized this specific prod promotion from ksayour-42.
-Do not relabel original implementation authorship. No Khalid
-contribution is claimed before his actual integration/review occurs. See docs/superpowers/plans/2026-10-30-khalid-modules.md
+with match history, achievements/progression and leaderboard (1). The owner
+authorized complete implementation and delivery to ppd, plus a manual for Khalid
+to verify and promote to prod from his own account. The owner subsequently
+authorized this specific prod promotion from ksayour-42; PR #11 records the
+completed integration. Do not relabel original implementation authorship or infer
+Khalid's personal review, verification or understanding from the account operation.
+See docs/superpowers/plans/2026-10-30-khalid-modules.md
 and its linked spec/module plans. Spectators and remote-player work are excluded.
-Email verification is being handled in the owner's separate laptop session.
+Email verification was implemented separately and is preserved in this integration.
 
 The owner clarified that email ownership verification is required even without
 module points. This is signup/account verification, not 2FA; do not count it as
-an extra module or add 2FA under this request. The proposed code flow and legacy
+an extra module or add 2FA under this request. The code flow and legacy
 account handling are in docs/superpowers/specs/2026-10-29-email-verification-design.md.
 The design has passed its builder check. On 2026-10-30 the owner confirmed
 implementing signup email verification; do not ask again whether to add it.
@@ -71,17 +80,18 @@ The owner approved the Resend plugin's email-best-practices guidance. On
 2026-10-30 the owner replaced the college sender with their connected business
 Gmail mailbox. This selects SMTP delivery, not Resend delivery. Keep the actual
 sender address and credentials in private configuration. The ChatGPT Gmail
-connection does not supply an application SMTP credential; authentication remains
-pending. Backend email verification is checkpointed on codex/email-verification
-in .worktrees/email-verification; its UI, strict resend cooldown, browser/build
-checks and live delivery remain unfinished. See that branch's
-docs/team/2026-10-30-email-verification-handoff.md.
+connection does not supply an application SMTP credential. The email feature,
+UI, strict resend cooldown and automated browser/build checks are implemented
+and integrated. SMTP authentication and actual receipt of a live email remain
+separate from the guarded local-mailbox evidence; do not infer them from tests.
+Use README.md and docs/api/auth.md for the current setup and contract.
 
-The UI overhaul has landed: the latest 2026-10-30 fetch found ppd main 13c79e6
-and prod main e9fa33f. Fetch both again before implementing; use current ppd
-as the feature base and prod as reference only. Preserve the rounded Readex Pro
-burgundy/rose redesign. This managed root still contains earlier local changes;
-do not mistake its working tree for the updated remote UI or copy it over main.
+The UI overhaul has landed. The original module preparation used ppd main
+13c79e6 and prod main e9fa33f; those are historical baselines. Fetch both again
+before implementing; use current ppd as the feature base and prod as reference
+only. Preserve the rounded Readex Pro
+burgundy/rose redesign. Preserve local changes and private data; do not copy an
+older working tree over current main.
 
 ## Delivery and authorship
 
@@ -240,7 +250,7 @@ verifier as well. Do not print generated credentials or use insecure TLS flags.
 
 Tests use real disposable SQLite files. `npm test` and `typecheck` generate the
 Prisma client; typecheck also generates Next route types. Playwright has actual
-Chrome/Firefox/Edge projects and complete UI flows with a guarded, isolated
+Chrome/Firefox/Brave projects and complete UI flows with a guarded, isolated
 Compose database reset. Use observed evidence; never infer manual trusted-browser
 interaction, team understanding or official module points from automated tests.
 
