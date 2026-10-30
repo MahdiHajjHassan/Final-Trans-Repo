@@ -63,3 +63,23 @@ understanding. Source modules map to four candidate points, extending the earlie
 No spectator/remote-player module or new game is introduced. No external messages
 or real-mail tests are sent by this integration. Earlier independent module/email
 UI reviews retain their recorded scope; the new check is an integration review.
+
+
+## Git delivery identifiers
+
+- Authenticated account: **ksayour-42**, id177610220, repository write access confirmed.
+- Integration commit: [465a49cda4ccf7d3848bdc3c44063d1867456f91](https://github.com/MahdiHajjHassan/Final-Trans-Repo/commit/465a49cda4ccf7d3848bdc3c44063d1867456f91).
+- Production branch: `khalid/modules-production`.
+- Delivery PR: [#11](https://github.com/MahdiHajjHassan/Final-Trans-Repo/pull/11).
+  Its canonical state records the actual merge result; this receipt does not
+  infer success from a branch push alone.
+- The first integration tree is `0c8ebefa6b157c7547644a1e503fdfb1d1656fa3`,
+  exactly equal to the complete staged source tree across all 220 changed paths,
+  including executable modes, the default-avatar asset and unchanged references.
+- GitHub reported the integration author and committer as Khaled Sayour, using
+  that authenticated account's normal identity. It is an unsigned Git commit;
+  an account-authenticated operation is not claimed as a personal GPG signature.
+- The subsequent receipt-only commit updates documentation and leaves the tested
+  application, dependencies, migrations and test assertions unchanged. Its full
+  provider tree is checked before the branch ref advances, using an expected-head
+  guard. No force push, author override or normal database reset is used.

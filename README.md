@@ -9,10 +9,9 @@ Members can edit profiles and avatars, accept friends, see friend presence,
 register for a fixed four-player tournament, and inspect saved history,
 achievements, progression and competitive standings.
 
-This is the **Final-Trans-Repo production-compatible module branch**, prepared
-from production history and hosted in [Transcendence2 (ppd)](https://github.com/MahdiHajjHassan/Transcendence2)
-for Khalid to verify and promote. Production destination is
-[MahdiHajjHassan/Final-Trans-Repo](https://github.com/MahdiHajjHassan/Final-Trans-Repo).
+This is **MahdiHajjHassan/Final-Trans-Repo (production source)**. Development
+remains in [Transcendence2 (ppd)](https://github.com/MahdiHajjHassan/Transcendence2).
+This module integration is tracked in [production PR #11](https://github.com/MahdiHajjHassan/Final-Trans-Repo/pull/11).
 The team is Mahdi (`mahajj-h`), Joseph (`jboustan`) and Khalid (`ksayour`, 42 campus login). Khalid’s GitHub username is `ksayour-42`, authenticated for this integration.
 
 ## Instructions

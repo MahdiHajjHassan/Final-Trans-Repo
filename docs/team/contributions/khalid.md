@@ -37,3 +37,10 @@ A new regression checks that operator email correction revokes all new member
 modules and presence until ownership is proved again, including stale actor data.
 Manual review, explanation and any future personal fixes should be recorded only
 when they actually occur.
+
+The authenticated account published production branch `khalid/modules-production`
+and opened [PR #11](https://github.com/MahdiHajjHassan/Final-Trans-Repo/pull/11).
+The integration commit is 465a49cda4ccf7d3848bdc3c44063d1867456f91; GitHub reports
+Khaled Sayour as author/committer. Use the PR's actual state for final delivery.
+This is the recorded Git integration; original implementation and human-review
+limits above remain unchanged.
