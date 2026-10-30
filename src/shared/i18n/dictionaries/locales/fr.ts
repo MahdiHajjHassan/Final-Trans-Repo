@@ -32,6 +32,12 @@ export const fr: Dictionary = {
   registered: "Compte créé. Connectez-vous pour continuer.",
   verified: "Adresse vérifiée. Connectez-vous avec votre mot de passe pour continuer.",
   verificationTitle: "Vérifiez votre e-mail",
+  adminVerificationTitle: "Vérifier le nouveau compte",
+  adminVerificationHelp:
+    "Aucun compte ni rôle n’est créé avant la confirmation du code envoyé à cette adresse.",
+  adminVerificationAddressHelp:
+    "Adresse incorrecte ? Retournez à la gestion des utilisateurs et recommencez. Le compte est toujours en attente.",
+  adminUserCreated: "Adresse vérifiée. Le nouveau compte est maintenant disponible.",
   verificationHelp:
     "Confirmez cette adresse une fois, puis connectez-vous normalement avec votre mot de passe.",
   verificationCode: "Code de vérification",

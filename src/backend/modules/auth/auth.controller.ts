@@ -87,6 +87,7 @@ export function createAuthHandlers(auth: AuthService, config: Pick<ServerConfig,
           readVerificationToken(request),
           input.code,
           clientKey(request),
+          await auth.resolveSession(readToken(request)),
         );
         const response = jsonData(result);
         response.headers.set("Set-Cookie", clearedVerificationCookie);
@@ -98,7 +99,11 @@ export function createAuthHandlers(auth: AuthService, config: Pick<ServerConfig,
       return handleApi(async () => {
         parseInput(z.object({}).strict(), await body(request));
         const raw = readVerificationToken(request);
-        await auth.verification.resend(raw, clientKey(request));
+        await auth.verification.resend(
+          raw,
+          clientKey(request),
+          await auth.resolveSession(readToken(request)),
+        );
         return jsonData(await auth.verification.read(raw));
       });
     },

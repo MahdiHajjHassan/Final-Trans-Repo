@@ -30,6 +30,12 @@ export const en = {
   registered: "Account created. Sign in to continue.",
   verified: "Email verified. Sign in with your password to continue.",
   verificationTitle: "Verify your email",
+  adminVerificationTitle: "Verify the new account",
+  adminVerificationHelp:
+    "No account or role is created until the code sent to this email is confirmed.",
+  adminVerificationAddressHelp:
+    "Wrong address? Return to Users and start again. The account is still pending.",
+  adminUserCreated: "Email verified. The new account is now available.",
   verificationHelp: "Confirm this address once, then sign in normally with your password.",
   verificationCode: "Verification code",
   verificationHint: "Six digits from the latest email, in the browser where you requested it.",

@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { test, expect, t, credentials, loginUi, loginApi } from "./fixtures";
 import { testSettings } from "../helpers/e2e-environment";
-import { verifyEmailUi } from "../helpers/mailbox";
+import { inboxCode, verifyEmailUi } from "../helpers/mailbox";
 import { dictionaries } from "../../src/shared/i18n/dictionaries";
 import type { Browser, Page } from "@playwright/test";
 async function peer(browser: Browser, who: "a" | "b" = "b") {
@@ -172,6 +172,12 @@ test("admin role changes are enforced and user deletion works through the interf
     await create.getByLabel(t.email, { exact: true }).fill("created-by-admin@example.test");
     await create.getByLabel(t.password, { exact: true }).fill(credentials().password);
     await create.getByRole("button", { name: t.createUser, exact: true }).click();
+    await expect(page).toHaveURL(/\/en\/verify-email$/);
+    await page
+      .getByLabel(t.verificationCode, { exact: true })
+      .fill(await inboxCode("created-by-admin@example.test"));
+    await page.getByRole("button", { name: t.verifyEmail, exact: true }).click();
+    await expect(page).toHaveURL(/\/en\/admin\/users\?notice=userCreated$/);
     await expect(
       page.getByRole("row").filter({ hasText: "created-by-admin@example.test" }),
     ).toBeVisible();

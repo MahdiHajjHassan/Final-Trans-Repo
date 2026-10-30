@@ -1,6 +1,8 @@
 import { afterEach, expect, test } from "vitest";
 import { createTestDb } from "../helpers/db";
 import { seedUser } from "../helpers/fixtures";
+import { createVerificationService } from "@/backend/modules/auth/email/verification.service";
+import type { VerificationMessage } from "@/backend/modules/auth/email/verification-mail";
 const cleanup: Array<() => Promise<void>> = [];
 afterEach(async () => {
   for (const close of cleanup.splice(0).reverse()) await close();
@@ -11,11 +13,25 @@ async function fixture() {
   const { createUserService } = await import("@/backend/modules/users/users.service");
   const admin = await seedUser(db, { role: "ADMIN" });
   const member = await seedUser(db);
-  return { db, url, users: createUserService(db), admin: admin.actor, member: member.actor };
+  const sent: VerificationMessage[] = [];
+  const verification = createVerificationService(db, {
+    send: async (message) => {
+      sent.push(message);
+    },
+  });
+  return {
+    db,
+    url,
+    users: createUserService(db, { verification }),
+    verification,
+    sent,
+    admin: admin.actor,
+    member: member.actor,
+  };
 }
 
 test("admin creates validated member/admin accounts with hashed passwords; current role and uniqueness are enforced", async () => {
-  const { db, users, admin, member } = await fixture();
+  const { db, users, verification, sent, admin, member } = await fixture();
   const input = {
     email: " NEW@example.test ",
     displayName: " New player ",
@@ -26,7 +42,18 @@ test("admin creates validated member/admin accounts with hashed passwords; curre
   await expect(users.createUser({ ...member, role: "ADMIN" }, input)).rejects.toMatchObject({
     code: "FORBIDDEN",
   });
-  const created = await users.createUser(admin, input);
+  const pending = await users.createUser(admin, input);
+  expect(
+    await db.user.findUnique({ where: { email: "new@example.test" }, select: { id: true } }),
+  ).toBeNull();
+  await verification.confirm(pending.token, sent.at(-1)!.code, "client", admin);
+  const { createAuthService } = await import("@/backend/modules/auth/auth.service");
+  const created = (
+    await createAuthService(db, { verification }).login(
+      { email: "new@example.test", password: input.password },
+      "client",
+    )
+  ).user;
   expect(created).toMatchObject({
     email: "new@example.test",
     displayName: "New player",
@@ -47,8 +74,15 @@ test("admin creates validated member/admin accounts with hashed passwords; curre
     await expect(users.createUser(admin, { ...input, ...patch })).rejects.toMatchObject({
       code: "VALIDATION",
     });
+  const second = await users.createUser(admin, {
+    ...input,
+    email: "second@example.test",
+    role: "ADMIN",
+  });
+  expect(await db.user.count()).toBe(3);
+  await verification.confirm(second.token, sent.at(-1)!.code, "client", admin);
   expect(
-    await users.createUser(admin, { ...input, email: "second@example.test", role: "ADMIN" }),
+    await db.user.findUnique({ where: { email: "second@example.test" }, select: { role: true } }),
   ).toMatchObject({ role: "ADMIN" });
 });
 test("admin can list/update roles; member and forged/demoted admin are forbidden", async () => {

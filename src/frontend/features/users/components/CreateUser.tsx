@@ -34,6 +34,7 @@ export function CreateUser({ locale }: { locale: Locale }) {
                 email: formText(form, "email").trim().toLowerCase(),
                 password: formText(form, "password"),
                 role: formText(form, "role"),
+                locale,
               };
               validateFields(input, {
                 displayName: displayNameSchema,
@@ -42,9 +43,10 @@ export function CreateUser({ locale }: { locale: Locale }) {
               });
               await request("/api/admin/users", "POST", input);
 
-              // Clear the temporary password from the form once the account was created.
+              // Clear the temporary password; mailbox proof must precede account creation.
               form.reset();
               setOpen(false);
+              router.push(`/${locale}/verify-email`);
               router.refresh();
             });
           }}

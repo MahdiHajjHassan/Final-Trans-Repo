@@ -17,6 +17,11 @@ export const registerSchema = z
   })
   .strict();
 
+// Only the protected administrator creation path may request an account role.
+export const adminCreateSchema = registerSchema.extend({
+  role: z.enum(["MEMBER", "ADMIN"]).default("MEMBER"),
+});
+
 // Login checks the supplied password without applying the new-password length rule.
 export const loginSchema = z
   .object({

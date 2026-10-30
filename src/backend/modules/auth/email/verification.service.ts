@@ -9,12 +9,14 @@ import {
 import { z } from "zod";
 import { Prisma, type EmailChallenge, type PrismaClient } from "@/generated/prisma/client";
 import type { Locale } from "@/shared/i18n/config";
+import type { Actor, Role } from "@/shared/auth";
 import { DomainError } from "../../../common/errors";
 import { parseInput } from "../../../common/validation";
 import { createRateLimiter } from "../../../common/security/rate-limit";
 import { withWriteRetry } from "../../../database/write-retry";
-import { loginSchema, registerSchema } from "../dto/auth.schema";
+import { adminCreateSchema, loginSchema, registerSchema } from "../dto/auth.schema";
 import { hashPassword, verifyPassword } from "../password";
+import { currentActor } from "../session.guard";
 import type { VerificationSender } from "./verification-mail";
 
 const digest = (value: string) => createHash("sha256").update(value).digest("hex");
@@ -67,6 +69,17 @@ export function createVerificationService(
     if (!record || record.pendingUntil <= now()) throw new DomainError("INVALID_CODE");
     return record;
   }
+  // An administrator's pending account remains bound to that current administrator.
+  async function requireCreator(
+    tx: Prisma.TransactionClient,
+    record: Pick<EmailChallenge, "createdById">,
+    actor?: Actor | null,
+  ) {
+    if (!record.createdById) return;
+    if (!actor) throw new DomainError("UNAUTHENTICATED");
+    if (actor.id !== record.createdById) throw new DomainError("FORBIDDEN");
+    if ((await currentActor(tx, actor)).role !== "ADMIN") throw new DomainError("FORBIDDEN");
+  }
   // Activation is conditional on this exact generation; stale SMTP completions cannot revive it.
   async function deliver(record: EmailChallenge, raw: string, code: string) {
     let status = "SENT";
@@ -114,6 +127,8 @@ export function createVerificationService(
       passwordHash: string;
       locale: Locale;
       userId?: string;
+      createdById?: string;
+      requestedRole?: Role;
     },
     client: string,
   ) {
@@ -123,6 +138,18 @@ export function createVerificationService(
     const next = generation(raw, pendingUntil);
     const record = await withWriteRetry(() =>
       db.$transaction(async (tx) => {
+        if (input.createdById) {
+          await requireCreator(
+            tx,
+            { createdById: input.createdById },
+            {
+              id: input.createdById,
+              role: "ADMIN",
+            },
+          );
+          if (await tx.user.findUnique({ where: { email: input.email } }))
+            throw new DomainError("CONFLICT", { email: ["unavailable"] });
+        }
         await reserveSend(tx, input.email);
         await tx.emailChallenge.deleteMany({ where: { pendingUntil: { lte: now() } } });
         return tx.emailChallenge.create({
@@ -133,6 +160,25 @@ export function createVerificationService(
     return deliver(record, raw, next.code);
   }
   return {
+    async startAdmin(actor: Actor | null, input: unknown, client = "internal") {
+      const data = parseInput(adminCreateSchema, input);
+      const creator = await currentActor(db, actor);
+      if (creator.role !== "ADMIN") throw new DomainError("FORBIDDEN");
+      await limit("admin-create", creator.id, 10, 60);
+      if (await db.user.findUnique({ where: { email: data.email }, select: { id: true } }))
+        throw new DomainError("CONFLICT", { email: ["unavailable"] });
+      return start(
+        {
+          email: data.email,
+          displayName: data.displayName,
+          passwordHash: await hashPassword(data.password),
+          locale: data.locale,
+          createdById: creator.id,
+          requestedRole: data.role,
+        },
+        client,
+      );
+    },
     async startSignup(input: unknown, client = "internal") {
       const data = parseInput(registerSchema, input);
       await limit("register-client", client, 5, 900);
@@ -171,18 +217,20 @@ export function createVerificationService(
       const record = await pending(raw);
       return {
         email: record.email,
+        ...(record.createdById ? { adminCreation: true } : {}),
         serverNow: now().toISOString(),
         expiresAt: record.expiresAt.toISOString(),
         resendAt: record.resendAt.toISOString(),
         status: record.status as "PENDING" | "SENT" | "FAILED",
       };
     },
-    async resend(raw: string | null, client: string) {
+    async resend(raw: string | null, client: string, actor?: Actor | null) {
       const record = await pending(raw);
       await sendLimits(client);
       const next = generation(raw!, record.pendingUntil, record);
       const changed = await withWriteRetry(() =>
         db.$transaction(async (tx) => {
+          await requireCreator(tx, record, actor);
           await reserveSend(tx, record.email);
           const updated = await tx.emailChallenge.updateMany({
             where: { id: record.id, generation: record.generation, pendingUntil: { gt: now() } },
@@ -195,7 +243,7 @@ export function createVerificationService(
       if (changed.count !== 1) throw new DomainError("INVALID_CODE");
       return deliver({ ...record, ...next.data }, raw!, next.code);
     },
-    async confirm(raw: string | null, input: unknown, client: string) {
+    async confirm(raw: string | null, input: unknown, client: string, actor?: Actor | null) {
       const code = parseInput(codeSchema, input);
       await limit("verification-guess-client", client, 30, 60);
       if (!validToken(raw)) throw new DomainError("INVALID_CODE");
@@ -210,6 +258,7 @@ export function createVerificationService(
             record.attempts >= 5
           )
             return false;
+          await requireCreator(tx, record, actor);
           const expected = Buffer.from(record.codeHash, "hex");
           const actual = Buffer.from(verifier(raw, record.generation, code), "hex");
           if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) {
@@ -237,7 +286,7 @@ export function createVerificationService(
                 email: record.email,
                 displayName: record.displayName,
                 passwordHash: record.passwordHash,
-                role: "MEMBER",
+                role: record.createdById ? record.requestedRole : "MEMBER",
                 emailVerifiedAt: now(),
               },
             });

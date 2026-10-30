@@ -81,7 +81,9 @@ That CA is a build secret, never an application credential.
 4. Switch English/French/Arabic, theme and phone width. Cells work with Tab and
    Enter/Space, preserve focus and announce turns/results. X/O differ by shape.
 5. Administrator > **Users** demonstrates user creation, editing, roles and
-   deletion. Members cannot administer users. The final administrator cannot
+   deletion. Creating a user first sends an email code; confirm it in the requesting
+   administrator browser before the account and chosen role are created.
+   Members cannot administer users. The final administrator cannot
    be deleted or demoted. Deleting a player ends active games and anonymizes
    their historical references.
 6. Registration Privacy/Terms links open a separate tab and preserve the form,

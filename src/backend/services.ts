@@ -19,15 +19,16 @@ import { createStatisticsService } from "./modules/statistics/statistics.service
 // Connects the database, validated settings and services. Game changes share one event bus.
 async function buildServices() {
   const db = await getDb(),
-    config = loadConfig(process.env);
+    config = loadConfig(process.env),
+    verification = createVerificationService(db, { send: createVerificationSender(config.mail) });
   return {
     db,
     config,
     auth: createAuthService(db, {
-      verification: createVerificationService(db, { send: createVerificationSender(config.mail) }),
+      verification,
     }),
     games: createGameService(db, { publish: gameEvents.publish }),
-    users: createUserService(db, { publish: gameEvents.publish }),
+    users: createUserService(db, { publish: gameEvents.publish, verification }),
     profiles: createProfileService(db),
     avatars: createAvatarService(db),
     friends: createFriendService(db),

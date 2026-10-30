@@ -50,6 +50,7 @@ export default async function Users({
         </div>
       </div>
       {invalid && <Alert tone="error">{t.VALIDATION}</Alert>}
+      {raw.notice === "userCreated" && <Alert>{t.adminUserCreated}</Alert>}
       <form className="form actions" method="get">
         <TextField
           name="q"

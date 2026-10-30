@@ -56,8 +56,14 @@ export function VerifyEmail({
   }
   const links = (
     <div className="actions">
-      <Link href={`/${locale}/register`}>{t.verificationRestart}</Link>
-      <Link href={`/${locale}/login`}>{t.login}</Link>
+      {metadata?.adminCreation ? (
+        <Link href={`/${locale}/admin/users`}>{t.users}</Link>
+      ) : (
+        <>
+          <Link href={`/${locale}/register`}>{t.verificationRestart}</Link>
+          <Link href={`/${locale}/login`}>{t.login}</Link>
+        </>
+      )}
     </div>
   );
   if (!metadata)
@@ -85,7 +91,11 @@ export function VerifyEmail({
           if (!/^\d{6}$/.test(value)) throw new RequestError("INVALID_CODE");
           await request("/api/auth/verification/confirm", "POST", { code: value });
           setCode("");
-          router.replace(`/${locale}/login?notice=verified`);
+          router.replace(
+            metadata.adminCreation
+              ? `/${locale}/admin/users?notice=userCreated`
+              : `/${locale}/login?notice=verified`,
+          );
           router.refresh();
         });
       }}
@@ -173,7 +183,7 @@ export function VerifyEmail({
           {t.resendIn.replace("{seconds}", new Intl.NumberFormat(locale).format(seconds))}
         </p>
       )}
-      <p>{t.verificationAddressHelp}</p>
+      <p>{metadata.adminCreation ? t.adminVerificationAddressHelp : t.verificationAddressHelp}</p>
       {links}
     </form>
   );

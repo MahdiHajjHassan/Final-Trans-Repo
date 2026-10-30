@@ -18,6 +18,7 @@ export type AccountDTO = {
 /** Safe verification state; the browser token, password hash and code stay out of this DTO. */
 export type VerificationMetadata = {
   email: string;
+  adminCreation?: boolean;
   serverNow: string;
   expiresAt: string;
   resendAt: string;

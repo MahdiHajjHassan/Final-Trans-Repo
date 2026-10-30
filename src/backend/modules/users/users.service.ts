@@ -6,9 +6,11 @@ import { currentActor } from "../auth/session.guard";
 import { withWriteRetry } from "../../database/write-retry";
 import { DomainError } from "../../common/errors";
 import { parseInput } from "../../common/validation";
-import { registerSchema } from "../auth/dto/auth.schema";
-import { hashPassword } from "../auth/password";
-import { createRateLimiter } from "../../common/security/rate-limit";
+import {
+  createVerificationService,
+  type VerificationService,
+} from "../auth/email/verification.service";
+import { createVerificationSender } from "../auth/email/verification-mail";
 import { cancelTournamentsForUser } from "../tournaments/tournament-deletion";
 
 // Account fields the administrator may see. Never include the password hash.
@@ -37,7 +39,6 @@ const querySchema = z
   })
   .strict();
 const idSchema = z.uuid().transform((id) => id.toLowerCase());
-const createSchema = registerSchema.extend({ role: z.enum(["MEMBER", "ADMIN"]).default("MEMBER") });
 
 // Being signed in is not enough here: load the current role and require ADMIN.
 async function administrator(tx: Prisma.TransactionClient, actor: Actor | null) {
@@ -61,38 +62,18 @@ export function parseUserQuery(input: URLSearchParams) {
 // Administrator account management. Permission checks happen here as well as in the page.
 export function createUserService(
   db: PrismaClient,
-  options: { publish?: (id: string, version: number) => void } = {},
+  options: {
+    publish?: (id: string, version: number) => void;
+    verification?: VerificationService;
+  } = {},
 ) {
+  const verification =
+    options.verification ??
+    createVerificationService(db, { send: createVerificationSender(undefined) });
   return {
-    // Creates a user with the requested role after checking the caller is still an admin.
-    async createUser(actor: Actor | null, input: unknown) {
-      const data = parseInput(createSchema, input);
-      await administrator(db, actor);
-      const limit = await createRateLimiter(db)("admin-create", actor!.id, 10, 60);
-      if (!limit.allowed) throw new DomainError("RATE_LIMITED", undefined, limit.retryAfterSeconds);
-      const passwordHash = await hashPassword(data.password);
-      try {
-        return await withWriteRetry(() =>
-          db.$transaction(async (tx) => {
-            await administrator(tx, actor);
-            return dto(
-              await tx.user.create({
-                data: {
-                  email: data.email,
-                  displayName: data.displayName,
-                  role: data.role,
-                  passwordHash,
-                },
-                select,
-              }),
-            );
-          }),
-        );
-      } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")
-          throw new DomainError("CONFLICT", { email: ["unavailable"] });
-        throw error;
-      }
+    // Stage the chosen role and hashed password; only mailbox proof inserts the user.
+    createUser(actor: Actor | null, input: unknown, client = "internal") {
+      return verification.startAdmin(actor, input, client);
     },
 
     // Find accounts by email or display name, returning a stable page of up to 25 users.

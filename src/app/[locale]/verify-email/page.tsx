@@ -25,8 +25,8 @@ export default async function Verification({ params }: { params: Promise<{ local
     <AuthLayout t={t}>
       <div className="page-heading">
         <div>
-          <h1>{t.verificationTitle}</h1>
-          <p>{t.verificationHelp}</p>
+          <h1>{initial?.adminCreation ? t.adminVerificationTitle : t.verificationTitle}</h1>
+          <p>{initial?.adminCreation ? t.adminVerificationHelp : t.verificationHelp}</p>
         </div>
       </div>
       <VerifyEmail locale={locale} initial={initial} />

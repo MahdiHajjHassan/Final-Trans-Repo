@@ -25,6 +25,7 @@ model User {
   gamesAsX     Game[]    @relation("GameX")
   gamesAsO     Game[]    @relation("GameO")
   emailChallenges EmailChallenge[]
+  createdVerificationRequests EmailChallenge[] @relation("AdminVerificationCreator")
   avatar       UserAvatar?
   friendshipsA Friendship[] @relation("FriendA")
   friendshipsB Friendship[] @relation("FriendB")
@@ -47,6 +48,9 @@ model EmailChallenge {
   id String @id
   userId String?
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdById String?
+  createdBy User? @relation("AdminVerificationCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  requestedRole Role @default(MEMBER)
   email String
   displayName String
   passwordHash String
@@ -61,6 +65,7 @@ model EmailChallenge {
   createdAt DateTime @default(now())
   @@index([email])
   @@index([userId])
+  @@index([createdById])
   @@index([pendingUntil])
 }
 
