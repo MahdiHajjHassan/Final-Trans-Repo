@@ -12,7 +12,9 @@ achievements, progression and competitive standings.
 This is **MahdiHajjHassan/Final-Trans-Repo (production source)**. Development
 remains in [Transcendence2 (ppd)](https://github.com/MahdiHajjHassan/Transcendence2).
 This module integration is tracked in [production PR #11](https://github.com/MahdiHajjHassan/Final-Trans-Repo/pull/11).
-The team is Mahdi (`mahajj-h`), Joseph (`jboustan`) and Khalid (`ksayour`, 42 campus login). Khalid’s GitHub username is `ksayour-42`, authenticated for this integration.
+The team is Mahdi Hajj Hassan (`mahajj-h`), Joseph Boustany (`jboustan`)
+and Khalid Sayour (`ksayour`). Khalid’s authenticated GitHub account is
+`ksayour-42`.
 
 ## Instructions
 
@@ -55,7 +57,7 @@ npm run smoke
 ```
 
 Create `local-certs` first if needed. Trust only the public `root.crt`:
-Windows Current User > Trusted Root Certification Authorities for Chrome/Edge;
+Windows Current User > Trusted Root Certification Authorities for Chrome/Brave;
 Firefox Settings > Privacy & Security > Certificates > Authorities may need a
 separate import, or enterprise root trust. Then reload without a certificate
 warning. Never copy Caddy's private CA key. The verifier uses explicit CA trust
@@ -197,6 +199,11 @@ responsive access, legal pages and one-command container startup apply separatel
 | G14 | Statistics, history, achievements/progression and leaderboard | 1 |
 | | Complete candidate target after the recorded verification | **20** |
 
+Khalid is responsible for the **four-point package G12–G14**: full user
+management (2), four-player tournaments (1), and statistics/history (1).
+The [package plan](docs/superpowers/plans/2026-10-30-khalid-modules.md)
+and [module manual](docs/team/khalid-module-manual.md) describe its scope and demo.
+
 These are candidate mappings, not official awarded points. Theme switching and
 basic authentication do not add points. No remote-player, public API, 2FA or notification module is claimed.
 Email ownership verification is integrated from current production and earns no point here. See
@@ -296,20 +303,32 @@ unverified test address or deletes an existing account afterward.
 
 ## Team, project management and AI use
 
-Mahdi (`mahajj-h`), Joseph (`jboustan`) and Khalid (`ksayour`) are the owner-confirmed roster.
-The owner authorized Mahdi/Codex to complete staging implementation. Current game work is a Mahdi/Codex-assisted implementation authorized for
-staging delivery; it must not be relabeled as Joseph's original implementation. Record Joseph's actual review, adaptation and
-explanation only after they occur. No human understanding is inferred from tests.
+| Member | 42 login | GitHub | Responsibilities and recorded work |
+| --- | --- | --- | --- |
+| Mahdi Hajj Hassan | `mahajj-h` | `MahdiHajjHassan` | Product/project direction, architecture, implementation and verification with Codex assistance. |
+| Joseph Boustany | `jboustan` | `josephboustany` | Frontend review, adaptation and explanation; completed personal contributions are recorded when performed. |
+| Khalid Sayour | `ksayour` | `ksayour-42` | Assigned G12–G14 (four candidate points); authenticated production integration through merged PR #11. |
+
+The owner authorized Mahdi/Codex to complete the implementation, including
+originally Joseph-assigned work and Khalid's module package. Team responsibility
+does not change original implementation authorship. Personal review, adaptation
+and explanation are recorded after they occur; passing tests does not establish
+human understanding.
 
 The design/spec and ordered implementation plan are in `docs/superpowers/`.
 Superpowers supplied the planning/TDD/debugging/review workflow; the vendored
 Impeccable 4.7.1 guided the UI. Codex assisted architecture, implementation, tests
 and documentation. All three students must understand the code and honestly explain
-AI assistance during evaluation. See [contributions](docs/team/contributions/mahdi.md)
-and [delivery map](docs/delivery/PUSH-MAP.md). The new modules retain their actual
-Mahdi/Codex implementation authorship. Khalid’s [production manual](docs/delivery/KHALID-PRODUCTION.md)
-explains his own verification/integration/push using the prepared prod-compatible
-branch; his future actions are not claimed as completed contributions.
+AI assistance during evaluation. Contribution records are maintained for
+[Mahdi](docs/team/contributions/mahdi.md),
+[Joseph](docs/team/contributions/joseph.md) and
+[Khalid](docs/team/contributions/khalid.md).
+The [delivery map](docs/delivery/PUSH-MAP.md) preserves source provenance.
+Khalid's production integration was merged in
+[PR #11](https://github.com/MahdiHajjHassan/Final-Trans-Repo/pull/11);
+the [production receipt](docs/evaluation/2026-10-30-khalid-production.md)
+records the actual delivery and verification limits. The
+[production manual](docs/delivery/KHALID-PRODUCTION.md) retains the laptop workflow.
 
 ## Resources
 

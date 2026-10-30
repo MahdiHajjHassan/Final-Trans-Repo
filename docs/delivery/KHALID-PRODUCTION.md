@@ -1,17 +1,19 @@
-> Current integration: Khalid's GitHub account **ksayour-42** is authenticated
-> and has write access. Production now includes completed email verification
-> and Chrome/Firefox/Brave selection; this promotion preserves both. See
+> Completed integration: Khalid Sayour's GitHub account **ksayour-42** published
+> [PR #11](https://github.com/MahdiHajjHassan/Final-Trans-Repo/pull/11), merged as
+> `61611fc4f91446835f13876aaa5e8ddd7268af1f`. Production includes completed email
+> verification and Chrome/Firefox/Brave selection. See
 > [the current receipt](../evaluation/2026-10-30-khalid-production.md).
 > The command-line steps below remain a laptop workflow; the managed-workspace
 > promotion uses the connected GitHub account. Earlier package-only email limits
 > describe the original ac97d86 preparation, not a request to remove current email.
 
-# Khalid: verify and promote the module package to production
+# Khalid Sayour: production integration and original laptop workflow
 
-This guide is for Khalid, **42 login ksayour**. Your GitHub username is a separate
-identity: verify it from your own account rather than treating ksayour as confirmed
-GitHub identity. No passwords, API keys, SMTP credentials or private CA keys belong
-in Git or chat.
+This guide is for Khalid Sayour, **42 login ksayour**, whose authenticated GitHub
+account is **ksayour-42**. The campus and GitHub logins are separate identities.
+The steps below preserve the original laptop workflow; the promotion above is
+already complete. No passwords, API keys, SMTP credentials or private CA keys
+belong in Git or chat.
 
 The module implementation commits retain their real Mahdi/Codex authorship.
 Your own integration commit, verification record, PR and push can honestly record
@@ -33,13 +35,13 @@ for the prepared branch’s exact verification and limits. Use the prepared
 prod-ready branch recorded there. It is based on production history and preserves production's
 existing cookie/header names, data location, runtime conventions and UI.
 **Do not merge the entire ppd history directly into prod or copy a source ZIP
-on top of an existing prod checkout.** No prod push is performed by the
-implementation session; the final production action belongs to you.
+on top of an existing prod checkout.** The original implementation session
+prepared the package; the later authenticated production integration is
+recorded in the receipt linked above.
 
-The separate email-verification session is outside this package. Before final
-production delivery coordinate its completed, tested commit if the owner wants
-it included. Never merge the unfinished cloud email checkpoint or bypass
-verification to run the demonstration.
+Email verification was developed separately and is now integrated in production.
+Preserve its completed, tested guards. Never replace it with the earlier
+unfinished checkpoint or bypass verification to run the demonstration.
 
 The [port receipt](KHALID-PROD-PORT.md) records source ancestry, the preserved
 production boundaries and image/source verification.
