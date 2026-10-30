@@ -6,7 +6,8 @@ import type { Metadata } from "next";
 import { isLocale, readTheme } from "@/shared/i18n/config";
 import { dictionaries } from "@/shared/i18n/dictionaries";
 import { getPageActor } from "@/backend/modules/auth/auth.pages";
-import { Logout, Preferences } from "@/frontend/layout/preferences";
+import { Preferences } from "@/frontend/layout/preferences";
+import { Navigation } from "@/frontend/layout/Navigation";
 export const dynamic = "force-dynamic";
 
 /** The translated site title and description for this language section. */
@@ -45,25 +46,18 @@ export default async function LocaleLayout({
       <header className="site-header">
         <div className="shell header-inner">
           <Link className="brand" href={"/" + locale + "/play"}>
+            <svg className="brand-symbol" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <path
+                d="m10 11 10 18m0-18L10 29"
+                stroke="currentColor"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+              />
+              <circle cx="29" cy="20" r="5" stroke="currentColor" strokeWidth="3.5" />
+            </svg>
             {t.brand}
           </Link>
-          <nav aria-label={t.mainNavigation} className="main-nav">
-            <Link href={"/" + locale + "/play"}>{t.board}</Link>
-            {actor ? (
-              <>
-                <Link href={"/" + locale + "/account"}>{t.account}</Link>
-                {actor.role === "ADMIN" && (
-                  <Link href={"/" + locale + "/admin/users"}>{t.users}</Link>
-                )}
-                <Logout locale={locale} />
-              </>
-            ) : (
-              <>
-                <Link href={"/" + locale + "/login"}>{t.login}</Link>
-                <Link href={"/" + locale + "/register"}>{t.register}</Link>
-              </>
-            )}
-          </nav>
+          <Navigation locale={locale} role={actor?.role} />
           <Suspense>
             <Preferences locale={locale} theme={theme} />
           </Suspense>
@@ -73,6 +67,10 @@ export default async function LocaleLayout({
         {children}
       </main>
       <footer className="shell footer">
+        <span className="footer-brand">
+          {t.brand}
+          <span aria-hidden="true"> / X O</span>
+        </span>
         {(["privacy", "terms"] as const).map((kind) => (
           <Link
             key={kind}

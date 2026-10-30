@@ -21,6 +21,7 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
     mutation = useMutation();
   const [game, setGame] = useState(initial.game),
     [viewerMark, setViewerMark] = useState(initial.viewerMark);
+  const [initialStatus] = useState(initial.game.status);
   const [connected, setConnected] = useState(false),
     [confirm, setConfirm] = useState<"resign" | "cancel" | null>(null);
   const id = initial.game.id;
@@ -137,7 +138,11 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
     setViewerMark(result.viewerMark);
   }
   return (
-    <section className="game-stage">
+    <section
+      className="game-stage"
+      data-status={game.status}
+      data-result={terminal && game.status !== initialStatus ? "new" : undefined}
+    >
       <div className="game-top">
         <Link href={"/" + locale + "/play"}>{t.backToPlay}</Link>
         <Badge tone={connected ? "accent" : "neutral"}>
@@ -145,24 +150,42 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
         </Badge>
       </div>
       <div className="players">
-        <div>
-          <small>
-            {t.youAre} <bdi>{viewerMark}</bdi>
-          </small>
-          <strong>
-            <bdi>{label(game.players[viewerMark])}</bdi>
-          </strong>
+        <div
+          className="player"
+          data-mark={viewerMark}
+          data-active={game.status === "ACTIVE" && game.turn === viewerMark}
+        >
+          <span className="player-symbol" aria-hidden="true">
+            {viewerMark}
+          </span>
+          <div className="player-details">
+            <small>
+              {t.youAre} <bdi>{viewerMark}</bdi>
+            </small>
+            <strong>
+              <bdi>{label(game.players[viewerMark])}</bdi>
+            </strong>
+          </div>
         </div>
         <span className="versus" aria-hidden="true">
           /
         </span>
-        <div>
-          <small>
-            {t.opponent} <bdi>{other}</bdi>
-          </small>
-          <strong>
-            <bdi>{label(game.players[other])}</bdi>
-          </strong>
+        <div
+          className="player"
+          data-mark={other}
+          data-active={game.status === "ACTIVE" && game.turn === other}
+        >
+          <span className="player-symbol" aria-hidden="true">
+            {other}
+          </span>
+          <div className="player-details">
+            <small>
+              {t.opponent} <bdi>{other}</bdi>
+            </small>
+            <strong>
+              <bdi>{label(game.players[other])}</bdi>
+            </strong>
+          </div>
         </div>
       </div>
       <h1 className="game-status" aria-live="polite" aria-atomic="true">

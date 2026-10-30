@@ -41,6 +41,9 @@ export function Preferences({ locale, theme }: { locale: Locale; theme: "light" 
       </SelectField>
       <Button
         variant="secondary"
+        className="theme-toggle"
+        aria-label={theme === "light" ? t.dark : t.light}
+        title={theme === "light" ? t.dark : t.light}
         disabled={mutation.pending}
         onClick={() =>
           void mutation.run(async () => {
@@ -51,7 +54,24 @@ export function Preferences({ locale, theme }: { locale: Locale; theme: "light" 
           })
         }
       >
-        {theme === "light" ? t.dark : t.light}
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          {theme === "light" ? (
+            <path d="M20.5 13.1A8.6 8.6 0 0 1 10.9 3.5a8.6 8.6 0 1 0 9.6 9.6Z" />
+          ) : (
+            <>
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+            </>
+          )}
+        </svg>
       </Button>
       <Feedback error={mutation.error} t={t} locale={locale} />
     </div>

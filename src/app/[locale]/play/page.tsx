@@ -8,6 +8,7 @@ import { getServices } from "@/backend/services";
 import { DomainError } from "@/backend/common/errors";
 import { Alert, Badge, EmptyState, Pagination } from "@/frontend/components/ui";
 import { GameLobby } from "@/frontend/features/games/components/GameLobby";
+import { GameArtwork } from "@/frontend/components/GameArtwork";
 export async function generateMetadata({
   params,
 }: {
@@ -47,25 +48,38 @@ export default async function Play({
     }
   return (
     <>
-      <div className="play-heading">
-        <h1>{t.brand}</h1>
-        <p>{t.playDescription}</p>
+      <div className={"play-intro" + (actor ? " member-intro" : "")}>
+        <div className="play-heading">
+          <h1>{t.brand}</h1>
+          <p>{t.playDescription}</p>
+          {!actor && (
+            <div className="guest-play">
+              <p>{t.signInToPlay}</p>
+              <div className="actions">
+                <Link className="button button-primary" href={"/" + locale + "/login"}>
+                  {t.login}
+                </Link>
+                <Link className="button button-secondary" href={"/" + locale + "/register"}>
+                  {t.register}
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+        <GameArtwork compact={Boolean(actor)} />
       </div>
       {actor ? (
         <GameLobby locale={locale} />
       ) : (
-        <div className="guest-play">
-          <p>{t.signInToPlay}</p>
-          <div className="actions">
-            <Link className="button button-primary" href={"/" + locale + "/login"}>
-              {t.login}
-            </Link>
-            <Link className="button button-secondary" href={"/" + locale + "/register"}>
-              {t.register}
-            </Link>
-          </div>
-          <p>{t.computerHelp}</p>
-          <p>{t.friendHelp}</p>
+        <div className="guest-modes">
+          <section>
+            <h2>{t.computer}</h2>
+            <p>{t.computerHelp}</p>
+          </section>
+          <section>
+            <h2>{t.friend}</h2>
+            <p>{t.friendHelp}</p>
+          </section>
         </div>
       )}
       <section className="game-rules">
