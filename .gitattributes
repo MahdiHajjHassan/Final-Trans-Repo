@@ -1,4 +1,1 @@
 * text=auto eol=lf
-
-# Preserve the approved vendored Windows launcher.
-.agents/skills/impeccable/scripts/impeccable.cmd text eol=crlf

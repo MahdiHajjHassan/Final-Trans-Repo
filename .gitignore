@@ -26,10 +26,20 @@ playwright/.auth/
 *.tsbuildinfo
 .DS_Store
 
-# Approved skills and isolated implementation/review artifacts
+# Local development notes and tooling
+.agents/
+.codex/
 .superpowers/
-.impeccable/*
-!.impeccable/surfaces/
+.impeccable/
+AGENTS.md
+CLAUDE.md
+PRODUCT.md
+DESIGN.md
+docs/superpowers/
+docs/team/
+docs/evaluation/
+docs/delivery/
+docs/requirements/
 
 # Local email-verification runtime overrides
 .env.smtp-validation.compose.yaml

@@ -11,8 +11,7 @@ achievements, progression and competitive standings.
 
 This is **MahdiHajjHassan/Final-Trans-Repo (production source)**. Development
 remains in [Transcendence2 (ppd)](https://github.com/MahdiHajjHassan/Transcendence2).
-This module integration is tracked in [production PR #11](https://github.com/MahdiHajjHassan/Final-Trans-Repo/pull/11).
-The team is Mahdi (`mahajj-h`), Joseph (`jboustan`) and Khalid (`ksayour`, 42 campus login). Khalid’s GitHub username is `ksayour-42`, authenticated for this integration.
+The team is Mahdi (`mahajj-h`), Joseph (`jboustan`) and Khalid (`ksayour`).
 
 ## Instructions
 
@@ -98,7 +97,7 @@ That CA is a build secret, never an application credential.
    swapped. No LAN or separate PCs are needed.
 9. **History** shows your own results and progression; **Leaderboard** ranks
    completed human games. AI, cancellation and account-deletion forfeits do not
-   earn competitive points. See the [demo manual](docs/team/khalid-module-manual.md).
+   earn competitive points.
 
 ## Architecture and technical choices
 
@@ -199,15 +198,13 @@ responsive access, legal pages and one-command container startup apply separatel
 
 These are candidate mappings, not official awarded points. Theme switching and
 basic authentication do not add points. No remote-player, public API, 2FA or notification module is claimed.
-Email ownership verification is integrated from current production and earns no point here. See
-[traceability](docs/requirements/module-matrix.md) and
-[current evidence](docs/evaluation/tic-tac-toe-evidence.md).
+Email ownership verification is included and earns no extra point here.
 
 ## Verification and fresh setup
 
 Run `npm run format` to apply the shared code style and `npm run format:check` to
-check it. Formatting excludes generated code, private files, vendored skills,
-documentation, lockfiles, and published migrations.
+check it. Formatting excludes generated code, private files, documentation,
+lockfiles, and published migrations.
 
 ```sh
 npm test
@@ -225,10 +222,7 @@ npm run rehearse
 Smoke checks use validated local HTTPS, temporary demonstration accounts and
 normal game actions; game records remain on the administrator account.
 `verify` runs sequential checks including actual Chrome, Firefox and Brave.
-The earlier Windows Firefox startup failure is historical; the Linux matrix
-restored the browser point. Current module results and exact limits are in
-[the current production evidence](docs/evaluation/2026-10-30-khalid-production.md). Install
-actual Chrome, Firefox and Brave; `npx playwright install chrome firefox` installs
+Install actual Chrome, Firefox and Brave; `npx playwright install chrome firefox` installs
 the managed versions where available. Brave uses its installed product executable; Chromium alone does not count as Brave.
 Browser tests use project `tictactoe-e2e-mahdi`, port 8443 and own ignored
 `.env.e2e`. Their guarded reset affects only that isolated database. Normal
@@ -296,31 +290,17 @@ unverified test address or deletes an existing account afterward.
 
 ## Team, project management and AI use
 
-Mahdi (`mahajj-h`), Joseph (`jboustan`) and Khalid (`ksayour`) are the owner-confirmed roster.
-The owner authorized Mahdi/Codex to complete staging implementation. Current game work is a Mahdi/Codex-assisted implementation authorized for
-staging delivery; it must not be relabeled as Joseph's original implementation. Record Joseph's actual review, adaptation and
-explanation only after they occur. No human understanding is inferred from tests.
+Mahdi (`mahajj-h`) led development and coordinated delivery. Khalid (`ksayour`,
+GitHub `ksayour-42`) integrated the member modules and promoted them to production.
+Joseph (`jboustan`) is the third team member. Development takes place on pre-prod,
+with validated changes promoted to the production repository.
 
-The design/spec and ordered implementation plan are in `docs/superpowers/`.
-Superpowers supplied the planning/TDD/debugging/review workflow; the vendored
-Impeccable 4.7.1 guided the UI. Codex assisted architecture, implementation, tests
-and documentation. All three students must understand the code and honestly explain
-AI assistance during evaluation. See [contributions](docs/team/contributions/mahdi.md)
-and [delivery map](docs/delivery/PUSH-MAP.md). The new modules retain their actual
-Mahdi/Codex implementation authorship. Khalid’s [production manual](docs/delivery/KHALID-PRODUCTION.md)
-explains his own verification/integration/push using the prepared prod-compatible
-branch; his future actions are not claimed as completed contributions.
+Codex assisted architecture, implementation, tests and documentation. The team
+is responsible for reviewing and understanding the submitted code and explaining
+the AI assistance used during evaluation.
 
 ## Resources
 
 - [Original subject](docs/reference/en.subject.pdf) and [evaluation sheet](docs/reference/EVALUATION-SHEET.pdf), unchanged.
 - [Next.js documentation](https://nextjs.org/docs), [Prisma documentation](https://www.prisma.io/docs), [Caddy documentation](https://caddyserver.com/docs/).
-- [Game API](docs/api/games.md), [auth contract](docs/api/auth.md), [profiles/friends/presence](docs/api/profiles.md), [tournaments](docs/api/tournaments.md), [statistics](docs/api/statistics.md), [design system](DESIGN.md).
-
-
-Current production integration preserves the completed email feature and selects
-actual Chrome, Firefox and Brave for evaluation. Historical Edge results remain
-in their dated reports; they are not claimed as current Brave results. Original
-module implementation remains Mahdi/Codex-assisted source. Khalid's authenticated
-GitHub account, ksayour-42, performs the integration described in the
-[production receipt](docs/evaluation/2026-10-30-khalid-production.md).
+- [Game API](docs/api/games.md), [auth contract](docs/api/auth.md), [profiles/friends/presence](docs/api/profiles.md), [tournaments](docs/api/tournaments.md), [statistics](docs/api/statistics.md).
