@@ -1,7 +1,7 @@
 import "dotenv/config";
-import { loadConfig } from "../src/backend/config/env";
-import { createDb } from "../src/backend/database/db";
-import { seedDatabase } from "../src/backend/database/seed";
+import { loadConfig } from "../../src/backend/config/env";
+import { createDb } from "../../src/backend/database/db";
+import { seedDatabase } from "../../src/backend/database/seed";
 
 const config = loadConfig(process.env);
 const db = await createDb(config.databaseUrl);

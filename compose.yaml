@@ -3,9 +3,9 @@ services:
     build: .
     environment:
       DATABASE_URL: file:/data/tictactoe.db
-      APP_ORIGIN: ${APP_ORIGIN:?Run ./scripts/setup.sh first}
-      ADMIN_EMAIL: ${ADMIN_EMAIL:?Run ./scripts/setup.sh first}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Run ./scripts/setup.sh first}
+      APP_ORIGIN: ${APP_ORIGIN:?Run npm run setup first}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Run npm run setup first}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Run npm run setup first}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-}
       SMTP_USER: ${SMTP_USER:-}

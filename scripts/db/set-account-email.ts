@@ -1,9 +1,9 @@
 import "dotenv/config";
 import { parseArgs } from "node:util";
 import { existsSync } from "node:fs";
-import { resolveDatabaseUrl } from "../src/backend/config/env";
-import { createDb } from "../src/backend/database/db";
-import { setAccountEmail } from "../src/backend/modules/auth/email/change-email";
+import { resolveDatabaseUrl } from "../../src/backend/config/env";
+import { createDb } from "../../src/backend/database/db";
+import { setAccountEmail } from "../../src/backend/modules/auth/email/change-email";
 
 // Operator-only console command; no public route or verification bypass is installed.
 const { values } = parseArgs({

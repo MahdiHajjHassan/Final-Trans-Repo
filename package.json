@@ -13,21 +13,19 @@
     "typecheck": "prisma generate && next typegen && tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "test": "prisma generate && vitest run --maxWorkers=1",
-    "test:server": "prisma generate && vitest run --maxWorkers=1",
     "test:e2e": "playwright test --project=chrome --project=brave --project=firefox",
     "db:generate": "prisma generate",
-    "db:migrate": "node -- scripts/migrate.mjs",
-    "db:seed": "prisma generate && tsx scripts/seed.ts",
+    "db:migrate": "node -- scripts/db/migrate.mjs",
+    "db:seed": "prisma generate && tsx scripts/db/seed.ts",
     "setup": "node -- scripts/setup.mjs",
-    "smoke": "node scripts/smoke.mjs",
-    "smoke:auth": "node -- scripts/smoke-auth.mjs",
-    "audit:source": "node -- scripts/audit-source.mjs",
-    "verify": "node -- scripts/verify.mjs",
-    "rehearse": "node -- scripts/rehearse.mjs",
-    "smoke:games": "node -- scripts/smoke-games.mjs",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.{mjs,ts}\" \"tests/**/*.ts\" \"*.{ts,mjs,json,yaml,yml}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.{mjs,ts}\" \"tests/**/*.ts\" \"*.{ts,mjs,json,yaml,yml}\"",
-    "account:email": "tsx scripts/set-account-email.ts"
+    "smoke": "node scripts/checks/smoke.mjs",
+    "smoke:auth": "node -- scripts/checks/smoke-auth.mjs",
+    "audit:source": "node -- scripts/checks/audit-source.mjs",
+    "verify": "node -- scripts/checks/verify.mjs",
+    "smoke:games": "node -- scripts/checks/smoke-games.mjs",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.{mjs,ts}\" \"tests/**/*.ts\" \"*.{ts,mjs,json,yaml,yml}\" \"deploy/*.yaml\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"scripts/**/*.{mjs,ts}\" \"tests/**/*.ts\" \"*.{ts,mjs,json,yaml,yml}\" \"deploy/*.yaml\"",
+    "account:email": "tsx scripts/db/set-account-email.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "2.2.2",
@@ -58,5 +56,13 @@
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "vitest": "5.0.5"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "all",
+    "endOfLine": "lf"
   }
 }

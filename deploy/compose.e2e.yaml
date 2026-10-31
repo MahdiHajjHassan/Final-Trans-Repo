@@ -14,7 +14,7 @@ services:
     ports:
       - 127.0.0.1:${TICTACTOE_E2E_MAIL_PORT:?Set an isolated mailbox port}:8025
 
-# Rehearsal may reuse the already trusted test authority; game data stays separate.
+# The isolated test authority uses its own named volume; game data stays separate.
 volumes:
   caddy-data:
     name: ${TICTACTOE_E2E_CA_VOLUME:?Set the isolated test certificate volume}

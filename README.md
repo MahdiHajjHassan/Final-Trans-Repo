@@ -40,7 +40,7 @@ Open **https://localhost:8443/en/play**. The database tables are created automat
 application starts. Caddy provides HTTPS and creates a local certificate authority.
 
 ```sh
-./scripts/verify-tls.sh
+./scripts/checks/verify-tls.sh
 ```
 
 This exports the public certificate to `local-certs/root.crt` and checks the application.
@@ -212,12 +212,37 @@ npm run setup -- --port 8443
 # Complete the local account and email-delivery setup before starting.
 docker compose up --build -d
 docker compose ps
-./scripts/verify-tls.sh
+./scripts/checks/verify-tls.sh
 ```
 
 The HTTPS entry point is **https://localhost:8443**. Only the proxy publishes a port;
 the application and database stay behind it. Pending migrations run at startup,
 and the initial administrator is created when the database is empty.
+
+### Tooling layout
+
+| Configuration | Purpose |
+| --- | --- |
+| `package.json` | npm workflows and Prettier settings |
+| `tsconfig.json`, `next.config.ts`, `next-env.d.ts` | TypeScript and Next.js |
+| `eslint.config.mjs`, `postcss.config.mjs` | Lint and CSS tooling |
+| `vitest.config.ts`, `playwright.config.ts` | Server tests and Chrome/Firefox/Brave browser tests |
+| `prisma.config.ts`, `prisma/` | Database generation and migrations |
+| `compose.yaml`, `Dockerfile`, `Caddyfile` | Normal deployment and HTTPS |
+| `deploy/compose.cloud.yaml` | Optional managed-cloud build CA trust |
+| `deploy/compose.e2e.yaml` | Isolated browser-test mailbox and reset guards |
+
+Run Compose from the repository root, with the base file first:
+
+```sh
+# Normal deployment
+docker compose up --build -d
+# Managed cloud with CODEX_PROXY_CERT supplied by the environment
+docker compose -f compose.yaml -f deploy/compose.cloud.yaml up --build -d
+```
+
+Database scripts live in `scripts/db/`; smoke, audit and verification scripts live
+in `scripts/checks/`. Setup and container startup remain in `scripts/`.
 
 ### Everyday commands
 
@@ -227,7 +252,7 @@ docker compose up --build -d          # Rebuild and start
 docker compose logs -f app            # Follow application logs
 docker compose ps                    # Check service status
 docker compose down                  # Stop services and retain data
-./scripts/verify-tls.sh               # Check HTTPS and database readiness
+./scripts/checks/verify-tls.sh        # Check HTTPS and database readiness
 ```
 
 Keep the same Compose project and retain its volumes to preserve accounts, games
@@ -372,3 +397,8 @@ npm run build
 
 Browser tests use Playwright with Chrome, Firefox and Brave. Install the actual browsers
 and trust the test application's public certificate before running `npm run test:e2e`.
+
+Ordinary checks are `npm run typecheck`, `npm run lint`, `npm run format:check`,
+`npm test` and `npm run build`. After a build, `npm run audit:source` checks source
+and public artifacts. `npm run verify` runs the full workflow: types, lint, server
+tests, build, source audit and all three browser projects, including verified HTTPS.

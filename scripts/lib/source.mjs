@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { lstat, readFile, mkdir, copyFile, writeFile } from "node:fs/promises";
-import { resolve, dirname, join, relative, isAbsolute } from "node:path";
+import { lstat, readFile } from "node:fs/promises";
+import { resolve, join, relative, isAbsolute } from "node:path";
 import { createHash } from "node:crypto";
 const manifestName = "source-manifest.json";
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
@@ -40,18 +40,4 @@ export async function sourceFiles(root = process.cwd()) {
     present.push(path);
   }
   return present;
-}
-export async function copyWorkingSource(source, target) {
-  await mkdir(target, { recursive: true });
-  const files = [];
-  for (const path of await sourceFiles(source)) {
-    const from = safe(source, path),
-      to = safe(target, path);
-    await mkdir(dirname(to), { recursive: true });
-    await copyFile(from, to);
-    files.push({ path, sha256: hash(await readFile(to)) });
-  }
-  const manifest = { kind: "uncommitted-working-source", files };
-  await writeFile(join(target, manifestName), JSON.stringify(manifest, null, 2));
-  return manifest;
 }

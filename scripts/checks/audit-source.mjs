@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { readdir, readFile } from "node:fs/promises";
-import { sourceFiles } from "./lib/source.mjs";
+import { sourceFiles } from "../lib/source.mjs";
 import { join } from "node:path";
 for (const path of await sourceFiles()) {
   if (

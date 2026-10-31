@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { call, login } from "./lib/http.mjs";
+import { call, login } from "../lib/http.mjs";
 if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD)
   throw new Error("Private administrator settings missing");
 if (!process.env.SMOKE_MEMBER_EMAIL || !process.env.SMOKE_MEMBER_PASSWORD)

@@ -29,8 +29,18 @@ test("isolated Compose configuration uses and declares the native path separator
   vi.stubEnv("CODEX_PROXY_CERT", "");
   vi.stubEnv("COMPOSE_PATH_SEPARATOR", "wrong-inherited-separator");
   const settings = testSettings();
-  expect(settings.env.COMPOSE_FILE).toBe(["compose.yaml", "compose.e2e.yaml"].join(delimiter));
+  expect(settings.env.COMPOSE_FILE).toBe(
+    ["compose.yaml", "deploy/compose.e2e.yaml"].join(delimiter),
+  );
   expect(settings.env.COMPOSE_PATH_SEPARATOR).toBe(delimiter);
+});
+
+test("isolated Compose includes the optional cloud overlay only with a proxy certificate", () => {
+  vi.stubEnv("TICTACTOE_E2E_ENV_FILE", ".env.e2e-harness-regression");
+  vi.stubEnv("CODEX_PROXY_CERT", "/synthetic/proxy.crt");
+  expect(testSettings().env.COMPOSE_FILE).toBe(
+    ["compose.yaml", "deploy/compose.cloud.yaml", "deploy/compose.e2e.yaml"].join(delimiter),
+  );
 });
 
 test("browser setup command diagnostics redact configured credentials", () => {

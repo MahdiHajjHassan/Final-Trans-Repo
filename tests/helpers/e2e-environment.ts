@@ -31,8 +31,8 @@ export function testSettings() {
   const values = existsSync(envFile) ? parse(readFileSync(envFile)) : {};
   const files = [
     "compose.yaml",
-    ...(process.env.CODEX_PROXY_CERT ? ["compose.cloud.yaml"] : []),
-    "compose.e2e.yaml",
+    ...(process.env.CODEX_PROXY_CERT ? ["deploy/compose.cloud.yaml"] : []),
+    "deploy/compose.e2e.yaml",
   ];
   return {
     project,
@@ -90,7 +90,7 @@ export async function resetTestDb() {
       "-T",
       "app",
       "./node_modules/.bin/tsx",
-      "scripts/test-db.ts",
+      "scripts/db/test-db.ts",
       "--project",
       project,
     ]),

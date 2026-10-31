@@ -15,7 +15,7 @@ test("deployment migrates a fresh nested SQLite location and preserves data on r
   dirs.push(dir);
   const path = join(dir, "nested", "test.db");
   const run = () =>
-    spawnSync(process.execPath, ["--", resolve("scripts/migrate.mjs")], {
+    spawnSync(process.execPath, ["--", resolve("scripts/db/migrate.mjs")], {
       env: { ...process.env, DATABASE_URL: `file:${path}` },
       encoding: "utf8",
     });

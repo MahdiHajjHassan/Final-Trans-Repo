@@ -14,7 +14,7 @@ test("test reset command refuses ordinary projects, ordinary origins and local d
     ]) {
       const result = spawnSync(
         process.execPath,
-        ["--import", "tsx", "scripts/test-db.ts", "--project", project],
+        ["--import", "tsx", "scripts/db/test-db.ts", "--project", project],
         {
           encoding: "utf8",
           env: {
