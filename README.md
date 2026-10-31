@@ -26,7 +26,7 @@ npm run setup
 docker compose up --build -d --force-recreate
 ```
 
-Open **https://localhost/en/play**. Setup generates a Git-ignored `.env` with
+Open **https://localhost:8443/en/play**. Setup generates a Git-ignored `.env` with
 this computer's random administrator password. Read **ADMIN_EMAIL** and
 **ADMIN_PASSWORD** privately there. Setup refuses to replace an existing file;
 startup does not reset an existing administrator's password. Register additional
@@ -35,9 +35,24 @@ browser must confirm the six-digit email code before the account exists.
 Existing unverified accounts prove email ownership after a correct password,
 then return to password login. No verification bypass is provided.
 
-Only Caddy publishes a port, bound to loopback HTTPS. The Node process runs as
-non-root. Startup deploys migrations and seeds the administrator. Named volumes
-retain game data and certificates across recreation. Do not delete volumes.
+If you already have an older `.env` using port 443, migrate its connection
+settings before starting the updated source:
+
+```sh
+npm run setup -- --update-port --port 8443
+docker compose up --build -d --force-recreate
+```
+
+This changes only `HTTPS_PORT` and `APP_ORIGIN` to `8443` and
+`https://localhost:8443`. Existing administrator credentials, mail settings,
+database configuration and Docker volumes are preserved. Do not delete `.env`
+or run `docker compose down -v`. If your shell exports `HTTPS_PORT` or
+`APP_ORIGIN`, update those overrides too; shell values take precedence over `.env`.
+
+Only Caddy publishes a port, bound to loopback HTTPS on port **8443** by default
+so rootless Docker does not need permission to bind privileged port 443. The Node
+process runs as non-root. Startup deploys migrations and seeds the administrator.
+Named volumes retain game data and certificates across recreation. Do not delete volumes.
 The `game-data` volume stores `file:/data/tictactoe.db`.
 
 Verify the real certificate chain and hostname:
@@ -61,9 +76,12 @@ warning. Never copy Caddy's private CA key. The verifier uses explicit CA trust
 and hostname verification; no insecure TLS flags are needed.
 
 For a different port, generate an environment with
-`npm run setup -- --port 8443`. With an existing `.env`, keep `HTTPS_PORT` and
-`APP_ORIGIN` consistent. Keep `COMPOSE_PROJECT_NAME` consistent for all runtime
-and TLS commands, so recreation reuses the same certificates and data.
+`npm run setup -- --port 9443`. With an existing `.env`, keep `HTTPS_PORT` and
+`APP_ORIGIN` consistent. Use `npm run setup -- --update-port --port 9443` to
+change an existing local installation without replacing credentials. An explicit
+`--port 443` remains available on hosts that permit binding privileged ports.
+Keep `COMPOSE_PROJECT_NAME` consistent for all runtime and TLS commands, so
+recreation reuses the same certificates and data.
 In a managed cloud needing its public network proxy CA, set `CODEX_PROXY_CERT`
 and include `compose.cloud.yaml` using the OS-specific COMPOSE_FILE separator.
 That CA is a build secret, never an application credential.

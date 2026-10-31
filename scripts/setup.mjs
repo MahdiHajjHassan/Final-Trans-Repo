@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
 import { randomBytes } from "node:crypto";
-import { open, unlink } from "node:fs/promises";
+import { lstat, open, readFile, rename, unlink } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
@@ -48,11 +48,50 @@ async function writePrivateEnvironment(target, contents) {
   }
 }
 
+async function updateEnvironmentPort(target, port, origin) {
+  // Replace only the public connection settings, never regenerate credentials.
+  if (!(await lstat(target)).isFile())
+    throw new Error("Port update requires a regular environment file.");
+  const original = await readFile(target, "utf8");
+  const replacements = new Map([
+    ["HTTPS_PORT", String(port)],
+    ["APP_ORIGIN", origin],
+  ]);
+  // Consume complete quoted values so assignment-like text inside secrets is untouched.
+  const assignment =
+    /^([ \t\uFEFF]*(?:export[ \t]+)?([\w.-]+)[ \t]*=[ \t]*)(?:"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`|[^\r\n]*)/gm;
+  const matches = [...original.matchAll(assignment)];
+  for (const key of replacements.keys()) {
+    if (matches.filter((match) => match[2] === key).length !== 1)
+      throw new Error(`Port update requires exactly one ${key} assignment.`);
+  }
+  const contents = original.replace(assignment, (line, prefix, key) => {
+    if (!replacements.has(key)) return line;
+    const comment = line.match(/[ \t]+#.*$/)?.[0] ?? "";
+    return `${prefix}${replacements.get(key)}${comment}`;
+  });
+  if (contents === original) return;
+
+  // Write privately beside the original, then replace it atomically.
+  const temporary = `${target}.${randomBytes(12).toString("hex")}.tmp`;
+  try {
+    await writePrivateEnvironment(temporary, contents);
+    if ((await readFile(target, "utf8")) !== original)
+      throw new Error("Environment file changed during port update; retry the command.");
+    await rename(temporary, target);
+  } finally {
+    await unlink(temporary).catch((error) => {
+      if (error.code !== "ENOENT") throw error;
+    });
+  }
+}
+
 try {
   const { values } = parseArgs({
     options: {
       "env-file": { type: "string", default: ".env" },
-      port: { type: "string", default: "443" },
+      port: { type: "string", default: "8443" },
+      "update-port": { type: "boolean", default: false },
     },
     strict: true,
   });
@@ -60,17 +99,22 @@ try {
     throw new Error("Port must be 1-65535");
   const port = Number(values.port);
   const origin = `https://localhost${port === 443 ? "" : `:${port}`}`;
-  const contents =
-    [
-      "DATABASE_URL=file:./data/tictactoe.db",
-      `APP_ORIGIN=${origin}`,
-      `HTTPS_PORT=${port}`,
-      "ADMIN_EMAIL=admin@tictactoe.local",
-      `ADMIN_PASSWORD=${randomBytes(24).toString("hex")}`,
-    ].join("\n") + "\n";
   const target = resolve(values["env-file"]);
-  await writePrivateEnvironment(target, contents);
-  console.log(`Created ${target}. Keep this file private; credentials are not printed.`);
+  if (values["update-port"]) {
+    await updateEnvironmentPort(target, port, origin);
+    console.log(`Updated HTTPS port and origin in ${target}. Credentials were preserved.`);
+  } else {
+    const contents =
+      [
+        "DATABASE_URL=file:./data/tictactoe.db",
+        `APP_ORIGIN=${origin}`,
+        `HTTPS_PORT=${port}`,
+        "ADMIN_EMAIL=admin@tictactoe.local",
+        `ADMIN_PASSWORD=${randomBytes(24).toString("hex")}`,
+      ].join("\n") + "\n";
+    await writePrivateEnvironment(target, contents);
+    console.log(`Created ${target}. Keep this file private; credentials are not printed.`);
+  }
 } catch (error) {
   console.error(
     error?.code === "EEXIST"

@@ -33,7 +33,7 @@ services:
       NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1},app
       no_proxy: ${NO_PROXY:-localhost,127.0.0.1},app
     ports:
-      - 127.0.0.1:${HTTPS_PORT:-443}:443
+      - 127.0.0.1:${HTTPS_PORT:-8443}:443
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
