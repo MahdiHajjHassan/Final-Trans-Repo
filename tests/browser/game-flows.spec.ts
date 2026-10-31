@@ -4,6 +4,7 @@ import { testSettings } from "../helpers/e2e-environment";
 import { inboxCode, verifyEmailUi } from "../helpers/mailbox";
 import { dictionaries } from "../../src/shared/i18n/dictionaries";
 import type { Browser, Page } from "@playwright/test";
+import type { GameDTO } from "../../src/shared/games";
 async function peer(browser: Browser, who: "a" | "b" = "b") {
   const context = await browser.newContext({
     baseURL: testSettings().values.APP_ORIGIN,
@@ -342,4 +343,102 @@ test("a delayed active snapshot cannot undo the displayed terminal result", asyn
   );
   await expect(page.getByRole("heading", { name: t.lost, exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: t.resign, exact: true })).toHaveCount(0);
+});
+
+test("an older move response cannot roll back the name received on the real stream", async ({
+  page,
+}) => {
+  test.setTimeout(60000);
+  await loginUi(page);
+  await page.getByRole("button", { name: t.playComputer, exact: true }).click();
+  await expect(page.getByText(t.connected, { exact: true })).toBeVisible();
+  const gameId = page.url().split("/").at(-1)!;
+  const moveUrl = `${testSettings().values.APP_ORIGIN}/api/games/${gameId}/moves`;
+  const ownName = page.locator('.players .player[data-mark="X"] strong');
+  const resign = page.getByRole("button", { name: t.resign, exact: true });
+  const renamed = "Stream renamed member";
+  await expect(ownName).toHaveText("Member A");
+
+  let release!: () => void;
+  const releaseResponse = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let committed!: (game: GameDTO) => void;
+  let failed!: (error: unknown) => void;
+  const serverCommitted = new Promise<GameDTO>((resolve, reject) => {
+    committed = resolve;
+    failed = reject;
+  });
+  await page.route(moveUrl, async (route) => {
+    try {
+      // Execute the actual write once, then hold only its browser response.
+      // The authenticated SSE connection remains unmodified throughout.
+      const response = await route.fetch();
+      expect(response.status()).toBe(200);
+      const { data } = (await response.json()) as { data: GameDTO };
+      committed(data);
+      await releaseResponse;
+      await route.fulfill({ response });
+    } catch (error) {
+      failed(error);
+      throw error;
+    }
+  });
+
+  try {
+    await page.locator('[data-cell="0"]').click();
+    const saved = await serverCommitted;
+    expect(saved.players.X?.displayName).toBe("Member A");
+    expect(saved.cells.filter((cell) => cell !== null)).toHaveLength(2);
+    await expect(page.locator(".game-mark")).toHaveCount(2);
+    await expect(resign).toBeDisabled();
+    await expect(
+      page.getByRole("heading", { name: t.computerThinking, exact: true }),
+    ).toBeVisible();
+
+    const changed = await page.request.patch("/api/account", {
+      headers: { Origin: testSettings().values.APP_ORIGIN },
+      data: { displayName: renamed },
+    });
+    expect(changed.status()).toBe(200);
+    // No reload or manual sync: the next authenticated 15-second heartbeat
+    // must refresh the name at this same saved board version.
+    await expect(ownName).toHaveText(renamed, { timeout: 20000 });
+    await expect(resign).toBeDisabled();
+
+    const delivered = page.waitForResponse(
+      (response) => response.url() === moveUrl && response.request().method() === "POST",
+    );
+    release();
+    expect((await delivered).status()).toBe(200);
+    await expect(resign).toBeEnabled();
+    await expect(page.getByRole("heading", { name: t.yourTurn, exact: true })).toBeVisible();
+    await expect(ownName).toHaveText(renamed);
+    await expect(page.locator(".game-mark")).toHaveCount(2);
+    for (const [cell, mark] of saved.cells.entries()) {
+      const square = page.locator(`[data-cell="${cell}"]`);
+      if (mark) await expect(square.locator(`.mark-${mark.toLowerCase()}`)).toBeVisible();
+      else await expect(square.locator(".game-mark")).toHaveCount(0);
+    }
+
+    await page.unroute(moveUrl);
+    // The displayed board has no version attribute. Its next actual write
+    // exposes the client version through the existing expectedVersion contract.
+    const nextRequest = page.waitForRequest(
+      (request) => request.url() === moveUrl && request.method() === "POST",
+    );
+    const nextResponse = page.waitForResponse(
+      (response) => response.url() === moveUrl && response.request().method() === "POST",
+    );
+    await page.locator(`[data-cell="${saved.cells.findIndex((cell) => cell === null)}"]`).click();
+    expect((await nextRequest).postDataJSON().expectedVersion).toBe(saved.version);
+    const accepted = await nextResponse;
+    expect(accepted.status()).toBe(200);
+    expect(((await accepted.json()).data as GameDTO).version).toBeGreaterThan(saved.version);
+    await expect(resign).toBeEnabled();
+    await expect(ownName).toHaveText(renamed);
+  } finally {
+    release();
+    await page.unroute(moveUrl);
+  }
 });

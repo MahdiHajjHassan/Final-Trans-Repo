@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import { pageLocale } from "@/shared/i18n/server";
 import { requirePageActor } from "@/backend/modules/auth/auth.pages";
 import { getServices } from "@/backend/services";

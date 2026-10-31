@@ -17,6 +17,7 @@ model User {
   id           String    @id @default(uuid())
   email        String    @unique
   displayName  String
+  profileVersion Int @default(1)
   passwordHash String
   emailVerifiedAt DateTime?
   role         Role      @default(MEMBER)
@@ -233,4 +234,10 @@ model GameMove {
   // A game cannot save the same move number or play the same cell twice.
   @@unique([gameId, ply])
   @@unique([gameId, cell])
+}
+
+// Singleton revision maintained by SQLite triggers in the statistics migration.
+model StatisticsRevision {
+  id Int @id
+  revision BigInt @default(0)
 }

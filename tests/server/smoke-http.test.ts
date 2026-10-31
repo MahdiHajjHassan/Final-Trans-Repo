@@ -10,7 +10,6 @@ import {
   smokeServerCertificate,
   smokeServerPrivateKey,
 } from "../helpers/smoke-tls-fixtures";
-// @ts-expect-error JavaScript smoke helper has no declaration file.
 import * as transport from "../../scripts/lib/http.mjs";
 
 const directory = mkdtempSync(join(tmpdir(), "smoke-tls-"));

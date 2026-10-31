@@ -62,7 +62,15 @@ function mailConfig(environment: Record<string, string | undefined>): MailConfig
     isolatedTest,
     ...(!isolatedTest
       ? {
-          user: emailSchema.parse(environment.SMTP_USER),
+          user: z
+            .string()
+            .min(1)
+            .max(1000)
+            .refine(
+              (value) => value.trim().length > 0 && !/[\u0000-\u001f\u007f]/.test(value),
+              "Invalid SMTP username",
+            )
+            .parse(environment.SMTP_USER),
           password: z.string().min(1).max(1000).parse(environment.SMTP_PASSWORD),
         }
       : {}),

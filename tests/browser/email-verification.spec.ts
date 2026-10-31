@@ -1,4 +1,4 @@
-import { test, expect, t, credentials, loginApi } from "./fixtures";
+import { test, expect, settleBrowserNetwork, t, credentials, loginApi } from "./fixtures";
 import { inboxCode, verifyEmailUi } from "../helpers/mailbox";
 import { composeArgs, runTestCommand, testSettings } from "../helpers/e2e-environment";
 import { dictionaries } from "../../src/shared/i18n/dictionaries";
@@ -92,10 +92,12 @@ test("wrong codes show a linked error and the latest delivered code still works"
 
 test("SMTP failure remains unverified and recovers through an explicit resend", async ({
   page,
+  browser,
 }) => {
   test.setTimeout(120000);
   runTestCommand("docker", composeArgs(["stop", "mailpit"]));
   try {
+    await settleBrowserNetwork(browser, testSettings().values.APP_ORIGIN);
     await page.goto("/en/register");
     await page.getByLabel(t.displayName, { exact: true }).fill("Delivery recovery");
     await page.getByLabel(t.email, { exact: true }).fill("delivery@example.test");
@@ -113,7 +115,20 @@ test("SMTP failure remains unverified and recovers through an explicit resend", 
     await expect(page.getByText(t.EMAIL_UNAVAILABLE, { exact: true })).toBeVisible();
     expect((await page.request.get("/api/account")).status()).toBe(401);
   } finally {
-    runTestCommand("docker", composeArgs(["start", "mailpit"]));
+    runTestCommand(
+      "docker",
+      composeArgs([
+        "up",
+        "--no-deps",
+        "--no-recreate",
+        "-d",
+        "--wait",
+        "--wait-timeout",
+        "30",
+        "mailpit",
+      ]),
+    );
+    await settleBrowserNetwork(browser, testSettings().values.APP_ORIGIN);
   }
   const resend = page.getByRole("button", { name: t.resendCode, exact: true });
   await expect(resend).toBeEnabled({ timeout: 75000 });

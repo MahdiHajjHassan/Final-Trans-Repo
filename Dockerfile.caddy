@@ -1,0 +1,21 @@
+# syntax=docker/dockerfile:1
+# Rebuild the maintained Caddy release: its official binary still links an older
+# Go HTTP/2 implementation. Module versions and checksums live in tooling/caddy.
+FROM golang:1.27.3-alpine3.24@sha256:d200d2dd76b03a99b52651fd1325aff7dcd35422c35c01bac56571b0507f3deb AS build
+WORKDIR /src
+ENV GOTOOLCHAIN=local CGO_ENABLED=0
+COPY tooling/caddy/go.mod tooling/caddy/go.sum ./
+COPY tooling/caddy/main.go ./
+RUN --mount=type=secret,id=proxy_ca \
+    --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    set -eu; \
+    if [ -f /run/secrets/proxy_ca ]; then export SSL_CERT_FILE=/run/secrets/proxy_ca; fi; \
+    go build -mod=readonly -trimpath -ldflags="-w -s" -o /out/caddy .
+
+FROM caddy:2.11.7-alpine@sha256:e70b164da81ef698b3ad19af799ea6086ce6d9e48ed4079eb9fe26f6fbf14ee5 AS runtime
+RUN --mount=type=secret,id=proxy_ca \
+    set -eu; \
+    if [ -f /run/secrets/proxy_ca ]; then export SSL_CERT_FILE=/run/secrets/proxy_ca; fi; \
+    apk upgrade --no-cache
+COPY --from=build /out/caddy /usr/bin/caddy

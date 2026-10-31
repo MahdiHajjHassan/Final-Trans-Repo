@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import type { FriendList } from "@/shared/friends";
 import type { Locale } from "@/shared/i18n/config";
 import { dictionaries } from "@/shared/i18n/dictionaries";

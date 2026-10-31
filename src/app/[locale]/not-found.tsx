@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import { useParams } from "next/navigation";
 import { isLocale } from "@/shared/i18n/config";
 import { dictionaries } from "@/shared/i18n/dictionaries";

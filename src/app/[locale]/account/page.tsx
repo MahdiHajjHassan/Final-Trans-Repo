@@ -3,7 +3,7 @@ import { requirePageActor } from "@/backend/modules/auth/auth.pages";
 import { getServices } from "@/backend/services";
 import { AccountForms } from "@/frontend/features/account/components/AccountForms";
 import { AvatarForm } from "@/frontend/features/profiles/components/AvatarForm";
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 export const metadata = { robots: { index: false, follow: false } };
 
 /** /:locale/account: load the signed-in account on the server, then render its edit forms. */

@@ -96,3 +96,33 @@ test("an SMTP greeting failure is sanitized and never automatically retried", as
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });
+
+test.each(["apikey", "CaseSensitiveUser", "AKIAEXAMPLE123", "Sender@Example.TEST"])(
+  "public SMTP preserves the non-email username %s exactly",
+  (username) => {
+    const config = loadConfig({
+      ...base,
+      SMTP_HOST: "smtp.example.test",
+      SMTP_PORT: "587",
+      SMTP_USER: username,
+      SMTP_PASSWORD: "test-password-not-a-real-credential",
+      SMTP_FROM_EMAIL: "sender@example.test",
+    });
+    expect(config.mail?.user).toBe(username);
+  },
+);
+
+test.each(["", "   ", "a".repeat(1001), "user\nname"])(
+  "public SMTP rejects an empty, oversized or control-containing username",
+  (username) => {
+    expect(() =>
+      loadConfig({
+        ...base,
+        SMTP_HOST: "smtp.example.test",
+        SMTP_USER: username,
+        SMTP_PASSWORD: "test-password-not-a-real-credential",
+        SMTP_FROM_EMAIL: "sender@example.test",
+      }),
+    ).toThrow();
+  },
+);

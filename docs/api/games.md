@@ -18,6 +18,13 @@ Success JSON wraps data; errors wrap error.code. Validation400, anonymous401,
 unseated403, missing404, stale/illegal state409, rate limit429 with Retry-After.
 Codes are visible only to a waiting room's creator; players are public-name-only
 projections. Limits/user/minute: create10, join20, game actions60. Five concurrent
-streams/user. Snapshot ids are monotonic versions; heartbeat every15seconds
-reauthorizes. Reconnect reads canonical state; never replay an uncertain move.
+streams/user. Snapshot ids are nondecreasing board versions; multiple state events can
+share an id when current player names change. GameDTO includes playerMetadataVersion,
+the sum of the seated human accounts' name revisions (empty/deleted/AI seats add zero).
+For a greater board version, replace the full snapshot. For an equal board version,
+replace only players and playerMetadataVersion when its metadata revision is greater.
+Reject older board versions regardless of their metadata revision. A seat change or
+account deletion advances the board version and may reduce the metadata revision.
+Heartbeat every15seconds reauthorizes and delivers changed name revisions even if
+names return to their previous values. Reconnect reads canonical state; never replay an uncertain move.
 The event bus targets one application process. There is no public API-key module.

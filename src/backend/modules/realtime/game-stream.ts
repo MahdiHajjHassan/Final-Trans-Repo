@@ -25,6 +25,7 @@ export async function createGameStream(
     encoder = new TextEncoder();
   let closed = false,
     seen = 0,
+    seenPlayerMetadata = -1,
     unsubscribe: () => void = () => {},
     interval: ReturnType<typeof setInterval> | undefined;
   let controller: ReadableStreamDefaultController<Uint8Array>;
@@ -48,8 +49,8 @@ export async function createGameStream(
   }
   let queue = Promise.resolve();
 
-  // Read the latest board and recheck access. A newer version sends a snapshot; otherwise, a
-  // heartbeat.
+  // Names come from current accounts and can change without a board write. Send those
+  // changes too, while keeping board versions monotonic.
   function refresh() {
     // Keep overlapping notifications from sending snapshots out of order.
     queue = queue
@@ -62,8 +63,12 @@ export async function createGameStream(
         if (!current) throw new DomainError("UNAUTHENTICATED");
         const { game } = await games.read(current, canonicalId);
         if (closed) return;
-        if (game.version > seen) {
+        if (
+          game.version > seen ||
+          (game.version === seen && game.playerMetadataVersion > seenPlayerMetadata)
+        ) {
           seen = game.version;
+          seenPlayerMetadata = game.playerMetadataVersion;
           send(
             "id: " +
               game.version +

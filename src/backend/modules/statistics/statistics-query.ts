@@ -33,28 +33,37 @@ export type Aggregate = {
   points: number;
   rank: number;
 };
-type Raw = Record<Exclude<keyof Aggregate, "userId">, number | bigint> & { userId: string };
+type Raw = Record<Exclude<keyof Aggregate, "userId">, number | bigint | null> & {
+  userId: string | null;
+  total: number | bigint;
+};
+export type RankingPage = { rows: Aggregate[]; total: number };
 
+// Both references share the same materialized ranked CTE. LEFT JOIN preserves the
+// total even when an out-of-range page (or an unranked user) has no selected rows.
 export async function rankedPlayers(
   tx: Prisma.TransactionClient,
   query: { userId?: string; skip?: number; take?: number },
-): Promise<Aggregate[]> {
+): Promise<RankingPage> {
   const rows = await tx.$queryRaw<Raw[]>(
-    Prisma.sql`${competitive} SELECT * FROM ranked ${query.userId ? Prisma.sql`WHERE "userId"=${query.userId}` : Prisma.empty} ORDER BY rank LIMIT ${query.take ?? 25} OFFSET ${query.skip ?? 0}`,
+    Prisma.sql`${competitive}, selected AS (
+      SELECT * FROM ranked ${query.userId ? Prisma.sql`WHERE "userId"=${query.userId}` : Prisma.empty}
+      ORDER BY rank LIMIT ${query.take ?? 25} OFFSET ${query.skip ?? 0}
+    ) SELECT selected.*, counts.total FROM (SELECT COUNT(*) AS total FROM ranked) counts
+      LEFT JOIN selected ON 1=1 ORDER BY selected.rank`,
   );
-  return rows.map((row) => ({
-    userId: row.userId,
-    played: Number(row.played),
-    wins: Number(row.wins),
-    losses: Number(row.losses),
-    draws: Number(row.draws),
-    points: Number(row.points),
-    rank: Number(row.rank),
-  }));
-}
-export async function rankedCount(tx: Prisma.TransactionClient): Promise<number> {
-  const rows = await tx.$queryRaw<{ total: number | bigint }[]>(
-    Prisma.sql`${competitive} SELECT COUNT(*) AS total FROM ranked`,
-  );
-  return Number(rows[0].total);
+  return {
+    total: Number(rows[0].total),
+    rows: rows
+      .filter((row) => row.userId !== null)
+      .map((row) => ({
+        userId: row.userId!,
+        played: Number(row.played),
+        wins: Number(row.wins),
+        losses: Number(row.losses),
+        draws: Number(row.draws),
+        points: Number(row.points),
+        rank: Number(row.rank),
+      })),
+  };
 }

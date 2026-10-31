@@ -200,3 +200,31 @@ test("an expired session stays unauthenticated when opportunistic cleanup encoun
   await expect(resolveSessionToken(db, session.token, now)).resolves.toBeNull();
   expect(await db.session.count()).toBe(0);
 });
+
+test("creating a session prunes expired sessions for abandoned accounts and keeps live sessions", async () => {
+  const { db, auth } = await fixture();
+  const abandoned = await seedUser(db),
+    active = await seedUser(db),
+    unverified = await seedUser(db, { verified: false });
+  const now = new Date("2026-10-27T00:00:00Z");
+  await db.session.createMany({
+    data: [
+      {
+        id: "expired-abandoned",
+        userId: abandoned.actor.id,
+        expiresAt: new Date(now.getTime() - 1),
+      },
+      { id: "expired-at-boundary", userId: unverified.actor.id, expiresAt: now },
+      {
+        id: "live-other-account",
+        userId: abandoned.actor.id,
+        expiresAt: new Date(now.getTime() + 1),
+      },
+    ],
+  });
+  const session = await auth.login({ email: active.email, password: active.password }, "prune");
+  expect((await db.session.findMany({ select: { id: true } })).map((row) => row.id).sort()).toEqual(
+    ["live-other-account", createHash("sha256").update(session.token).digest("hex")].sort(),
+  );
+  await expect(auth.resolveSession(session.token)).resolves.toEqual(active.actor);
+});

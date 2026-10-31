@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import { useRouter } from "next/navigation";
 import { Alert, Button, CheckboxField, TextField } from "@/frontend/components/ui";
 import { Feedback } from "@/frontend/components/Feedback";

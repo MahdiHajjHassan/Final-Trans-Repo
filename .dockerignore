@@ -8,6 +8,7 @@ node_modules
 .next
 .env*
 data
+backups
 local-certs
 test-results
 playwright-report

@@ -64,6 +64,7 @@ export function GameLobby({ locale }: { locale: Locale }) {
               required
               minLength={8}
               maxLength={8}
+              pattern="[A-HJ-NP-Za-hj-np-z2-9]{8}"
             />
             <Button variant="secondary" disabled={mutation.pending}>
               {t.joinGame}

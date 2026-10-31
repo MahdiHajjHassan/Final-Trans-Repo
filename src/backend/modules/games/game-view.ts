@@ -4,8 +4,8 @@ import { decodeBoard, evaluateBoard } from "./engine/game.engine";
 
 // Load the players' public names with the game; their private account fields are not needed.
 export const gameInclude = {
-  x: { select: { displayName: true } },
-  o: { select: { displayName: true } },
+  x: { select: { displayName: true, profileVersion: true } },
+  o: { select: { displayName: true, profileVersion: true } },
   tournamentMatch: { select: { id: true, tournamentId: true } },
 } satisfies Prisma.GameInclude;
 export type GameRecord = Prisma.GameGetPayload<{ include: typeof gameInclude }>;
@@ -36,6 +36,8 @@ export function gameDto(game: GameRecord): GameDTO {
               ? null
               : human(null),
     },
+    playerMetadataVersion:
+      (game.x?.profileVersion ?? 0) + (game.mode === "AI" ? 0 : (game.o?.profileVersion ?? 0)),
     status: game.status,
     turn: game.turn as Mark | null,
     winner: game.winner as Mark | null,

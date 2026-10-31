@@ -2,36 +2,15 @@ import { test as base, expect, type Page, type APIRequestContext } from "@playwr
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { resetTestDb, testSettings } from "../helpers/e2e-environment";
+import { settleBrowserNetwork } from "../helpers/browser-network";
+export { settleBrowserNetwork } from "../helpers/browser-network";
 import { dictionaries } from "../../src/shared/i18n/dictionaries";
 export const t = dictionaries.en;
 type ExpectedFailure = { path: string; status: number };
 export const test = base.extend<{ isolated: void; expectedFailures: ExpectedFailure[] }>({
   browser: [
     async ({ browser }, provide) => {
-      const warmup = await browser.newContext({ ignoreHTTPSErrors: false });
-      try {
-        const page = await warmup.newPage();
-        for (let attempt = 0; attempt < 2; attempt++) {
-          try {
-            const response = await page.goto(`${testSettings().values.APP_ORIGIN}/api/health`, {
-              waitUntil: "networkidle",
-            });
-            if (response?.status() !== 200) throw new Error("Browser HTTPS warmup failed");
-            break;
-          } catch (error) {
-            // Docker bridge creation can notify Chrome after Compose is healthy.
-            // Retry only this initial idempotent health GET, never test actions.
-            const transient =
-              String(error).includes("ERR_NETWORK_CHANGED") ||
-              String(error).includes(
-                'interrupted by another navigation to "chrome-error://chromewebdata/"',
-              );
-            if (attempt !== 0 || !transient) throw error;
-          }
-        }
-      } finally {
-        await warmup.close();
-      }
+      await settleBrowserNetwork(browser, testSettings().values.APP_ORIGIN);
       await provide(browser);
     },
     { scope: "worker" },

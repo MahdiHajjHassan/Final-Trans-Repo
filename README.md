@@ -23,7 +23,7 @@ in English, French and Arabic, with right-to-left layout and light/dark themes.
 
 ## Instructions
 
-**Prerequisites:** Git, Node.js **24**, npm and Docker with the Compose plugin.
+**Prerequisites:** Git, Node.js **24.22.2 or newer within 24.x**, npm and Docker with the Compose plugin.
 On Windows, the native SQLite dependency also requires Python and Visual Studio C++ Build Tools.
 
 ```sh
@@ -98,7 +98,7 @@ More commands and the API reference are in [Technical documentation](#technical-
 
 ## Database Schema
 
-The database contains eleven models. The full definitions are in
+The database models and their full definitions are in
 [prisma/schema.prisma](prisma/schema.prisma). `?` indicates a nullable field;
 `String` IDs are UUIDs except for the hash-based session/challenge keys.
 
@@ -114,6 +114,7 @@ The database contains eleven models. The full definitions are in
 | Tournament | `id: String`, `hostId: String?`, `joinCode: String`, `status: TournamentStatus`, `championSlot: Int?` | Owns entries and bracket matches |
 | TournamentEntry | `id: String`, `tournamentId: String`, `userId: String?`, `slot: Int` | A numbered tournament seat |
 | TournamentMatch | `id: String`, `tournamentId: String`, `slot: TournamentSlot`, `entryAId: String?`, `entryBId: String?`, `winnerEntryId: String?` | Semifinal/final pairing and its game attempts |
+| StatisticsRevision | `id: Int`, `revision: BigInt` | Singleton revision maintained by database triggers for statistics cache freshness |
 | RateLimitBucket | `key: String`, `windowStart: DateTime`, `count: Int` | Persistent action and page-request limits |
 
 Moves and results are saved transactionally. Game versions reject stale actions, and unique
@@ -228,7 +229,7 @@ and the initial administrator is created when the database is empty.
 | `eslint.config.mjs`, `postcss.config.mjs` | Lint and CSS tooling |
 | `vitest.config.ts`, `playwright.config.ts` | Server tests and Chrome/Firefox/Brave browser tests |
 | `prisma.config.ts`, `prisma/` | Database generation and migrations |
-| `compose.yaml`, `Dockerfile`, `Caddyfile` | Normal deployment and HTTPS |
+| `compose.yaml`, `Dockerfile`, `Dockerfile.caddy`, `Caddyfile` | Normal deployment and HTTPS |
 | `deploy/compose.cloud.yaml` | Optional managed-cloud build CA trust |
 | `deploy/compose.e2e.yaml` | Isolated browser-test mailbox and reset guards |
 
@@ -272,6 +273,11 @@ The application needs a working email sender and a reachable inbox for the initi
 administrator. New accounts and the administrator's first sign-in require email verification.
 The initial administrator is created only once; later starts preserve existing accounts.
 
+Public SMTP accepts ports 465 (implicit TLS) or 587 (STARTTLS). `SMTP_USER` is the
+provider's exact, case-sensitive login name; it may be `apikey`, an account ID or an
+email address. `SMTP_FROM_EMAIL` must be an email address. Keep the SMTP password
+and `.env` private. Public SMTP always requires authentication and verified TLS.
+
 Caddy manages HTTPS certificates. Import only its public root certificate into the browser
 or operating system. Accounts, games and certificates remain available after a normal
 container restart.
@@ -292,7 +298,83 @@ npm run db:generate
 ```
 
 The schema and migration files are in [prisma/](prisma/). Existing data is preserved
-when applying the published migrations.
+when applying the published migrations. `/api/health` verifies every current application
+table and scalar column before declaring the database ready.
+
+## Database backup and recovery
+
+Use the SQLite online backup API while the application runs. Copying only the live
+`.db` file can lose committed transactions that are still in its WAL. The helper
+includes those transactions, validates SQLite integrity and foreign keys, writes a
+private snapshot, and refuses an existing destination or SQLite sidecar.
+
+```sh
+backup_stamp=$(date -u +%Y%m%dT%H%M%SZ)
+docker compose exec -T app node scripts/db/database-backup.mjs backup \
+  /data/tictactoe.db "/data/backups/$backup_stamp.db"
+mkdir -p backups
+chmod 700 backups
+docker compose cp "app:/data/backups/$backup_stamp.db" "backups/$backup_stamp.db"
+chmod 600 "backups/$backup_stamp.db"
+```
+
+Keep a protected copy outside the Docker volume and host. Backups contain personal
+account data and password hashes; do not commit or distribute them. Newly created
+backup directories use mode 700 and snapshot files mode 600; an existing backup
+directory must already be private. Keep the source release and separate private
+configuration needed to run that snapshot. Test recovery against a disposable
+installation periodically.
+
+For recovery, first stop both services, then stage a validated snapshot at a **new**
+path. Replace `SAVED_BACKUP.db` with the chosen in-volume backup filename. Restore
+never overwrites the application's database.
+
+```sh
+docker compose stop proxy app
+docker compose run --rm --no-deps --entrypoint node app \
+  scripts/db/database-backup.mjs restore /data/backups/SAVED_BACKUP.db /data/restored.db
+```
+
+Only after staging succeeds, keep the services stopped and retain the old database
+and all its sidecars in a new recovery directory before installing the staged file.
+The following refuses an existing recovery directory; choose a fresh name on each
+attempt. Run it only for the installation you intend to restore.
+
+```sh
+docker compose run --rm --no-deps --entrypoint sh app -c '
+  set -eu
+  test -f /data/restored.db
+  mkdir -m 700 /data/before-restore
+  for suffix in "" -wal -shm -journal; do
+    if [ -e "/data/tictactoe.db$suffix" ]; then
+      mv "/data/tictactoe.db$suffix" "/data/before-restore/tictactoe.db$suffix"
+    fi
+  done
+  mv /data/restored.db /data/tictactoe.db
+'
+docker compose up -d
+./scripts/checks/verify-tls.sh
+```
+
+Retain `before-restore` until the recovered accounts and games are verified. Startup
+applies pending migrations before serving HTTP. The helper accepts explicit local
+file paths and never reads a production path implicitly. For a local development
+database, the same helper works as
+`node scripts/db/database-backup.mjs backup data/tictactoe.db backups/new-snapshot.db`.
+
+## Source archives
+
+`npm run audit:source` works from Git checkouts and extracted
+source ZIPs. Git exports retain uncommitted edits and additions; ZIPs with
+`source-manifest.json` verify every listed SHA-256 hash before use. ZIPs without a
+manifest use safe file enumeration. Both paths exclude credentials, database files,
+backups, generated clients, builds and local test output, and refuse source symlinks.
+The manifest detects accidental changes; it is not a signed authenticity guarantee.
+After editing files from a manifested ZIP, use a Git checkout for a new working
+source export or deliberately remove the outdated manifest to enumerate local
+source. `audit:source` also scans available public build output for configured
+secret values; it reports when no build is present. Run `npm run build` before the
+full build-artifact audit.
 
 ## API
 
@@ -370,7 +452,7 @@ and [statistics](docs/api/statistics.md).
 
 ## Backend without Docker
 
-Backend tests can run locally with Node.js 24 and npm:
+Backend tests can run locally with Node.js 24.22.2 or newer within 24.x and npm:
 
 ```sh
 npm ci

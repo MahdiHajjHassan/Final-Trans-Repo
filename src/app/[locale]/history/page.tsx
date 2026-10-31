@@ -1,9 +1,9 @@
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import { pageLocale } from "@/shared/i18n/server";
 import { requirePageActor } from "@/backend/modules/auth/auth.pages";
 import { getServices } from "@/backend/services";
 import { DomainError } from "@/backend/common/errors";
-import type { HistoryPage } from "@/shared/statistics";
+import type { HistoryPage, StatsSummary as Summary } from "@/shared/statistics";
 import { StatsSummary } from "@/frontend/features/statistics/components/StatsSummary";
 import { MatchHistory } from "@/frontend/features/statistics/components/MatchHistory";
 import { Alert, Button, SelectField } from "@/frontend/components/ui";
@@ -21,22 +21,37 @@ export default async function History({
     query = await searchParams,
     s = await getServices();
   let history: HistoryPage | null = null;
+  let summary: Summary | null = null;
+  let failure: DomainError | null = null;
   try {
     history = await s.statistics.history(actor, query);
+    summary = await s.statistics.summary(actor);
   } catch (error) {
-    if (!(error instanceof DomainError && error.code === "VALIDATION")) throw error;
+    if (!(error instanceof DomainError && ["VALIDATION", "RATE_LIMITED"].includes(error.code)))
+      throw error;
+    failure = error;
   }
-  if (!history)
+  if (!history || !summary)
     return (
       <>
         <h1>{t.history}</h1>
         <Alert tone="error">
-          {t.VALIDATION} <Link href={`/${locale}/history`}>{t.refresh}</Link>
+          <p>{failure?.code === "RATE_LIMITED" ? t.RATE_LIMITED : t.VALIDATION}</p>
+          {failure?.retryAfterSeconds && (
+            <p>
+              {t.retryAfter.replace(
+                "{seconds}",
+                new Intl.NumberFormat(locale).format(failure.retryAfterSeconds),
+              )}
+            </p>
+          )}
+          <form method="get" action={`/${locale}/history`}>
+            <Button>{t.refresh}</Button>
+          </form>
         </Alert>
       </>
     );
-  const summary = await s.statistics.summary(actor),
-    mode = typeof query.mode === "string" ? query.mode : "ALL";
+  const mode = typeof query.mode === "string" ? query.mode : "ALL";
   return (
     <>
       <div className="page-heading">

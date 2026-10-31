@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, Badge, Button, Dialog, TextField } from "@/frontend/components/ui";
@@ -26,9 +26,21 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
     [confirm, setConfirm] = useState<"resign" | "cancel" | null>(null);
   const id = initial.game.id;
 
-  // Only move forward in version; a slow response must not replace a more recent board.
+  // Names are current account metadata, independent of board versions. Equal-version
+  // reads can refresh newer name revisions; only newer versions can replace the saved board.
   const apply = useCallback((next: GameDTO) => {
-    setGame((current) => (next.version > current.version ? next : current));
+    setGame((current) =>
+      next.version > current.version
+        ? next
+        : next.version === current.version &&
+            next.playerMetadataVersion > current.playerMetadataVersion
+          ? {
+              ...current,
+              players: next.players,
+              playerMetadataVersion: next.playerMetadataVersion,
+            }
+          : current,
+    );
     if (next.status === "FINISHED" || next.status === "CANCELLED") setConfirm(null);
   }, []);
   useEffect(() => {
@@ -44,8 +56,8 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
       window.location.replace("/" + locale + (code === "NOT_FOUND" ? "/play" : "/login"));
     }
 
-    // Disable play, read the saved board again, then reopen the stream. Failed reads back off
-    // up to ten seconds.
+    // Disable play, read the saved board again, then reopen the stream. Repeated failures
+    // back off even when GET works but the stream is still rejected.
     function recover() {
       if (stopped) return;
       source?.close();
@@ -60,7 +72,6 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
           if (stopped) return;
           apply(result.game);
           setViewerMark(result.viewerMark);
-          delay = 2000;
           connect();
         } catch (error) {
           const code = error instanceof RequestError ? error.code : "NETWORK";
@@ -68,10 +79,10 @@ export function LiveGame({ initial, locale }: { initial: GameView; locale: Local
             leave(code);
             return;
           }
-          delay = Math.min(delay * 2, 10000);
           recover();
         }
       }, delay);
+      delay = Math.min(delay * 2, 10000);
     }
 
     // Listen for full boards and access changes. A connection failure enters the recovery

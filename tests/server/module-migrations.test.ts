@@ -3,7 +3,6 @@ import { readFile, readdir } from "node:fs/promises";
 import { randomBytes, createHash, randomUUID } from "node:crypto";
 import Sqlite from "better-sqlite3";
 import { createTestDb } from "../helpers/db";
-import { seedUser } from "../helpers/fixtures";
 import { createGameService } from "@/backend/modules/games/games.service";
 import { createProfileService } from "@/backend/modules/profiles/profiles.service";
 
@@ -18,9 +17,30 @@ test("additive module migrations preserve populated legacy users sessions and fi
       .sort();
     for (const name of names.filter((n) => n < "202610300100"))
       raw.exec(await readFile(`prisma/migrations/${name}/migration.sql`, "utf8"));
-    const a = await seedUser(f.db),
-      b = await seedUser(f.db),
-      userBefore = await f.db.user.findUniqueOrThrow({ where: { id: a.actor.id } });
+    // Seed the old schema with SQL: today's Prisma defaults include later columns.
+    const legacyUser = (name: string) => {
+      const id = randomUUID();
+      raw
+        .prepare(
+          'INSERT INTO "User" (id,email,displayName,passwordHash,emailVerifiedAt) VALUES (?,?,?,?,?)',
+        )
+        .run(id, `${id}@example.test`, name, "legacy-test-hash", "2026-10-01T00:00:00.000Z");
+      return { actor: { id, role: "MEMBER" as const } };
+    };
+    const a = legacyUser("First player"),
+      b = legacyUser("Second player"),
+      userBefore = await f.db.user.findUniqueOrThrow({
+        where: { id: a.actor.id },
+        select: {
+          id: true,
+          email: true,
+          displayName: true,
+          passwordHash: true,
+          emailVerifiedAt: true,
+          role: true,
+          createdAt: true,
+        },
+      });
     const token = randomBytes(32).toString("hex"),
       sessionId = createHash("sha256").update(token).digest("hex"),
       id = randomUUID(),
@@ -54,7 +74,7 @@ test("additive module migrations preserve populated legacy users sessions and fi
     for (const name of names.filter((n) => n >= "202610300100"))
       raw.exec(await readFile(`prisma/migrations/${name}/migration.sql`, "utf8"));
     const userAfter = await f.db.user.findUniqueOrThrow({ where: { id: a.actor.id } });
-    expect(userAfter).toEqual(userBefore);
+    expect(userAfter).toEqual({ ...userBefore, profileVersion: 1 });
     const session = await f.db.session.findUniqueOrThrow({ where: { id: sessionId } });
     expect(session.userId).toBe(a.actor.id);
     expect(session.lastSeenAt).toBeNull();

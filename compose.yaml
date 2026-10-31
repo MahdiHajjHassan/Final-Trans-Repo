@@ -27,7 +27,9 @@ services:
       start_period: 30s
     restart: unless-stopped
   proxy:
-    image: caddy:2-alpine@sha256:eb4d35b7452d1ab6171fbdbe8d9275b2301dad6dad92115d91e19fb9b24d510f
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
     environment:
       # The private Docker backend must not be routed through an egress proxy.
       NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1},app

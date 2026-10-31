@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@/shared/i18n/config";
 import type { TournamentDTO, TournamentMatchDTO } from "@/shared/tournaments";

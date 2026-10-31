@@ -4,8 +4,14 @@ import { readFile } from "node:fs/promises";
 
 export const origin = process.env.APP_ORIGIN ?? "https://localhost";
 
+/** @typedef {{ method?: string, body?: unknown, cookie?: string, origin?: string }} CallOptions */
+
 export function createClient({ origin, caFile }) {
   if (new URL(origin).protocol !== "https:") throw new Error("Smoke checks require HTTPS");
+  /**
+   * @param {string} path
+   * @param {CallOptions} [options]
+   */
   async function call(path, { method = "GET", body, cookie, origin: headerOrigin = origin } = {}) {
     const encoded = body === undefined ? undefined : JSON.stringify(body);
     const ca = await readFile(caFile);

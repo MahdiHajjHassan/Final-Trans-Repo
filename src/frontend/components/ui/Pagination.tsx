@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import type { Dictionary } from "@/shared/i18n/dictionaries";
 
 /** Previous/next links for a server-rendered list. Other search filters stay in the URL. */

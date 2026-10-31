@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import { playerLabel } from "@/shared/player-label";
 import type { Metadata } from "next";
 import { pageLocale } from "@/shared/i18n/server";

@@ -103,6 +103,7 @@ export const en = {
   notFoundTitle: "Page not found",
   notFoundHelp: "Return to Play to continue.",
   retry: "Try again",
+  retryAfter: "Try again in {seconds} seconds.",
   profile: "Public profile",
   security: "Password and sessions",
   accountDescription: "Your display name is public. Your email stays private.",

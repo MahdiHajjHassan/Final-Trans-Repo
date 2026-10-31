@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import { useRouter } from "next/navigation";
 import { Alert, Button } from "./ui";
 import type { Dictionary } from "@/shared/i18n/dictionaries";

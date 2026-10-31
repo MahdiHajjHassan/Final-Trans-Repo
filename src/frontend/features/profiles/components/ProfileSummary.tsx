@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/frontend/components/AppLink";
 import { useRouter } from "next/navigation";
 import type { ProfilePage } from "@/shared/profiles";
 import type { Locale } from "@/shared/i18n/config";

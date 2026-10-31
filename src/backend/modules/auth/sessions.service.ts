@@ -14,6 +14,10 @@ export async function createSessionToken(
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
+  // Expired browser cookies may never return. Prune their rows on session creation using
+  // the expiresAt index, including sessions belonging to other or unverified accounts.
+  await db.session.deleteMany({ where: { expiresAt: { lte: now } } });
+
   // The browser gets the token; the database only gets its hash.
   await db.session.create({
     data: { id: sessionTokenHash(token)!, userId, expiresAt, lastSeenAt: now },

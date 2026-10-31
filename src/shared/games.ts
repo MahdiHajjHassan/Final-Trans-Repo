@@ -18,6 +18,8 @@ export type GameDTO = {
   mode: GameMode;
   cells: Cells;
   players: { X: Player; O: Player };
+  /** Orders current player names within the same board version. */
+  playerMetadataVersion: number;
   status: GameStatus;
   turn: Mark | null;
   winner: Mark | null;

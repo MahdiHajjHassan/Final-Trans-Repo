@@ -105,6 +105,7 @@ export const ar: Dictionary = {
   notFoundTitle: "الصفحة غير موجودة",
   notFoundHelp: "ارجع إلى صفحة اللعب للمتابعة.",
   retry: "حاول مجددًا",
+  retryAfter: "حاول مجددًا بعد {seconds} ثانية.",
   profile: "الملف العام",
   security: "كلمة المرور والجلسات",
   accountDescription: "اسمك المعروض عام. بريدك الإلكتروني خاص.",

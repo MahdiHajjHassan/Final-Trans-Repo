@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { createTestDb } from "../helpers/db";
 import { seedUser } from "../helpers/fixtures";
 import { createAuthService } from "@/backend/modules/auth/auth.service";
@@ -114,6 +114,97 @@ test("deleting an active player revokes their stream and delivers an anonymized 
     expect(snapshot).toContain('"kind":"DELETED"');
   } finally {
     for (const controller of aborts) controller.abort();
+    await f.close();
+  }
+});
+
+test("heartbeats deliver current self-service and admin names without changing a finished board version", async () => {
+  const f = await createTestDb(),
+    abort = new AbortController();
+  try {
+    const a = await seedUser(f.db, { displayName: "Original name" }),
+      admin = await seedUser(f.db, { role: "ADMIN" }),
+      auth = createAuthService(f.db),
+      events = createGameEvents(),
+      games = createGameService(f.db, { publish: events.publish });
+    const room = await games.create(a.actor, { mode: "AI" });
+    const finished = await games.resign(a.actor, room.game.id, {
+      expectedVersion: room.game.version,
+    });
+    const session = await createSessionToken(f.db, a.actor.id, new Date());
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+    const response = await createGameStream(
+      new Request("https://localhost", {
+        headers: { Cookie: sessionCookieName + "=" + session.token },
+        signal: abort.signal,
+      }),
+      room.game.id,
+      { auth, games, events },
+    );
+    const reader = response.body!.getReader(),
+      decode = new TextDecoder();
+    const snapshot = async () => decode.decode((await reader.read()).value);
+    expect(await snapshot()).toContain('"displayName":"Original name"');
+    await auth.updateAccount(a.actor, { displayName: "Self updated" });
+    const fresh = await games.read(a.actor, room.game.id);
+    expect(fresh.game.version).toBe(finished.version);
+    vi.advanceTimersByTime(15000);
+    expect(await snapshot()).toContain('"displayName":"Self updated"');
+    const { createUserService } = await import("@/backend/modules/users/users.service");
+    await createUserService(f.db).updateUser(admin.actor, a.actor.id, {
+      displayName: "Admin updated",
+    });
+    vi.advanceTimersByTime(15000);
+    const changed = await snapshot();
+    expect(changed).toContain("event: state");
+    expect(changed).toContain('"displayName":"Admin updated"');
+    expect(changed).toContain('"version":' + finished.version);
+    expect((await games.read(a.actor, room.game.id)).game.cells).toEqual(finished.cells);
+    vi.advanceTimersByTime(15000);
+    expect(await snapshot()).toBe(": heartbeat\n\n");
+    await auth.logout(session.token);
+    vi.advanceTimersByTime(15000);
+    expect(await snapshot()).toContain("access-lost");
+    expect((await reader.read()).done).toBe(true);
+  } finally {
+    abort.abort();
+    vi.useRealTimers();
+    await f.close();
+  }
+});
+
+test("a rename returning to the previous name emits a new metadata revision at the same board version", async () => {
+  const f = await createTestDb(),
+    abort = new AbortController();
+  try {
+    const person = await seedUser(f.db, { displayName: "Original" }),
+      auth = createAuthService(f.db),
+      events = createGameEvents(),
+      games = createGameService(f.db, { publish: events.publish });
+    const room = await games.create(person.actor, { mode: "AI" });
+    const session = await createSessionToken(f.db, person.actor.id, new Date());
+    const response = await createGameStream(
+      new Request("https://localhost", {
+        headers: { Cookie: sessionCookieName + "=" + session.token },
+        signal: abort.signal,
+      }),
+      room.game.id,
+      { auth, games, events },
+    );
+    const reader = response.body!.getReader(),
+      decode = new TextDecoder();
+    const initial = decode.decode((await reader.read()).value);
+    expect(initial).toContain('"displayName":"Original"');
+    await auth.updateAccount(person.actor, { displayName: "Intermediate" });
+    await auth.updateAccount(person.actor, { displayName: "Original" });
+    events.publish(room.game.id, room.game.version);
+    const restored = decode.decode((await reader.read()).value);
+    expect(restored).toContain("event: state");
+    expect(restored).toContain('"displayName":"Original"');
+    expect(restored).toContain('"version":1');
+    expect(restored).toContain('"playerMetadataVersion":3');
+  } finally {
+    abort.abort();
     await f.close();
   }
 });

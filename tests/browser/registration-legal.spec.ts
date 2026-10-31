@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { dictionaries } from "../../src/shared/i18n/dictionaries";
 
 for (const locale of ["en", "fr", "ar"] as const) {

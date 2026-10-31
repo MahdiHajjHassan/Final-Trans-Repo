@@ -109,6 +109,7 @@ export const fr: Dictionary = {
   notFoundTitle: "Page introuvable",
   notFoundHelp: "Retournez à la page de jeu pour continuer.",
   retry: "Réessayer",
+  retryAfter: "Réessayez dans {seconds} secondes.",
   profile: "Profil public",
   security: "Mot de passe et sessions",
   accountDescription: "Votre nom affiché est public. Votre e-mail reste privé.",

@@ -1,6 +1,6 @@
-import { test, expect, loginUi, credentials, t } from "./fixtures";
+import { test, expect, settleBrowserNetwork, loginUi, credentials, t } from "./fixtures";
 import { inboxCode } from "../helpers/mailbox";
-import { composeArgs, runTestCommand } from "../helpers/e2e-environment";
+import { composeArgs, runTestCommand, testSettings } from "../helpers/e2e-environment";
 
 async function stage(page: import("@playwright/test").Page, email: string) {
   await loginUi(page, "admin");
@@ -60,16 +60,31 @@ test("admin user creation waits for the mailbox code before listing or granting 
 
 test("failed administrator verification delivery leaves no account and shows explicit recovery", async ({
   page,
+  browser,
 }) => {
   const email = "undelivered-admin@example.test";
   runTestCommand("docker", composeArgs(["stop", "mailpit"]));
   try {
+    await settleBrowserNetwork(browser, testSettings().values.APP_ORIGIN);
     await stage(page, email);
     await expect(page.getByText(t.EMAIL_UNAVAILABLE, { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: t.verifyEmail, exact: true })).toBeDisabled();
     const users = (await (await page.request.get("/api/admin/users")).json()).data.items;
     expect(users.some((user: { email: string }) => user.email === email)).toBe(false);
   } finally {
-    runTestCommand("docker", composeArgs(["start", "mailpit"]));
+    runTestCommand(
+      "docker",
+      composeArgs([
+        "up",
+        "--no-deps",
+        "--no-recreate",
+        "-d",
+        "--wait",
+        "--wait-timeout",
+        "30",
+        "mailpit",
+      ]),
+    );
+    await settleBrowserNetwork(browser, testSettings().values.APP_ORIGIN);
   }
 });

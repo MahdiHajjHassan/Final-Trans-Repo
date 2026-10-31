@@ -1,0 +1,7 @@
+This private adapter preserves the legacy callable CommonJS API used by the current React, import and accessibility ESLint plugins. All matching runs through minimatch 11.0.3, installed as minimatch-patched. The package name and version identify this application-owned bridge; they do not claim to be an upstream minimatch release.
+
+The removed makeRe method supports the sole installed consumer, import/no-internal-modules, which only calls .test(). It returns a matcher backed by minimatch 11, never a regular expression. Do not add consumers that expect RegExp.source, exec or instanceof without revisiting this contract.
+
+The official @eslint/compat layer handles the older plugin ESLint APIs. Explicit ESLint peer overrides record locally tested compatibility with ESLint 10; upstream plugin manifests still only advertise support through ESLint 9. Keep all React, import and accessibility rules enabled.
+
+npm local-directory overrides currently produce broken nested links on a clean install. The small local tarball is an intentional vendored source dependency, with integrity recorded in package-lock.json. To change the bridge, run `npm pack ./tooling/minimatch-compat --pack-destination ./tooling --ignore-scripts`, regenerate package-lock.json, and run `npm ci`, `npm run lint:compat` and `npm run lint`. The compatibility check verifies both lockfile integrities, installed alias bytes, and the tar payload against these readable sources. It exercises ESM named imports, the ESM config-array consumer, affected conditional rules, and a bounded adversarial glob.

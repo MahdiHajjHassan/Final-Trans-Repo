@@ -76,3 +76,38 @@ test("foreign keys remove sessions and anonymize game references without deletin
   expect(await db.game.count({ where: { xId: b.actor.id } })).toBe(1);
   expect(await db.game.count()).toBe(2);
 });
+
+test.each([
+  "UserAvatar",
+  "EmailChallenge",
+  "Friendship",
+  "Tournament",
+  "TournamentEntry",
+  "TournamentMatch",
+  "StatisticsRevision",
+])("readiness fails when current application table %s is missing", async (table) => {
+  const { db } = await fixture();
+  await db.$executeRawUnsafe(`DROP TABLE "${table}"`);
+  const { readiness } = await import("@/backend/database/readiness");
+  await expect(readiness(db)).rejects.toThrow("migrations");
+});
+
+test.each([
+  ["User", "emailVerifiedAt"],
+  ["Session", "lastSeenAt"],
+  ["Game", "tournamentAttempt"],
+  ["GameMove", "mark"],
+  ["RateLimitBucket", "count"],
+  ["UserAvatar", "revision"],
+  ["EmailChallenge", "requestedRole"],
+  ["Friendship", "status"],
+  ["Tournament", "version"],
+  ["TournamentEntry", "slot"],
+  ["TournamentMatch", "attempt"],
+  ["StatisticsRevision", "revision"],
+])("readiness fails when current column %s.%s is missing", async (table, column) => {
+  const { db } = await fixture();
+  await db.$executeRawUnsafe(`ALTER TABLE "${table}" RENAME COLUMN "${column}" TO "old_column"`);
+  const { readiness } = await import("@/backend/database/readiness");
+  await expect(readiness(db)).rejects.toThrow("migrations");
+});
