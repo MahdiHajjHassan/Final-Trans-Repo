@@ -1,54 +1,9 @@
 import "dotenv/config";
 import assert from "node:assert/strict";
-import { request } from "node:https";
-import { readFile } from "node:fs/promises";
+import { authCall as call } from "../lib/http.mjs";
 
-const origin = process.env.APP_ORIGIN ?? "https://localhost";
-if (new URL(origin).protocol !== "https:") throw new Error("Auth smoke requires HTTPS");
-const ca = await readFile(process.env.TASKBOARD_CA_FILE ?? "local-certs/root.crt");
 if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD)
   throw new Error("Local admin credentials are missing");
-function call(path, options = {}) {
-  const body = options.body === undefined ? undefined : JSON.stringify(options.body);
-  return new Promise((resolve, reject) => {
-    const req = request(
-      new URL(path, origin),
-      {
-        method: options.method ?? "GET",
-        ca,
-        rejectUnauthorized: true,
-        timeout: 10000,
-        headers: {
-          Origin: options.origin ?? origin,
-          ...(body
-            ? { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) }
-            : {}),
-          ...(options.cookie ? { Cookie: options.cookie } : {}),
-        },
-      },
-      (res) => {
-        let data = "";
-        res.on("data", (chunk) => {
-          data += chunk;
-        });
-        res.on("end", () => {
-          try {
-            const json =
-              data && res.headers["content-type"]?.includes("application/json")
-                ? JSON.parse(data)
-                : null;
-            resolve({ status: res.statusCode, headers: res.headers, body: json });
-          } catch {
-            reject(new Error("Invalid JSON response; body intentionally omitted"));
-          }
-        });
-      },
-    );
-    req.on("timeout", () => req.destroy(new Error("Auth smoke timed out")));
-    req.on("error", reject);
-    req.end(body);
-  });
-}
 const credentials = { email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD };
 assert.equal(
   (
