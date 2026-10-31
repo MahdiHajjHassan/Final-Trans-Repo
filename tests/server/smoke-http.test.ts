@@ -1,9 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createServer, type Server } from "node:https";
+import {
+  smokeCaCertificate,
+  smokeOtherCaCertificate,
+  smokeServerCertificate,
+  smokeServerPrivateKey,
+} from "../helpers/smoke-tls-fixtures";
 // @ts-expect-error JavaScript smoke helper has no declaration file.
 import * as transport from "../../scripts/lib/http.mjs";
 
@@ -11,77 +17,13 @@ const directory = mkdtempSync(join(tmpdir(), "smoke-tls-"));
 let server: Server;
 let origin: string;
 const caFile = join(directory, "ca.crt");
-function openssl(...args: string[]) {
-  execFileSync("openssl", args, { cwd: directory, stdio: "ignore" });
-}
 beforeAll(async () => {
-  openssl(
-    "req",
-    "-x509",
-    "-newkey",
-    "rsa:2048",
-    "-nodes",
-    "-keyout",
-    "ca.key",
-    "-out",
-    "ca.crt",
-    "-days",
-    "1",
-    "-subj",
-    "/CN=Smoke Test CA",
-  );
-  openssl(
-    "req",
-    "-newkey",
-    "rsa:2048",
-    "-nodes",
-    "-keyout",
-    "server.key",
-    "-out",
-    "server.csr",
-    "-subj",
-    "/CN=localhost",
-  );
-  writeFileSync(
-    join(directory, "extensions"),
-    "subjectAltName=DNS:localhost\nextendedKeyUsage=serverAuth\n",
-  );
-  openssl(
-    "x509",
-    "-req",
-    "-in",
-    "server.csr",
-    "-CA",
-    "ca.crt",
-    "-CAkey",
-    "ca.key",
-    "-CAcreateserial",
-    "-out",
-    "server.crt",
-    "-days",
-    "1",
-    "-extfile",
-    "extensions",
-  );
-  openssl(
-    "req",
-    "-x509",
-    "-newkey",
-    "rsa:2048",
-    "-nodes",
-    "-keyout",
-    "other.key",
-    "-out",
-    "other.crt",
-    "-days",
-    "1",
-    "-subj",
-    "/CN=Other CA",
-  );
+  writeFileSync(caFile, smokeCaCertificate);
+  writeFileSync(join(directory, "other.crt"), smokeOtherCaCertificate);
   server = createServer(
     {
-      key: readFileSync(join(directory, "server.key")),
-      cert: readFileSync(join(directory, "server.crt")),
+      key: smokeServerPrivateKey,
+      cert: smokeServerCertificate,
     },
     (req, res) => {
       let raw = "";
