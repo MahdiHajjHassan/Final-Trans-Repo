@@ -134,6 +134,17 @@ player display names, never email, passwords or tokens. Production preserves the
 `X-Taskboard-Client-IP` proxy convention. This port does not rename existing
 session or preference cookies.
 
+Page refreshes are also rate-limited per client address supplied by Caddy:
+30 document requests per fixed 10-second window, with a separate total allowance
+of 120 page requests (including React prefetch/RSC) in that window. Exceeding a
+budget returns HTTP **429 Too Many Requests**, a positive `Retry-After` delay in
+seconds and an uncached English, French or Arabic message. Wait for that delay
+before refreshing again. Changing the URL, query string, cookies or user agent
+does not reset the quota. Static assets, health checks and API/SSE traffic do not
+use the page quota; existing action-specific API limits remain independent.
+People sharing one client address share the page budget. Limits are stored in
+SQLite and survive application restarts.
+
 Game state is committed before publication. Scoped HTTPS server-sent events send
 full snapshots, with monotonic versions and 15-second authorization heartbeats.
 On reconnection the client reads canonical state before enabling moves. A
@@ -178,7 +189,7 @@ to connected players.
 | --- | --- |
 | User | Unique email, public name, password hash, MEMBER/ADMIN role; sessions and X/O game seats |
 | Session | Hash-only token, expiry, nullable lastSeenAt, User foreign key; revoked on password change/deletion |
-| RateLimitBucket | Persistent per-action quotas and reset times |
+| RateLimitBucket | Persistent action/page quotas and reset times |
 | Game | Mode, nine-cell board, seats, turn, status/result, unique invitation, version/times |
 | GameMove | Game foreign key, mark/cell/ply; unique game+cell and game+ply |
 | UserAvatar | User primary/foreign key, canonical 256px WebP bytes, revision; cascades on deletion |
